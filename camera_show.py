@@ -4,13 +4,13 @@
 
 # **Importance**
 # todo ** tinkboard install
+# todo ** need area/pos ?
 
 import tkinter as tki
 from tkinter import filedialog
 import cv2
 import PIL.Image as Image
 import PIL.ImageTk as ImageTk
-import time
 import imutils
 import datetime
 import numpy as np
@@ -30,6 +30,12 @@ class App:
     def __init__(self, window, window_title, video_source=0):
         self.file_path_o = ""
         self.file_path_c = ""
+        self.photo = None
+        self.load_img_o = None
+        self.photo_org = None
+        self.photo_cp = None
+        self.load_img_cp = None
+        self.load_draw = None
 
         # Create Control Bar
         cv2.namedWindow("Parameters")
@@ -42,27 +48,17 @@ class App:
         self.window.geometry("1800x900")
         self.window.title(window_title)
         self.window.resizable(1, 1)
-        # self.window.geometry("1191x750+1762+153")
-        # self.window.minsize(120, 1)
-        # self.window.maxsize(3290, 1061)
-        self.video_source = video_source
-
-        # # top
-        # top.geometry("1191x750+1762+153")
-        # top.minsize(120, 1)
-        # top.maxsize(3290, 1061)
-        # top.resizable(1, 1)
-        # top.title("New Toplevel")
-        # top.configure(background="#d9d9d9")
+        self.window.configure(background="#d9d9d9")
 
         # open video source (by default this will try to open the computer webcam)
+        self.video_source = video_source
         self.vid = MyVideoCapture(self.video_source)
 
-        # # Button that lets the user take a snapshot
+        # Button that lets the user take a snapshot
         self.btn_snapshot = tki.Button(window, text="Snapshot", width=40, height=3, command=self.snapshot_origin)
         self.btn_snapshot.place(relx=0.41, rely=0.05)
         # self.btn_snapshot.pack()
-        #
+
         self.btn_compare = tki.Button(window, text="Save", width=40, height=3, command=self.save_draw)
         self.btn_compare.place(relx=0.61, rely=0.05)
         # self.btn_compare.pack()
@@ -84,14 +80,13 @@ class App:
         self.pathlabel = tki.Label(window)
         self.pathlabel.place(relx=0.41, rely=0.25)
         # self.pathlabel.pack()
-        #
 
-        # # Create a canvas that can fit the above video source size
+        # Create a canvas that can fit the above video source size
         self.canvas = tki.Canvas(window)
         self.canvas.place(relx=0.01, rely=0.05)
-        self.canvas.config(width=camera_w/2, height=camera_h/2)
+        self.canvas.config(width=camera_w / 2, height=camera_h / 2)
         # self.canvas.pack()
-        #
+
         self.canvas2 = tki.Canvas(window, cursor="cross")
         self.canvas2.place(relx=0.1, rely=0.4)
         # >> additional
@@ -113,8 +108,6 @@ class App:
         self.canvas3.config(width=camera_w, height=camera_h)
         # self.canvas3.pack()
 
-
-
         # # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
         self.update()
@@ -129,7 +122,7 @@ class App:
         ret, frame = self.vid.get_frame()
 
         if ret:
-            frame = imutils.resize(frame, height=int(camera_h/2), width=int(camera_w/2))
+            frame = imutils.resize(frame, height=int(camera_h / 2), width=int(camera_w / 2))
             cv_frame = Image.fromarray(frame)
             self.photo = ImageTk.PhotoImage(image=cv_frame)
             self.canvas.create_image(0, 0, image=self.photo, anchor=tki.NW)
@@ -138,7 +131,6 @@ class App:
 
     def reset(self):
         self.canvas2.delete("all")
-
         self.canvas3.delete("all")
         self.data_draw = {}
         self.pathlabel.config(text="")
@@ -149,31 +141,18 @@ class App:
         self.start_y = self.canvas2.canvasy(event.y)
 
         # create rectangle if not yet exist
-        # if not self.rect:
         self.rect.append(self.canvas2.create_rectangle(self.x, self.y, 1, 1, outline='red'))
 
     def on_move_press(self, event):
-        curX = self.canvas2.canvasx(event.x)
-        curY = self.canvas2.canvasy(event.y)
-
-        # w, h = self.canvas2.winfo_width(), self.canvas2.winfo_height()
-        # if event.x > 0.9 * w:
-        #     self.canvas2.xview_scroll(1, 'units')
-        # elif event.x < 0.1 * w:
-        #     self.canvas2.xview_scroll(-1, 'units')
-        # if event.y > 0.9 * h:
-        #     self.canvas2.yview_scroll(1, 'units')
-        # elif event.y < 0.1 * h:
-        #     self.canvas2.yview_scroll(-1, 'units')
-
-        # expand rectangle as you drag the mouse
-        self.canvas2.coords(self.rect[-1], self.start_x, self.start_y, curX, curY)
+        cur_x = self.canvas2.canvasx(event.x)
+        cur_y = self.canvas2.canvasy(event.y)
+        self.canvas2.coords(self.rect[-1], self.start_x, self.start_y, cur_x, cur_y)
 
     def on_button_release(self, event):
         self.count_draw += 1
-        curX = self.canvas2.canvasx(event.x)
-        curY = self.canvas2.canvasy(event.y)
-        self.data_draw[self.count_draw] = {"rect": [self.start_x, self.start_y, curX, curY]}
+        cur_x = self.canvas2.canvasx(event.x)
+        cur_y = self.canvas2.canvasy(event.y)
+        self.data_draw[self.count_draw] = {"rect": [self.start_x, self.start_y, cur_x, cur_y]}
 
     def snapshot(self, mode):
         # Get a frame from the video source
@@ -208,7 +187,8 @@ class App:
                 self.load_rect(self.canvas3, self.load_draw, cp_result)
                 self.load_draw = {}
 
-    def load_rect(self, cvs, data, result=None):
+    @staticmethod
+    def load_rect(cvs, data, result=None):
         for key, val in data.items():
             if result:
                 color = result[key]
@@ -234,10 +214,10 @@ class App:
                 y1, y2 = val["rect"][3], val["rect"][1]
             image_area = copy_image.crop((x1, y1, x2, y2))
             open_cv_image = np.array(image_area)
-            imgDil = self.image_preprocess(open_cv_image)
+            img_dil = self.image_preprocess(open_cv_image)
             cv2.imshow("result", open_cv_image)
-            cv2.imwrite("test.jpg", imgDil)
-            data_result = self.getContours(imgDil)
+            cv2.imwrite("test.jpg", img_dil)
+            data_result = self.get_contours(img_dil)
             if data_result:
                 x, y, area, points = data_result
                 # print(x, y, area, points)
@@ -267,9 +247,9 @@ class App:
         for key, val in self.load_draw.items():
             image_area = self.load_img_cp.crop((val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))
             open_cv_image = np.array(image_area)
-            imgDil = self.image_preprocess(open_cv_image)
-            cv2.imwrite("test_cp.jpg", imgDil)
-            data_result = self.getContours(imgDil)
+            img_dil = self.image_preprocess(open_cv_image)
+            cv2.imwrite("test_cp.jpg", img_dil)
+            # data_result = self.get_contours(img_dil)
 
             image_o_area = self.load_img_o.crop(
                 (val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))  # // = image_o fill
@@ -281,10 +261,11 @@ class App:
             print(score)
             # if data_result:
             #     x, y, area, points = data_result
-            thershold_percent = 10
+            # thershold_percent = 10
             thershold_score = 20
-            if (score >= thershold_score):# and ((abs(area - self.load_draw[key]["area"]) * 100) / self.load_draw[key]["area"] < thershold_percent):
-                # print("True", key, area, self.load_draw[key]["area"])
+            if score >= thershold_score:
+                # and ((abs(area - self.load_draw[key]["area"]) * 100) / self.load_draw[key]["area"] <
+                # thershold_percent): print("True", key, area, self.load_draw[key]["area"])
                 print("item %s => " % key + "True")
                 result[key] = "green"
             else:
@@ -314,23 +295,8 @@ class App:
                 self.load_rect(self.canvas2, self.load_draw)
 
     # >> image processing
-    def cp_similarity(self, original, image_to_compare):
-        # 1) Check if 2 images are equals
-        # print(original.shape, image_to_compare.shape)
-        # if original.shape == image_to_compare.shape:
-        #     # print("The images have same size and channels")
-        #     difference = cv2.subtract(original, image_to_compare)
-        #     b, g, r = cv2.split(difference)
-        #
-        #     if cv2.countNonZero(b) == 0 and cv2.countNonZero(g) == 0 and cv2.countNonZero(r) == 0:
-        #         # print("The images are completely Equal")
-        #         pass
-        #     else:
-        #         # print("The images are NOT equal")
-        #         pass
-
-        # 2) Check for similarities between the 2 images
-
+    @staticmethod
+    def cp_similarity(original, image_to_compare):
         sift = cv2.xfeatures2d.SIFT_create()
         kp_1, desc_1 = sift.detectAndCompute(original, None)
         kp_2, desc_2 = sift.detectAndCompute(image_to_compare, None)
@@ -346,9 +312,10 @@ class App:
         for m, n in matches:
             if m.distance < ratio * n.distance:
                 good_points.append(m)
-        return (len(good_points)*100) / len(matches)
+        return (len(good_points) * 100) / len(matches)
 
-    def getContours(self, img):
+    @staticmethod
+    def get_contours(img):
         contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         # >>> Find original position
         # item_area = 10000  # minimum area of item
@@ -356,6 +323,7 @@ class App:
         original_area = 0
         if len(contours) == 1:
             # todo fix not check from len
+            approx = []
             for cnt in contours:
                 area = cv2.contourArea(cnt)
 
@@ -371,17 +339,18 @@ class App:
 
             return original_x, original_y, original_area, len(approx)
 
-    def image_preprocess(self, img):
-        imgContour = img.copy()
-        imgBlur = cv2.GaussianBlur(img, (7, 7), 1)
-        imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
+    @staticmethod
+    def image_preprocess(img):
+        # imgContour = img.copy()
+        img_blur = cv2.GaussianBlur(img, (7, 7), 1)
+        img_gray = cv2.cvtColor(img_blur, cv2.COLOR_BGR2GRAY)
         threshold1 = cv2.getTrackbarPos("Threshold1", "Parameters")
         threshold2 = cv2.getTrackbarPos("Threshold2", "Parameters")
-        imgCanny = cv2.Canny(imgGray, threshold1, threshold2)  # 255 # todo create tuning bar gui
+        img_canny = cv2.Canny(img_gray, threshold1, threshold2)  # 255 # todo create tuning bar gui
         kernel = np.ones((5, 5))
-        imgDil = cv2.dilate(imgCanny, kernel, iterations=1)
+        img_dil = cv2.dilate(img_canny, kernel, iterations=1)
 
-        return imgDil
+        return img_dil
 
     # << image processing
 
@@ -405,8 +374,6 @@ class MyVideoCapture:
                 return ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             else:
                 return ret, None
-        # else:
-        #     return (ret, None)
 
     # Release the video source when the object is destroyed
     def __del__(self):

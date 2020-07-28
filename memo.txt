@@ -1,8 +1,0 @@
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo apt install ./google-chrome-stable_current_amd64.deb
-
-chromium-browser --user-data-dir=/tmp/chrome1
-
-sudo apt-get install libgl
-
-python -m venv py35env
