@@ -1,25 +1,25 @@
-import json
-
-with open('data/data_o_2020-07-27_11-56-15.json', 'r') as fp:
-    load_draw = json.load(fp)
-print(type(load_draw))
-print(load_draw["abc"])
-sdf
-import tkinter as tki
-from tkinter import filedialog
-root = tki.Tk()
-
-def browsefunc():
-    filename = filedialog.askopenfilename()
-    pathlabel.config(text=filename)
-
-browsebutton = tki.Button(root, text="Browse", command=browsefunc)
-browsebutton.pack()
-
-pathlabel = tki.Label(root)
-pathlabel.pack()
-root.mainloop()
-asd
+# import json
+#
+# with open('data/data_o_2020-07-27_11-56-15.json', 'r') as fp:
+#     load_draw = json.load(fp)
+# print(type(load_draw))
+# print(load_draw["abc"])
+# sdf
+# import tkinter as tki
+# from tkinter import filedialog
+# root = tki.Tk()
+#
+# def browsefunc():
+#     filename = filedialog.askopenfilename()
+#     pathlabel.config(text=filename)
+#
+# browsebutton = tki.Button(root, text="Browse", command=browsefunc)
+# browsebutton.pack()
+#
+# pathlabel = tki.Label(root)
+# pathlabel.pack()
+# root.mainloop()
+# asd
 
 #! /usr/bin/env python
 #  -*- coding: utf-8 -*-

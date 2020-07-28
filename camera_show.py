@@ -16,9 +16,13 @@ import datetime
 import numpy as np
 import json
 
+# Testing
+DEBUG = True
+
+# Config
 full_w = 1350
-camera_h = 250
-camera_w = 300
+camera_h = 480
+camera_w = 640
 out_path = "output/"
 
 
@@ -35,19 +39,61 @@ class App:
         cv2.createTrackbar("Area", "Parameters", 100, 60000, self.empty)
 
         self.window = window
-        # self.window.geometry("1300x700")
+        self.window.geometry("1800x900")
         self.window.title(window_title)
+        self.window.resizable(1, 1)
+        # self.window.geometry("1191x750+1762+153")
+        # self.window.minsize(120, 1)
+        # self.window.maxsize(3290, 1061)
         self.video_source = video_source
+
+        # # top
+        # top.geometry("1191x750+1762+153")
+        # top.minsize(120, 1)
+        # top.maxsize(3290, 1061)
+        # top.resizable(1, 1)
+        # top.title("New Toplevel")
+        # top.configure(background="#d9d9d9")
 
         # open video source (by default this will try to open the computer webcam)
         self.vid = MyVideoCapture(self.video_source)
 
-        # Create a canvas that can fit the above video source size
-        self.canvas = tki.Canvas(window)
-        self.canvas.config(width=camera_w, height=camera_h)
-        self.canvas.pack()
+        # # Button that lets the user take a snapshot
+        self.btn_snapshot = tki.Button(window, text="Snapshot", width=40, height=3, command=self.snapshot_origin)
+        self.btn_snapshot.place(relx=0.41, rely=0.05)
+        # self.btn_snapshot.pack()
+        #
+        self.btn_compare = tki.Button(window, text="Save", width=40, height=3, command=self.save_draw)
+        self.btn_compare.place(relx=0.61, rely=0.05)
+        # self.btn_compare.pack()
 
+        self.load_filename = None
+        self.browsebutton = tki.Button(window, text="Browse", width=40, height=3, command=self.browsefunc)
+        self.browsebutton.place(relx=0.81, rely=0.05)
+        # self.browsebutton.pack(anchor=tki.CENTER, expand=True)
+
+        self.btn_compare = tki.Button(window, text="Compare", width=40, height=3, command=self.snapshot_compare)
+        self.btn_compare.place(relx=0.41, rely=0.15)
+        # self.btn_compare.pack(anchor=tki.CENTER, expand=True)
+        #
+        self.btn_reset = tki.Button(window, text="Reset", width=40, height=3, command=self.reset)
+        self.btn_reset.place(relx=0.61, rely=0.15)
+        # self.btn_reset.pack(anchor=tki.CENTER, expand=True)
+        #
+
+        self.pathlabel = tki.Label(window)
+        self.pathlabel.place(relx=0.41, rely=0.25)
+        # self.pathlabel.pack()
+        #
+
+        # # Create a canvas that can fit the above video source size
+        self.canvas = tki.Canvas(window)
+        self.canvas.place(relx=0.01, rely=0.05)
+        self.canvas.config(width=camera_w/2, height=camera_h/2)
+        # self.canvas.pack()
+        #
         self.canvas2 = tki.Canvas(window, cursor="cross")
+        self.canvas2.place(relx=0.1, rely=0.4)
         # >> additional
         self.x = self.y = 0
         self.count_draw = 0
@@ -60,33 +106,16 @@ class App:
         self.start_y = None
         # <<
         self.canvas2.config(width=camera_w, height=camera_h)
-        self.canvas2.pack()
+        # self.canvas2.pack()
 
         self.canvas3 = tki.Canvas(window)
+        self.canvas3.place(relx=0.5, rely=0.4)
         self.canvas3.config(width=camera_w, height=camera_h)
-        self.canvas3.pack()
+        # self.canvas3.pack()
 
-        # Button that lets the user take a snapshot
-        self.btn_snapshot = tki.Button(window, text="Snapshot", width=50, command=self.snapshot_origin)
-        self.btn_snapshot.pack(anchor=tki.CENTER, expand=True)
 
-        self.btn_compare = tki.Button(window, text="Save", width=50, command=self.save_draw)
-        self.btn_compare.pack(anchor=tki.CENTER, expand=True)
 
-        self.load_filename = None
-        self.browsebutton = tki.Button(window, text="Browse", width=50, command=self.browsefunc)
-        self.browsebutton.pack(anchor=tki.CENTER, expand=True)
-
-        self.pathlabel = tki.Label(window)
-        self.pathlabel.pack()
-
-        self.btn_compare = tki.Button(window, text="Compare", width=50, command=self.snapshot_compare)
-        self.btn_compare.pack(anchor=tki.CENTER, expand=True)
-
-        self.btn_reset = tki.Button(window, text="Reset", width=50, command=self.reset)
-        self.btn_reset.pack(anchor=tki.CENTER, expand=True)
-
-        # After it is called once, the update method will be automatically called every delay milliseconds
+        # # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
         self.update()
 
@@ -100,7 +129,9 @@ class App:
         ret, frame = self.vid.get_frame()
 
         if ret:
-            self.photo = ImageTk.PhotoImage(image=Image.fromarray(frame))
+            frame = imutils.resize(frame, height=int(camera_h/2), width=int(camera_w/2))
+            cv_frame = Image.fromarray(frame)
+            self.photo = ImageTk.PhotoImage(image=cv_frame)
             self.canvas.create_image(0, 0, image=self.photo, anchor=tki.NW)
 
         self.window.after(self.delay, self.update)
@@ -109,6 +140,8 @@ class App:
         self.canvas2.delete("all")
 
         self.canvas3.delete("all")
+        self.data_draw = {}
+        self.pathlabel.config(text="")
 
     def on_button_press(self, event):
         # save mouse drag start position
@@ -123,15 +156,15 @@ class App:
         curX = self.canvas2.canvasx(event.x)
         curY = self.canvas2.canvasy(event.y)
 
-        w, h = self.canvas2.winfo_width(), self.canvas2.winfo_height()
-        if event.x > 0.9 * w:
-            self.canvas2.xview_scroll(1, 'units')
-        elif event.x < 0.1 * w:
-            self.canvas2.xview_scroll(-1, 'units')
-        if event.y > 0.9 * h:
-            self.canvas2.yview_scroll(1, 'units')
-        elif event.y < 0.1 * h:
-            self.canvas2.yview_scroll(-1, 'units')
+        # w, h = self.canvas2.winfo_width(), self.canvas2.winfo_height()
+        # if event.x > 0.9 * w:
+        #     self.canvas2.xview_scroll(1, 'units')
+        # elif event.x < 0.1 * w:
+        #     self.canvas2.xview_scroll(-1, 'units')
+        # if event.y > 0.9 * h:
+        #     self.canvas2.yview_scroll(1, 'units')
+        # elif event.y < 0.1 * h:
+        #     self.canvas2.yview_scroll(-1, 'units')
 
         # expand rectangle as you drag the mouse
         self.canvas2.coords(self.rect[-1], self.start_x, self.start_y, curX, curY)
@@ -152,7 +185,10 @@ class App:
             if mode == "original":
                 self.file_path_o = out_path + "o_" + filename
                 cv2.imwrite(self.file_path_o, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-                self.load_img_o = Image.open(self.file_path_o)
+                if DEBUG:
+                    self.load_img_o = Image.open(out_path + "o_Capture.PNG")
+                else:
+                    self.load_img_o = Image.open(self.file_path_o)
                 size = [camera_w, camera_h, 0, 0]
                 self.load_img_o = self.load_img_o.resize((size[0], size[1]), Image.ANTIALIAS)
                 self.photo_org = ImageTk.PhotoImage(image=self.load_img_o)
@@ -160,11 +196,13 @@ class App:
             elif mode == "compare":
                 self.file_path_c = out_path + "c_" + filename
                 cv2.imwrite(self.file_path_c, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-                self.load_img_cp = Image.open(self.file_path_c)
+                if DEBUG:
+                    self.load_img_cp = Image.open(out_path + "cp_Capture.PNG")
+                else:
+                    self.load_img_cp = Image.open(self.file_path_c)
                 size = [camera_w, camera_h, 0, 0]
                 self.load_img_cp = self.load_img_cp.resize((size[0], size[1]), Image.ANTIALIAS)
                 cp_result = self.detect_compare()
-                print(cp_result)
                 self.photo_cp = ImageTk.PhotoImage(image=self.load_img_cp)
                 self.canvas3.create_image(size[2], size[3], image=self.photo_cp, anchor=tki.NW)
                 self.load_rect(self.canvas3, self.load_draw, cp_result)
@@ -187,17 +225,24 @@ class App:
 
     def save_draw(self):
         self.count_draw = 0
+        copy_image = self.load_img_o.copy()
         for key, val in self.data_draw.items():
-            image_area = self.load_img_o.crop((val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))
+            x1, y1, x2, y2 = val["rect"]
+            if val["rect"][0] > val["rect"][2]:
+                x1, x2 = val["rect"][2], val["rect"][0]
+            if val["rect"][1] > val["rect"][3]:
+                y1, y2 = val["rect"][3], val["rect"][1]
+            image_area = copy_image.crop((x1, y1, x2, y2))
             open_cv_image = np.array(image_area)
             imgDil = self.image_preprocess(open_cv_image)
-            cv2.imshow("result", imgDil)
+            cv2.imshow("result", open_cv_image)
             cv2.imwrite("test.jpg", imgDil)
             data_result = self.getContours(imgDil)
             if data_result:
                 x, y, area, points = data_result
                 # print(x, y, area, points)
                 # todo use other value ?
+                self.data_draw[key]["rect"] = [x1, y1, x2, y2]
                 self.data_draw[key]["area"] = area
                 self.data_draw[key]["filename"] = self.file_path_o
 
@@ -205,7 +250,7 @@ class App:
         data = json.dumps(self.data_draw)
         with open('data/data_%s.json' % self.file_path_o[:-4].replace("output/", ""), 'w') as fp:
             fp.write(data)
-        print("SAVE !")
+        print("SAVE !", 'data/data_%s.json' % self.file_path_o[:-4].replace("output/", ""))
         self.data_draw = {}
 
     def detect_compare(self):
@@ -220,7 +265,6 @@ class App:
             except Exception as e:
                 raise e
         for key, val in self.load_draw.items():
-            # print(val)
             image_area = self.load_img_cp.crop((val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))
             open_cv_image = np.array(image_area)
             imgDil = self.image_preprocess(open_cv_image)
@@ -231,22 +275,24 @@ class App:
                 (val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))  # // = image_o fill
             image_o_area = np.array(image_o_area)
             image_cp_area = np.array(image_area)
+            cv2.imshow("result1", image_o_area)
+            cv2.imshow("result2", image_cp_area)
             score = self.cp_similarity(image_o_area, image_cp_area)
             print(score)
-            if data_result:
-                x, y, area, points = data_result
-                thershold_percent = 10
-                thershold_score = 50
-                if (score > thershold_score) and ((abs(area - self.load_draw[key]["area"]) * 100) / self.load_draw[key]["area"] < thershold_percent):
-                    # print("True", key, area, self.load_draw[key]["area"])
-                    print("item %s => " % key + "True")
-                    result[key] = "green"
-                else:
-                    print("item %s => " % key + "False")
-                    result[key] = "red"
+            # if data_result:
+            #     x, y, area, points = data_result
+            thershold_percent = 10
+            thershold_score = 20
+            if (score >= thershold_score):# and ((abs(area - self.load_draw[key]["area"]) * 100) / self.load_draw[key]["area"] < thershold_percent):
+                # print("True", key, area, self.load_draw[key]["area"])
+                print("item %s => " % key + "True")
+                result[key] = "green"
             else:
                 print("item %s => " % key + "False")
                 result[key] = "red"
+            # else:
+            #     print("item %s => " % key + "False")
+            #     result[key] = "red"
 
         return result
 
@@ -270,16 +316,18 @@ class App:
     # >> image processing
     def cp_similarity(self, original, image_to_compare):
         # 1) Check if 2 images are equals
-        print(original.shape, image_to_compare.shape)
-        if original.shape == image_to_compare.shape:
-            print("The images have same size and channels")
-            difference = cv2.subtract(original, image_to_compare)
-            b, g, r = cv2.split(difference)
-
-            if cv2.countNonZero(b) == 0 and cv2.countNonZero(g) == 0 and cv2.countNonZero(r) == 0:
-                print("The images are completely Equal")
-            else:
-                print("The images are NOT equal")
+        # print(original.shape, image_to_compare.shape)
+        # if original.shape == image_to_compare.shape:
+        #     # print("The images have same size and channels")
+        #     difference = cv2.subtract(original, image_to_compare)
+        #     b, g, r = cv2.split(difference)
+        #
+        #     if cv2.countNonZero(b) == 0 and cv2.countNonZero(g) == 0 and cv2.countNonZero(r) == 0:
+        #         # print("The images are completely Equal")
+        #         pass
+        #     else:
+        #         # print("The images are NOT equal")
+        #         pass
 
         # 2) Check for similarities between the 2 images
 
@@ -352,7 +400,6 @@ class MyVideoCapture:
     def get_frame(self):
         if self.vid.isOpened():
             ret, frame = self.vid.read()
-            frame = imutils.resize(frame, height=camera_h, width=camera_w)
             if ret:
                 # Return a boolean success flag and the current frame converted to BGR
                 return ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -367,14 +414,4 @@ class MyVideoCapture:
             self.vid.release()
 
 
-# Create a window and pass it to the Application object
-for i in range(5):
-    try:
-        cap = cv2.VideoCapture(i)
-        # Check whether user selected camera is opened successfully.
-        if not (cap.isOpened()):
-            pass
-        else:
-            App(tki.Tk(), "Tkinter and OpenCV", video_source=i)
-    except:
-        pass
+App(tki.Tk(), "Tkinter and OpenCV", video_source=0)

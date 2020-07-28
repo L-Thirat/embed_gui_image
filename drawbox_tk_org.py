@@ -30,7 +30,7 @@ class ExampleApp(Frame):
         self.start_x = None
         self.start_y = None
 
-        self.im = PIL.Image.open("saved_img.jpg")
+        self.im = PIL.Image.open("test.jpg")
         self.wazil,self.lard=self.im.size
         self.canvas.config(scrollregion=(0,0,self.wazil,self.lard))
         self.tk_im = PIL.ImageTk.PhotoImage(self.im)
@@ -51,14 +51,14 @@ class ExampleApp(Frame):
         curY = self.canvas.canvasy(event.y)
 
         w, h = self.canvas.winfo_width(), self.canvas.winfo_height()
-        if event.x > 0.9*w:
-            self.canvas.xview_scroll(1, 'units')
-        elif event.x < 0.1*w:
-            self.canvas.xview_scroll(-1, 'units')
-        if event.y > 0.9*h:
-            self.canvas.yview_scroll(1, 'units')
-        elif event.y < 0.1*h:
-            self.canvas.yview_scroll(-1, 'units')
+        # if event.x > 0.9*w:
+        #     self.canvas.xview_scroll(1, 'units')
+        # elif event.x < 0.1*w:
+        #     self.canvas.xview_scroll(-1, 'units')
+        # if event.y > 0.9*h:
+        #     self.canvas.yview_scroll(1, 'units')
+        # elif event.y < 0.1*h:
+        #     self.canvas.yview_scroll(-1, 'units')
 
         # expand rectangle as you drag the mouse
         self.canvas.coords(self.rect, self.start_x, self.start_y, curX, curY)
