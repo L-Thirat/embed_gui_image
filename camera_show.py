@@ -136,6 +136,7 @@ class App:
         self.pathlabel.config(text="")
 
     def on_button_press(self, event):
+        self.flag_press = False
         # save mouse drag start position
         self.start_x = self.canvas2.canvasx(event.x)
         self.start_y = self.canvas2.canvasy(event.y)
@@ -144,15 +145,17 @@ class App:
         self.rect.append(self.canvas2.create_rectangle(self.x, self.y, 1, 1, outline='red'))
 
     def on_move_press(self, event):
+        self.flag_press = True
         cur_x = self.canvas2.canvasx(event.x)
         cur_y = self.canvas2.canvasy(event.y)
         self.canvas2.coords(self.rect[-1], self.start_x, self.start_y, cur_x, cur_y)
 
     def on_button_release(self, event):
-        self.count_draw += 1
-        cur_x = self.canvas2.canvasx(event.x)
-        cur_y = self.canvas2.canvasy(event.y)
-        self.data_draw[self.count_draw] = {"rect": [self.start_x, self.start_y, cur_x, cur_y]}
+        if self.flag_press:
+            self.count_draw += 1
+            cur_x = self.canvas2.canvasx(event.x)
+            cur_y = self.canvas2.canvasy(event.y)
+            self.data_draw[self.count_draw] = {"rect": [self.start_x, self.start_y, cur_x, cur_y]}
 
     def snapshot(self, mode):
         # Get a frame from the video source
@@ -208,23 +211,24 @@ class App:
         copy_image = self.load_img_o.copy()
         for key, val in self.data_draw.items():
             x1, y1, x2, y2 = val["rect"]
-            if val["rect"][0] > val["rect"][2]:
-                x1, x2 = val["rect"][2], val["rect"][0]
-            if val["rect"][1] > val["rect"][3]:
-                y1, y2 = val["rect"][3], val["rect"][1]
+            if x1 > x2:
+                x1, x2 = x2, x1
+            if y1 > y2:
+                y1, y2 = y2, y1
             image_area = copy_image.crop((x1, y1, x2, y2))
-            open_cv_image = np.array(image_area)
-            img_dil = self.image_preprocess(open_cv_image)
-            cv2.imshow("result", open_cv_image)
-            cv2.imwrite("test.jpg", img_dil)
-            data_result = self.get_contours(img_dil)
-            if data_result:
-                x, y, area, points = data_result
-                # print(x, y, area, points)
-                # todo use other value ?
-                self.data_draw[key]["rect"] = [x1, y1, x2, y2]
-                self.data_draw[key]["area"] = area
-                self.data_draw[key]["filename"] = self.file_path_o
+            if (image_area.size[0] != 0) and (image_area.size[1] != 0):
+                open_cv_image = np.array(image_area, dtype=np.uint8)
+                img_dil = self.image_preprocess(open_cv_image)
+                cv2.imshow("result", open_cv_image)
+                cv2.imwrite("test.jpg", img_dil)
+                data_result = self.get_contours(img_dil)
+                if data_result:
+                    x, y, area, points = data_result
+                    # print(x, y, area, points)
+                    # todo use other value ?
+                    self.data_draw[key]["rect"] = [x1, y1, x2, y2]
+                    self.data_draw[key]["area"] = area
+                    self.data_draw[key]["filename"] = self.file_path_o
 
         # todo need test
         data = json.dumps(self.data_draw)
@@ -246,15 +250,16 @@ class App:
                 raise e
         for key, val in self.load_draw.items():
             image_area = self.load_img_cp.crop((val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))
-            open_cv_image = np.array(image_area)
+            print(image_area.size)
+            open_cv_image = np.array(image_area, dtype=np.uint8)
             img_dil = self.image_preprocess(open_cv_image)
             cv2.imwrite("test_cp.jpg", img_dil)
             # data_result = self.get_contours(img_dil)
 
             image_o_area = self.load_img_o.crop(
                 (val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))  # // = image_o fill
-            image_o_area = np.array(image_o_area)
-            image_cp_area = np.array(image_area)
+            image_o_area = np.array(image_o_area, dtype=np.uint8)
+            image_cp_area = np.array(image_area, dtype=np.uint8)
             cv2.imshow("result1", image_o_area)
             cv2.imshow("result2", image_cp_area)
             score = self.cp_similarity(image_o_area, image_cp_area)
@@ -285,7 +290,7 @@ class App:
                 self.load_draw = json.load(fp)
 
                 # load img
-                self.load_img_o = Image.open(self.load_draw["1"]["filename"])
+                self.load_img_o = Image.open(self.load_draw[list(self.load_draw.keys())[0]]["filename"])
                 size = [camera_w, camera_h, 0, 0]
                 self.load_img_o = self.load_img_o.resize((size[0], size[1]), Image.ANTIALIAS)
                 self.photo_org = ImageTk.PhotoImage(image=self.load_img_o)
