@@ -59,9 +59,9 @@ class App:
         self.btn_snapshot.place(relx=0.41, rely=0.05)
         # self.btn_snapshot.pack()
 
-        self.btn_compare = tki.Button(window, text="Save", width=40, height=3, command=self.save_draw)
-        self.btn_compare.place(relx=0.61, rely=0.05)
-        # self.btn_compare.pack()
+        self.btn_save = tki.Button(window, text="Save", width=40, height=3, command=self.save_draw)
+        self.btn_save.place(relx=0.61, rely=0.05)
+        # self.btn_save.pack()
 
         self.load_filename = None
         self.browsebutton = tki.Button(window, text="Browse", width=40, height=3, command=self.browsefunc)
