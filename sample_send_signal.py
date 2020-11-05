@@ -1,17 +1,14 @@
 import ASUS.GPIO as GPIO
 import time
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.ASUS)
+
 LED = 164
-GPIO.setup(LED,GPIO.OUT)
-
 BTN_input = 167
-# [167, 160, 162]
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.ASUS)
-GPIO.setup(164, GPIO.OUT)
-GPIO.setup(167, GPIO.IN)
+GPIO.setup(LED, GPIO.OUT)
+GPIO.setup(BTN_input, GPIO.IN)
+
 
 def control(pin, signal):
     if signal:
@@ -22,11 +19,12 @@ def control(pin, signal):
         print("OFF")
     time.sleep(1)
 
+
 try:
     while True:
         if GPIO.input(BTN_input):
-            control(pin=LED, signal=False) # is pressed
+            control(pin=LED, signal=False)  # is pressed
         else:
-            control(pin=LED, signal=True) # is not pressed
+            control(pin=LED, signal=True)  # is not pressed
 except KeyboardInterrupt:
     GPIO.cleanup()
