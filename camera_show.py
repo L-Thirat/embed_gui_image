@@ -30,7 +30,6 @@ camera_w = 640
 out_path = "output/original/"
 cp_path = "output/compare/"
 
-
 # TODO MAMOS
 if TEST_MAMOS:
     import ASUS.GPIO as GPIO
@@ -50,7 +49,6 @@ def control(pin, signal):
         print("ON")
     else:
         GPIO.output(pin, GPIO.LOW)
-        #print("ON")
     time.sleep(1)
 
 
@@ -146,13 +144,13 @@ class App:
         # TODO MAMOS
         try:
             if not GPIO.input(BTN_input):
-                #control(pin=LED, signal=True)  # is pressed
+                # control(pin=LED, signal=True)  # is pressed # todo slowly bug
                 self.snapshot("compare")
             else:
                 pass
-                #control(pin=LED, signal=False)  # is not pressed
+                # control(pin=LED, signal=False)  # is not pressed # todo slowly bug
         except KeyboardInterrupt:
-            GPIO.cleanup()        # Get a frame from the video source
+            GPIO.cleanup()  # Get a frame from the video source
 
         ret, frame = self.vid.get_frame()
 
@@ -195,7 +193,7 @@ class App:
     def undo(self, event):
         if self.count_draw:
             del self.raw_data_draw[self.count_draw]
-            self.canvas2.delete(self.count_draw+1)
+            self.canvas2.delete(self.count_draw + 1)
             self.count_draw -= 1
 
     def snapshot(self, mode):
@@ -217,7 +215,7 @@ class App:
                 self.photo_org = ImageTk.PhotoImage(image=self.load_img_o)
                 self.canvas2.create_image(size[2], size[3], image=self.photo_org, anchor=tki.NW)
             elif mode == "compare":
-                self.file_path_c = cp_path + "c_" + filename
+                self.file_path_c = cp_path + "c_" + "temp_filename.jpg"
                 # if DEBUG:
                 #     self.load_img_cp = Image.open(cp_path + "c_2020-11-05_14-53-29.jpg")
                 # else:
