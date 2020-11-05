@@ -23,14 +23,14 @@ camera_w = 300
 out_path = "output/"
 
 class App:
-    def __init__(self, window, window_title, video_source=0):
+    def __init__(self, window, window_title):
         self.window = window
         # self.window.geometry("1300x700")
         self.window.title(window_title)
-        self.video_source = video_source
+        #self.video_source = video_source
 
         # open video source (by default this will try to open the computer webcam)
-        self.vid = MyVideoCapture(self.video_source)
+        self.vid = MyVideoCapture()
 
         # Create a canvas that can fit the above video source size
         self.canvas = tki.Canvas(window)
@@ -223,12 +223,15 @@ class App:
 
 
 class MyVideoCapture:
-    def __init__(self, video_source=0):
+    def __init__(self):
         # Open the video source
-        self.vid = cv2.VideoCapture(video_source)
-        if not self.vid.isOpened():
-            raise ValueError("Unable to open video source", video_source)
-
+        for i in range(10):
+            self.vid = cv2.VideoCapture(i)
+            if not self.vid.isOpened():
+                pass
+            #raise ValueError("Unable to open video source", video_source)
+            else:
+                break
         # Get video source width and height
         self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
