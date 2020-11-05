@@ -25,8 +25,8 @@ def control(pin, signal):
 try:
     while True:
         if GPIO.input(BTN_input):
-            control(pin=LED, signal=True)
+            control(pin=LED, signal=False) # is pressed
         else:
-            control(pin=LED, signal=False)
+            control(pin=LED, signal=True) # is not pressed
 except KeyboardInterrupt:
     GPIO.cleanup()
