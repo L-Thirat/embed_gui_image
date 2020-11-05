@@ -137,8 +137,8 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-output/
-data/
+# output/
+# data/
 temp/
 venv/
 GPIO_API_for_Python/
