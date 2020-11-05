@@ -21,7 +21,7 @@ import time
 
 # Testing
 DEBUG = True
-TEST_MAMOS = False
+TEST_MAMOS = True
 
 # Config
 full_w = 1350
@@ -50,7 +50,7 @@ def control(pin, signal):
         print("ON")
     else:
         GPIO.output(pin, GPIO.LOW)
-        print("OFF")
+        #print("ON")
     time.sleep(1)
 
 
@@ -145,12 +145,12 @@ class App:
     def update(self):
         # TODO MAMOS
         try:
-            if GPIO.input(BTN_input):
-                control(pin=LED, signal=False)  # is pressed
-                print("ON")
+            if not GPIO.input(BTN_input):
+                #control(pin=LED, signal=True)  # is pressed
                 self.snapshot("compare")
             else:
-                control(pin=LED, signal=True)  # is not pressed
+                pass
+                #control(pin=LED, signal=False)  # is not pressed
         except KeyboardInterrupt:
             GPIO.cleanup()        # Get a frame from the video source
 
