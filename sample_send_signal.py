@@ -8,16 +8,16 @@ GPIO.setup(LED,GPIO.OUT)
 BTN_input = 167
 # [167, 160, 162]
 
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.ASUS)
+GPIO.setup(164, GPIO.OUT)
+GPIO.setup(167, GPIO.IN)
+
 def control(pin, signal):
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.ASUS)
-    GPIO.setup(pin, GPIO.OUT)
     if signal:
         GPIO.output(pin, GPIO.HIGH)
-        print("on")
     else:
         GPIO.output(pin, GPIO.LOW)
-        print("off")
     time.sleep(1)
 
 try:
