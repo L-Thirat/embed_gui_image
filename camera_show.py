@@ -27,7 +27,7 @@ out_path = "output/"
 
 
 class App:
-    def __init__(self, window, window_title, video_source=0):
+    def __init__(self, window, window_title):
         self.file_path_o = ""
         self.file_path_c = ""
         self.photo = None
@@ -43,7 +43,6 @@ class App:
         cv2.createTrackbar("Threshold1", "Parameters", 42, 255, self.empty)
         cv2.createTrackbar("Threshold2", "Parameters", 0, 255, self.empty)
         cv2.createTrackbar("Area", "Parameters", 100, 60000, self.empty)
-
         self.window = window
         self.window.geometry("1800x900")
         self.window.title(window_title)
@@ -51,8 +50,7 @@ class App:
         self.window.configure(background="#d9d9d9")
 
         # open video source (by default this will try to open the computer webcam)
-        self.video_source = video_source
-        self.vid = MyVideoCapture(self.video_source)
+        self.vid = MyVideoCapture()
 
         # Button that lets the user take a snapshot
         self.btn_snapshot = tki.Button(window, text="Snapshot", width=40, height=3, command=self.snapshot_origin)
@@ -361,14 +359,17 @@ class App:
 
 
 class MyVideoCapture:
-    def __init__(self, video_source=0):
+    def __init__(self):
         # Open the video source
         if DEBUG:
             self.vid = cv2.VideoCapture("sample1.mp4")
         else:
-            self.vid = cv2.VideoCapture(video_source)
-            if not self.vid.isOpened():
-                raise ValueError("Unable to open video source", video_source)
+            for i in range(10):
+                self.vid = cv2.VideoCapture(i)
+                if not self.vid.isOpened():
+                    pass
+                else:
+                    break
 
             # Get video source width and height
             self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
