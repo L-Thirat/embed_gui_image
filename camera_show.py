@@ -21,7 +21,7 @@ import time
 
 # Testing
 DEBUG = True
-TEST_MAMOS = True
+TEST_MAMOS = False
 
 # Config
 full_w = 1350
@@ -31,25 +31,25 @@ out_path = "output/original/"
 cp_path = "output/compare/"
 
 # TODO MAMOS
-if TEST_MAMOS:
-    import ASUS.GPIO as GPIO
-
-    LED = 164
-    BTN_input = 167
-
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.ASUS)
-    GPIO.setup(LED, GPIO.OUT)
-    GPIO.setup(BTN_input, GPIO.IN)
-
-
-def control(pin, signal):
-    if signal:
-        GPIO.output(pin, GPIO.HIGH)
-        print("ON")
-    else:
-        GPIO.output(pin, GPIO.LOW)
-    time.sleep(1)
+# if TEST_MAMOS:
+#     import ASUS.GPIO as GPIO
+#
+#     LED = 164
+#     BTN_input = 167
+#
+#     GPIO.setwarnings(False)
+#     GPIO.setmode(GPIO.ASUS)
+#     GPIO.setup(LED, GPIO.OUT)
+#     GPIO.setup(BTN_input, GPIO.IN)
+#
+#
+# def control(pin, signal):
+#     if signal:
+#         GPIO.output(pin, GPIO.HIGH)
+#         print("ON")
+#     else:
+#         GPIO.output(pin, GPIO.LOW)
+#     time.sleep(1)
 
 
 class App:
@@ -142,15 +142,15 @@ class App:
 
     def update(self):
         # TODO MAMOS
-        try:
-            if not GPIO.input(BTN_input):
-                # control(pin=LED, signal=True)  # is pressed # todo slowly bug
-                self.snapshot("compare")
-            else:
-                pass
-                # control(pin=LED, signal=False)  # is not pressed # todo slowly bug
-        except KeyboardInterrupt:
-            GPIO.cleanup()  # Get a frame from the video source
+        # try:
+        #     if not GPIO.input(BTN_input):
+        #         # control(pin=LED, signal=True)  # is pressed # todo slowly bug
+        #         self.snapshot("compare")
+        #     else:
+        #         pass
+        #         # control(pin=LED, signal=False)  # is not pressed # todo slowly bug
+        # except KeyboardInterrupt:
+        #     GPIO.cleanup()  # Get a frame from the video source
 
         ret, frame = self.vid.get_frame()
 
@@ -265,9 +265,9 @@ class App:
 
         # todo need test
         data = json.dumps(self.raw_data_draw)
-        with open('data/data_%s.json' % self.file_path_o[:-4].replace("output/", ""), 'w') as fp:
+        with open('data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", ""), 'w') as fp:
             fp.write(data)
-        print("SAVE !", 'data/data_%s.json' % self.file_path_o[:-4].replace("output/", ""))
+        print("SAVE !", 'data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", ""))
         self.raw_data_draw = {"filename": ""}
 
     def detect_compare(self):
