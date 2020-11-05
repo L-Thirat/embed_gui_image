@@ -16,8 +16,10 @@ GPIO.setup(167, GPIO.IN)
 def control(pin, signal):
     if signal:
         GPIO.output(pin, GPIO.HIGH)
+        print("ON")
     else:
         GPIO.output(pin, GPIO.LOW)
+        print("OFF")
     time.sleep(1)
 
 try:
