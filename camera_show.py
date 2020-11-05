@@ -363,13 +363,16 @@ class App:
 class MyVideoCapture:
     def __init__(self, video_source=0):
         # Open the video source
-        self.vid = cv2.VideoCapture(video_source)
-        if not self.vid.isOpened():
-            raise ValueError("Unable to open video source", video_source)
+        if DEBUG:
+            self.vid = cv2.VideoCapture("sample1.mp4")
+        else:
+            self.vid = cv2.VideoCapture(video_source)
+            if not self.vid.isOpened():
+                raise ValueError("Unable to open video source", video_source)
 
-        # Get video source width and height
-        self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
-        self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            # Get video source width and height
+            self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
+            self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
     def get_frame(self):
         if self.vid.isOpened():
