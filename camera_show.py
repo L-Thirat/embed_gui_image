@@ -1,10 +1,4 @@
-# todo right click to prev draw/original
-# todo canvas draw only in image.org
 # todo config camera bar gui/cv2
-
-# **Importance**
-# todo ** tinkboard install
-# todo ** need area/pos ?
 
 import tkinter as tki
 from tkinter import filedialog
@@ -20,33 +14,39 @@ import os
 import time
 
 # Testing
-DEBUG = True
-TEST_MAMOS = True
+DEBUG = True  # Debug mode -> test from video source
+TEST_MAMOS = True  # TEST MAMOS mode -> use Mamos's button instead GUI
+sample_source = "sample1.mp4"
 
 # Config
-full_w = 1350
 camera_h = 480
 camera_w = 640
+
+# fix
 out_path = "output/original/"
 cp_path = "output/compare/"
 
 # TODO MAMOS
 if TEST_MAMOS:
-    import ASUS.GPIO as GPIO
+    try:
+        import ASUS.GPIO as GPIO
 
-    LED = 164
-    BTN_input = 167
+        LED = 164
+        BTN_input = 167
 
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.ASUS)
-    GPIO.setup(LED, GPIO.OUT)
-    GPIO.setup(BTN_input, GPIO.IN)
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.ASUS)
+        GPIO.setup(LED, GPIO.OUT)
+        GPIO.setup(BTN_input, GPIO.IN)
+    except:
+        pass
 
 
 def control(pin, signal):
+    """Control GPIO output"""
     if signal:
         GPIO.output(pin, GPIO.HIGH)
-        print("ON")
+        print("LED ON")
     else:
         GPIO.output(pin, GPIO.LOW)
     time.sleep(1)
@@ -69,6 +69,7 @@ class App:
         cv2.createTrackbar("Threshold1", "Parameters", 42, 255, self.empty)
         cv2.createTrackbar("Threshold2", "Parameters", 0, 255, self.empty)
         cv2.createTrackbar("Area", "Parameters", 100, 60000, self.empty)
+
         self.window = window
         self.window.geometry("1800x900")
         self.window.title(window_title)
@@ -106,7 +107,7 @@ class App:
 
         self.canvas2 = tki.Canvas(window, cursor="cross")
         self.canvas2.place(relx=0.1, rely=0.4)
-        # >> additional
+
         self.x = self.y = 0
         self.count_draw = 0
         self.raw_data_draw = {"filename": ""}
@@ -117,7 +118,7 @@ class App:
         self.rect = []
         self.start_x = None
         self.start_y = None
-        # <<
+
         self.canvas2.config(width=camera_w, height=camera_h)
 
         self.canvas3 = tki.Canvas(window)
@@ -126,12 +127,14 @@ class App:
 
         # Check latest data
         list_of_files = glob.glob('data/*')  # * means all if need specific format then *.csv
-        latest_file = max(list_of_files, key=os.path.getctime)
+        try:
+            latest_file = max(list_of_files, key=os.path.getctime)
+        except:
+            latest_file = ""
         if latest_file:
             self.read_raw_data(latest_file)
 
         # # After it is called once, the update method will be automatically called every delay milliseconds
-
         self.delay = 15
         self.update()
 
@@ -141,14 +144,16 @@ class App:
         pass
 
     def update(self):
-        # TODO MAMOS
+        """To update interface"""
+        # TODO MAMOS: LED OUTPUT
         try:
             if not GPIO.input(BTN_input):
-                # control(pin=LED, signal=True)  # is pressed # todo slowly bug
+                control(pin=LED, signal=True)  # is pressed # todo slowly bug
                 self.snapshot("compare")
             else:
-                pass
-                # control(pin=LED, signal=False)  # is not pressed # todo slowly bug
+                # pass
+                control(pin=LED, signal=False)  # is not pressed # todo slowly bug
+            GPIO.cleanup()
         except KeyboardInterrupt:
             GPIO.cleanup()  # Get a frame from the video source
 
@@ -163,12 +168,14 @@ class App:
         self.window.after(self.delay, self.update)
 
     def reset(self):
+        """Reset screen and parameters"""
         self.canvas2.delete("all")
         self.canvas3.delete("all")
         self.raw_data_draw = {"filename": ""}
         self.pathlabel.config(text="")
 
     def on_button_press(self, event):
+        """Event click the canvas"""
         self.flag_press = False
         # save mouse drag start position
         self.start_x = self.canvas2.canvasx(event.x)
@@ -178,12 +185,14 @@ class App:
         self.rect.append(self.canvas2.create_rectangle(self.x, self.y, 1, 1, outline='red'))
 
     def on_move_press(self, event):
+        """Event drag in the canvas"""
         self.flag_press = True
         cur_x = self.canvas2.canvasx(event.x)
         cur_y = self.canvas2.canvasy(event.y)
         self.canvas2.coords(self.rect[-1], self.start_x, self.start_y, cur_x, cur_y)
 
     def on_button_release(self, event):
+        """Event release from the canvas"""
         if self.flag_press:
             self.count_draw += 1
             cur_x = self.canvas2.canvasx(event.x)
@@ -191,12 +200,14 @@ class App:
             self.raw_data_draw[self.count_draw] = {"rect": [self.start_x, self.start_y, cur_x, cur_y]}
 
     def undo(self, event):
+        """Event right click on the canvas"""
         if self.count_draw:
             del self.raw_data_draw[self.count_draw]
             self.canvas2.delete(self.count_draw + 1)
             self.count_draw -= 1
 
     def snapshot(self, mode):
+        """Take a photo"""
         # Get a frame from the video source
         ret, frame = self.vid.get_frame()
         ts = datetime.datetime.now()
@@ -216,15 +227,12 @@ class App:
                 self.canvas2.create_image(size[2], size[3], image=self.photo_org, anchor=tki.NW)
             elif mode == "compare":
                 self.file_path_c = cp_path + "c_" + "temp_filename.jpg"
-                # if DEBUG:
-                #     self.load_img_cp = Image.open(cp_path + "c_2020-11-05_14-53-29.jpg")
-                # else:
                 cv2.imwrite(self.file_path_c, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
                 self.load_img_cp = Image.open(self.file_path_c)
 
                 size = [camera_w, camera_h, 0, 0]
                 self.load_img_cp = self.load_img_cp.resize((size[0], size[1]), Image.ANTIALIAS)
-                cp_result = self.detect_compare()
+                cp_result = self.load_json_data()
                 self.photo_cp = ImageTk.PhotoImage(image=self.load_img_cp)
                 self.canvas3.create_image(size[2], size[3], image=self.photo_cp, anchor=tki.NW)
                 self.load_rect(self.canvas3, self.load_draw, cp_result)
@@ -232,6 +240,7 @@ class App:
 
     @staticmethod
     def load_rect(cvs, data, result=None):
+        """Load rectangle data from json"""
         for key, val in data.items():
             if key != "filename":
                 if result:
@@ -242,9 +251,11 @@ class App:
                 cvs.create_text((val["rect"][2], val["rect"][3]), text=key, font=('Impact', -15), fill="yellow")
 
     def snapshot_origin(self):
+        """Call snapshot function with original image(LEFT)"""
         self.snapshot("original")
 
     def snapshot_compare(self):
+        """Call snapshot function with compare image(RIGHT)"""
         self.snapshot("compare")
 
     def save_draw(self):
@@ -270,8 +281,8 @@ class App:
         print("SAVE !", 'data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", ""))
         self.raw_data_draw = {"filename": ""}
 
-    def detect_compare(self):
-        result = {}
+    def load_json_data(self):
+        """Load rectangle and filename data from json file"""
         if self.load_filename:
             with open(self.load_filename, 'r') as fp:
                 self.load_draw = json.load(fp)
@@ -280,50 +291,51 @@ class App:
                 with open('data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", ""), 'r') as fp:
                     self.load_draw = json.load(fp)
             except Exception as e:
-                print(self.file_path_o)
+                print("ERROR: " + self.file_path_o)
 
                 raise e
+        self.detect_compare()
+
+    def detect_compare(self):
+        """Get result from comparing image"""
+        result = {}
         for key, val in self.load_draw.items():
             if key != "filename":
                 image_area = self.load_img_cp.crop((val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))
-                print(image_area.size)
-                open_cv_image = np.array(image_area, dtype=np.uint8)
-                img_dil = self.image_preprocessors(open_cv_image)
-                cv2.imwrite("test_cp.jpg", img_dil)
-                # data_result = self.get_contours(img_dil)
+                # >>> to show preprocess image
+                # open_cv_image = np.array(image_area, dtype=np.uint8)
+                # img_dil = self.image_preprocessors(open_cv_image)
+                # cv2.imwrite("temp/test_cp.jpg", img_dil)
+                # <<<
 
                 image_o_area = self.load_img_o.crop(
                     (val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))  # // = image_o fill
                 image_o_area = np.array(image_o_area, dtype=np.uint8)
                 image_cp_area = np.array(image_area, dtype=np.uint8)
-                # cv2.imshow("result1", image_o_area) # show prepossess image result
-                # cv2.imshow("result2", image_cp_area) # show prepossess image result
+                # cv2.imshow("result1", image_o_area) # to show prepossess image result
+                # cv2.imshow("result2", image_cp_area) # to show prepossess image result
                 score = self.cp_similarity(image_o_area, image_cp_area)
                 print(score)
-                # if data_result:
-                #     x, y, area, points = data_result
-                # thershold_percent = 10
                 thershold_score = 20
                 if score >= thershold_score:
                     # and ((abs(area - self.load_draw[key]["area"]) * 100) / self.load_draw[key]["area"] <
                     # thershold_percent): print("True", key, area, self.load_draw[key]["area"])
-                    print("item %s => " % key + "True")
+                    print("item %s => " % key + "True" + " SCORE: %f" % score)
                     result[key] = "green"
                 else:
-                    print("item %s => " % key + "False")
+                    print("item %s => " % key + "False" + " SCORE: %f" % score)
                     result[key] = "red"
-                # else:
-                #     print("item %s => " % key + "False")
-                #     result[key] = "red"
 
         return result
 
     def read_raw_data(self, filename):
+        """Read json data and update canvas"""
         if filename:
             with open(filename, 'r') as fp:
                 self.load_draw = json.load(fp)
 
                 # load img
+                print("Loading data: ")
                 print(self.load_draw)
                 self.load_img_o = Image.open(self.load_draw["filename"])
                 self.file_path_o = self.load_draw["filename"]
@@ -336,6 +348,7 @@ class App:
                 self.load_rect(self.canvas2, self.load_draw)
 
     def browsefunc(self):
+        """Find json data from Local PC"""
         self.load_filename = filedialog.askopenfilename()
         self.pathlabel.config(text=self.load_filename)
         self.read_raw_data(self.load_filename)
@@ -343,6 +356,7 @@ class App:
     # >> image processing
     @staticmethod
     def cp_similarity(original, image_to_compare):
+        """Comparing Algorithm"""
         sift = cv2.xfeatures2d.SIFT_create()
         kp_1, desc_1 = sift.detectAndCompute(original, None)
         kp_2, desc_2 = sift.detectAndCompute(image_to_compare, None)
@@ -361,33 +375,8 @@ class App:
         return (len(good_points) * 100) / len(matches)
 
     @staticmethod
-    def get_contours(img):
-        contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        # >>> Find original position
-        # item_area = 10000  # minimum area of item
-        original_x, original_y = 0, 0
-        original_area = 0
-        if len(contours) == 1:
-            # todo fix not check from len
-            approx = []
-            for cnt in contours:
-                area = cv2.contourArea(cnt)
-
-                # if area > item_area:
-                M = cv2.moments(cnt)
-
-                original_area = area
-                original_x = int(M['m10'] / M['m00'])
-                original_y = int(M['m01'] / M['m00'])
-
-                peri = cv2.arcLength(cnt, True)
-                approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
-
-            return original_x, original_y, original_area, len(approx)
-
-    @staticmethod
     def image_preprocessors(img):
-        # imgContour = img.copy()
+        """Image preprocessing"""
         img_blur = cv2.GaussianBlur(img, (7, 7), 1)
         img_gray = cv2.cvtColor(img_blur, cv2.COLOR_BGR2GRAY)
         threshold1 = cv2.getTrackbarPos("Threshold1", "Parameters")
@@ -405,7 +394,7 @@ class MyVideoCapture:
     def __init__(self):
         # Open the video source
         if DEBUG:
-            self.vid = cv2.VideoCapture("sample1.mp4")
+            self.vid = cv2.VideoCapture(sample_source)
         else:
             for i in range(10):
                 self.vid = cv2.VideoCapture(i)
