@@ -15,7 +15,7 @@ import time
 import atexit
 
 # Testing
-DEBUG = False  # Debug mode -> test from video source
+DEBUG = True  # Debug mode -> test from video source
 TEST_MAMOS = True  # TEST MAMOS mode -> use Mamos's button instead GUI
 sample_source = "sample1.mp4"
 
@@ -58,6 +58,7 @@ def control(pin):
 class App:
     def __init__(self, window, window_title):
         self.prev_input = False
+        self.prev_rect = []
         
         self.file_path_o = ""
         self.file_path_c = ""
@@ -95,9 +96,9 @@ class App:
         self.browsebutton = tki.Button(window, text="Browse", width=40, height=3, command=self.browsefunc)
         self.browsebutton.place(relx=0.81, rely=0.05)
 
-        if not TEST_MAMOS:
-            self.btn_compare = tki.Button(window, text="Compare", width=40, height=3, command=self.snapshot_compare)
-            self.btn_compare.place(relx=0.41, rely=0.15)
+        # if not TEST_MAMOS:
+        self.btn_compare = tki.Button(window, text="Compare", width=40, height=3, command=self.snapshot_compare)
+        self.btn_compare.place(relx=0.41, rely=0.15)
 
         self.btn_reset = tki.Button(window, text="Reset", width=40, height=3, command=self.reset)
         self.btn_reset.place(relx=0.61, rely=0.15)
@@ -151,19 +152,15 @@ class App:
     def update(self):
         """To update interface"""
         # TODO MAMOS: LED OUTPUT
-        try:
-            if not GPIO.input(BTN_input) and not self.prev_input:
-                #control(pin=LED, signal=True)  # is pressed # todo slowly bug
-                self.snapshot("compare")
-                print("click")
-                self.prev_input = True
-            elif GPIO.input(BTN_input) and self.prev_input:
-                self.prev_input = False
-                #control(pin=LED, signal=False)  # is not pressed # todo slowly bug
-            #GPIO.cleanup()
-        except KeyboardInterrupt:
-            GPIO.cleanup()  # Get a frame from the video source
-
+        # try:
+        #     if not GPIO.input(BTN_input) and not self.prev_input:
+        #         self.snapshot("compare")
+        #         print("click")
+        #         self.prev_input = True
+        #     elif GPIO.input(BTN_input) and self.prev_input:
+        #         self.prev_input = False
+        # except KeyboardInterrupt:
+        #     GPIO.cleanup()  # Get a frame from the video source
         ret, frame = self.vid.get_frame()
 
         if ret:
@@ -189,7 +186,8 @@ class App:
         self.start_y = self.canvas2.canvasy(event.y)
 
         # create rectangle if not yet exist
-        self.rect.append(self.canvas2.create_rectangle(self.x, self.y, 1, 1, outline='red'))
+        self.prev_rect.append(self.canvas2.create_rectangle(self.x, self.y, 1, 1, outline='red'))
+        self.rect.append(self.prev_rect[-1])
 
     def on_move_press(self, event):
         """Event drag in the canvas"""
@@ -208,9 +206,10 @@ class App:
 
     def undo(self, event):
         """Event right click on the canvas"""
+        print(self.count_draw)
         if self.count_draw:
             del self.raw_data_draw[self.count_draw]
-            self.canvas2.delete(self.count_draw + 1)
+            self.canvas2.delete(self.prev_rect[-1])
             self.count_draw -= 1
 
     def snapshot(self, mode):
@@ -244,10 +243,11 @@ class App:
                 size = [camera_w, camera_h, 0, 0]
                 self.load_img_cp = self.load_img_cp.resize((size[0], size[1]), Image.ANTIALIAS)
                 cp_result, summary = self.load_json_data()
-                if summary:
-                    control(LED_OK)
-                else:
-                    control(LED_NG)
+                if TEST_MAMOS:
+                    if summary:
+                        control(LED_OK)
+                    else:
+                        control(LED_NG)
                 end = time.time()
                 print("Calculate time: %f"%(end-start))
                 self.photo_cp = ImageTk.PhotoImage(image=self.load_img_cp)
@@ -322,8 +322,7 @@ class App:
         result = {}
         for key, val in self.load_draw.items():
             if key != "filename":
-                print(key)
-                print(self.load_img_cp.shape)
+                # print("key", key)
                 image_area = self.load_img_cp.crop((val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))
                 # >>> to show preprocess image
                 # open_cv_image = np.array(image_area, dtype=np.uint8)
@@ -335,19 +334,24 @@ class App:
                     (val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))  # // = image_o fill
                 image_o_area = np.array(image_o_area, dtype=np.uint8)
                 image_cp_area = np.array(image_area, dtype=np.uint8)
-                cv2.imshow("result1", image_o_area) # to show prepossess image result
-                cv2.imshow("result2", image_cp_area) # to show prepossess image result
-                #score = self.cp_similarity(image_o_area, image_cp_area)
-                #print(score)
-                #thershold_score = 20
-                #if score >= thershold_score:
-                    # and ((abs(area - self.load_draw[key]["area"]) * 100) / self.load_draw[key]["area"] <
-                    # thershold_percent): print("True", key, area, self.load_draw[key]["area"])
-                #    result[key] = "green"
-                #else:
-                #    print("item %s => " % key + "False" + " SCORE: %f" % score)
-                #    result[key] = "red"
-                #    summary = False
+                # cv2.imshow("result1", image_o_area)  # to show prepossess image result
+                # cv2.imshow("result2", image_cp_area)  # to show prepossess image result
+
+
+                # image_o_area = self.image_preprocessors(image_o_area)
+                # image_cp_area = self.image_preprocessors(image_cp_area)
+
+                score = self.cp_similarity(image_o_area, image_cp_area)
+                # print("score", score)
+                thershold_score = 20
+                if score >= thershold_score:
+                   result[key] = "green"
+                else:
+                   print("item %s => " % key + "False" + " SCORE: %f" % score)
+                   result[key] = "red"
+                   summary = False
+                   # cv2.imshow("result1", image_o_area)  # to show prepossess image result
+                   # cv2.imshow("result2", image_cp_area)  # to show prepossess image result
 
         return result, summary
 
@@ -380,36 +384,41 @@ class App:
     @staticmethod
     def cp_similarity(original, image_to_compare):
         """Comparing Algorithm"""
-        sift = cv2.xfeatures2d.SIFT_create()
+        sift = cv2.xfeatures2d.SIFT_create(150)
         kp_1, desc_1 = sift.detectAndCompute(original, None)
         kp_2, desc_2 = sift.detectAndCompute(image_to_compare, None)
+        # print(len(kp_1), len(kp_2))
 
-        index_params = dict(algorithm=0, trees=5)
-        search_params = dict()
-        print(len(kp_1),len(kp_2))
-        flann = cv2.FlannBasedMatcher(index_params, search_params)
+        if len(kp_1) > 1 and len(kp_2) > 1:
+            index_params = dict(algorithm=0, trees=5)
+            search_params = dict()
+            flann = cv2.FlannBasedMatcher(index_params, search_params)
+            matches = flann.knnMatch(desc_1, desc_2, k=2)
 
-        matches = flann.knnMatch(desc_1, desc_2, k=2)
-
-        good_points = []
-        ratio = 0.6
-        for m, n in matches:
-            if m.distance < ratio * n.distance:
-                good_points.append(m)
-        return (len(good_points) * 100) / len(matches)
+            good_points = []
+            ratio = 0.6
+            for m, n in matches:
+                if m.distance < ratio * n.distance:
+                    good_points.append(m)
+            return (len(good_points) * 100) / len(matches)
+        elif len(kp_1) != len(kp_2):
+            return 0
+        else:
+            return 100
 
     @staticmethod
     def image_preprocessors(img):
         """Image preprocessing"""
-        img_blur = cv2.GaussianBlur(img, (7, 7), 1)
-        img_gray = cv2.cvtColor(img_blur, cv2.COLOR_BGR2GRAY)
-        threshold1 = cv2.getTrackbarPos("Threshold1", "Parameters")
-        threshold2 = cv2.getTrackbarPos("Threshold2", "Parameters")
-        img_canny = cv2.Canny(img_gray, threshold1, threshold2)  # 255 # todo create tuning bar gui
-        kernel = np.ones((5, 5))
-        img_dil = cv2.dilate(img_canny, kernel, iterations=1)
+        # img = cv2.convertScaleAbs(img, alpha=1, beta=10)
+        # img_blur = cv2.GaussianBlur(img, (7, 7), 1)
+        # img_gray = cv2.cvtColor(img_blur, cv2.COLOR_BGR2GRAY)
+        # threshold1 = cv2.getTrackbarPos("Threshold1", "Parameters")
+        # threshold2 = cv2.getTrackbarPos("Threshold2", "Parameters")
+        # img_canny = cv2.Canny(img_gray, threshold1, threshold2)  # 255 # todo create tuning bar gui
+        # kernel = np.ones((5, 5))
+        # img_dil = cv2.dilate(img_canny, kernel, iterations=1)
 
-        return img_dil
+        return img
 
     # << image processing
 
@@ -446,7 +455,7 @@ class MyVideoCapture:
 
 def exit_handler():
     print("Ending ..")
-    GPIO.cleanup()
+    # GPIO.cleanup()
 
 atexit.register(exit_handler)
 App(tki.Tk(), "Tkinter and OpenCV")
