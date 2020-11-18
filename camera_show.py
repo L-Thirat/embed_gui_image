@@ -12,9 +12,10 @@ import json
 import glob
 import os
 import time
+import atexit
 
 # Testing
-DEBUG = True  # Debug mode -> test from video source
+DEBUG = False  # Debug mode -> test from video source
 TEST_MAMOS = True  # TEST MAMOS mode -> use Mamos's button instead GUI
 sample_source = "sample1.mp4"
 
@@ -31,29 +32,33 @@ if TEST_MAMOS:
     try:
         import ASUS.GPIO as GPIO
 
-        LED = 164
+        LED_OK = 161
+        LED_NG = 184
         BTN_input = 167
 
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.ASUS)
-        GPIO.setup(LED, GPIO.OUT)
+        GPIO.setup(LED_OK, GPIO.OUT)
+        GPIO.setup(LED_NG, GPIO.OUT)
         GPIO.setup(BTN_input, GPIO.IN)
     except:
         pass
 
 
-def control(pin, signal):
+def control(pin):
     """Control GPIO output"""
-    if signal:
-        GPIO.output(pin, GPIO.HIGH)
-        print("LED ON")
-    else:
-        GPIO.output(pin, GPIO.LOW)
-    time.sleep(1)
+    #if signal:
+    GPIO.output(pin, GPIO.HIGH)
+    print("LED ON")
+    time.sleep(0.1)
+    GPIO.output(pin, GPIO.LOW)
+    #time.sleep(0.1)
 
 
 class App:
     def __init__(self, window, window_title):
+        self.prev_input = False
+        
         self.file_path_o = ""
         self.file_path_c = ""
         self.photo_rt = None
@@ -147,13 +152,15 @@ class App:
         """To update interface"""
         # TODO MAMOS: LED OUTPUT
         try:
-            if not GPIO.input(BTN_input):
-                control(pin=LED, signal=True)  # is pressed # todo slowly bug
+            if not GPIO.input(BTN_input) and not self.prev_input:
+                #control(pin=LED, signal=True)  # is pressed # todo slowly bug
                 self.snapshot("compare")
-            else:
-                # pass
-                control(pin=LED, signal=False)  # is not pressed # todo slowly bug
-            GPIO.cleanup()
+                print("click")
+                self.prev_input = True
+            elif GPIO.input(BTN_input) and self.prev_input:
+                self.prev_input = False
+                #control(pin=LED, signal=False)  # is not pressed # todo slowly bug
+            #GPIO.cleanup()
         except KeyboardInterrupt:
             GPIO.cleanup()  # Get a frame from the video source
 
@@ -209,7 +216,10 @@ class App:
     def snapshot(self, mode):
         """Take a photo"""
         # Get a frame from the video source
+        start_task = time.time()
         ret, frame = self.vid.get_frame()
+        end = time.time()
+        print("Capture time: %f"%(end-start_task))
         ts = datetime.datetime.now()
         filename = "{}.jpg".format(ts.strftime("%Y-%m-%d_%H-%M-%S"))
 
@@ -226,17 +236,27 @@ class App:
                 self.photo_org = ImageTk.PhotoImage(image=self.load_img_o)
                 self.canvas2.create_image(size[2], size[3], image=self.photo_org, anchor=tki.NW)
             elif mode == "compare":
+                start = time.time()
                 self.file_path_c = cp_path + "c_" + "temp_filename.jpg"
                 cv2.imwrite(self.file_path_c, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
                 self.load_img_cp = Image.open(self.file_path_c)
 
                 size = [camera_w, camera_h, 0, 0]
                 self.load_img_cp = self.load_img_cp.resize((size[0], size[1]), Image.ANTIALIAS)
-                cp_result = self.load_json_data()
+                cp_result, summary = self.load_json_data()
+                if summary:
+                    control(LED_OK)
+                else:
+                    control(LED_NG)
+                end = time.time()
+                print("Calculate time: %f"%(end-start))
                 self.photo_cp = ImageTk.PhotoImage(image=self.load_img_cp)
                 self.canvas3.create_image(size[2], size[3], image=self.photo_cp, anchor=tki.NW)
                 self.load_rect(self.canvas3, self.load_draw, cp_result)
                 self.load_draw = {}
+                end_task = time.time()
+                print("Calculate event time: %f"%(end_task-start_task))
+
 
     @staticmethod
     def load_rect(cvs, data, result=None):
@@ -294,13 +314,16 @@ class App:
                 print("ERROR: " + self.file_path_o)
 
                 raise e
-        self.detect_compare()
+        return self.detect_compare()
 
     def detect_compare(self):
+        summary = True
         """Get result from comparing image"""
         result = {}
         for key, val in self.load_draw.items():
             if key != "filename":
+                print(key)
+                print(self.load_img_cp.shape)
                 image_area = self.load_img_cp.crop((val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))
                 # >>> to show preprocess image
                 # open_cv_image = np.array(image_area, dtype=np.uint8)
@@ -312,21 +335,21 @@ class App:
                     (val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))  # // = image_o fill
                 image_o_area = np.array(image_o_area, dtype=np.uint8)
                 image_cp_area = np.array(image_area, dtype=np.uint8)
-                # cv2.imshow("result1", image_o_area) # to show prepossess image result
-                # cv2.imshow("result2", image_cp_area) # to show prepossess image result
-                score = self.cp_similarity(image_o_area, image_cp_area)
-                print(score)
-                thershold_score = 20
-                if score >= thershold_score:
+                cv2.imshow("result1", image_o_area) # to show prepossess image result
+                cv2.imshow("result2", image_cp_area) # to show prepossess image result
+                #score = self.cp_similarity(image_o_area, image_cp_area)
+                #print(score)
+                #thershold_score = 20
+                #if score >= thershold_score:
                     # and ((abs(area - self.load_draw[key]["area"]) * 100) / self.load_draw[key]["area"] <
                     # thershold_percent): print("True", key, area, self.load_draw[key]["area"])
-                    print("item %s => " % key + "True" + " SCORE: %f" % score)
-                    result[key] = "green"
-                else:
-                    print("item %s => " % key + "False" + " SCORE: %f" % score)
-                    result[key] = "red"
+                #    result[key] = "green"
+                #else:
+                #    print("item %s => " % key + "False" + " SCORE: %f" % score)
+                #    result[key] = "red"
+                #    summary = False
 
-        return result
+        return result, summary
 
     def read_raw_data(self, filename):
         """Read json data and update canvas"""
@@ -363,6 +386,7 @@ class App:
 
         index_params = dict(algorithm=0, trees=5)
         search_params = dict()
+        print(len(kp_1),len(kp_2))
         flann = cv2.FlannBasedMatcher(index_params, search_params)
 
         matches = flann.knnMatch(desc_1, desc_2, k=2)
@@ -420,4 +444,9 @@ class MyVideoCapture:
             self.vid.release()
 
 
+def exit_handler():
+    print("Ending ..")
+    GPIO.cleanup()
+
+atexit.register(exit_handler)
 App(tki.Tk(), "Tkinter and OpenCV")
