@@ -16,7 +16,7 @@ import atexit
 
 # Testing
 DEBUG = True  # Debug mode -> test from video source
-TEST_MAMOS = True  # TEST MAMOS mode -> use Mamos's button instead GUI
+TEST_MAMOS = False  # TEST MAMOS mode -> use Mamos's button instead GUI
 sample_source = "sample1.mp4"
 
 # Config
@@ -55,6 +55,35 @@ def control(pin):
     #time.sleep(0.1)
 
 
+def get_contours(img_contour, big_img):
+    big_contours, big_hierarchy_big = cv2.findContours(big_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    # >>> Find original position
+    item_area = 100
+    for cnt in big_contours:
+        area = cv2.contourArea(cnt)
+        print(area)
+
+        if area > item_area:
+            M = cv2.moments(cnt)
+
+            original_area = area
+            original_x = int(M['m10'] / M['m00'])
+            original_y = int(M['m01'] / M['m00'])
+
+            rotrect = cv2.minAreaRect(cnt)
+
+            cv2.circle(img_contour, (original_x, original_y), 1, (0, 0, 0), 5)
+            # >>> DEGREE
+            # get rotated rectangle from outer contour
+            rotrect = cv2.minAreaRect(cnt)
+            box = cv2.boxPoints(rotrect)
+            box = np.int0(box)
+
+            # draw rotated rectangle on copy of img as result
+            cv2.drawContours(img_contour, [box], 0, (0, 0, 0), 2)
+
+
 class App:
     def __init__(self, window, window_title):
         self.prev_input = False
@@ -72,7 +101,7 @@ class App:
         # Create Control Bar
         cv2.namedWindow("Parameters")
         cv2.resizeWindow("Parameters", 640, 240)
-        cv2.createTrackbar("Threshold1", "Parameters", 42, 255, self.empty)
+        cv2.createTrackbar("Threshold1", "Parameters", 100, 255, self.empty)
         cv2.createTrackbar("Threshold2", "Parameters", 0, 255, self.empty)
         cv2.createTrackbar("Area", "Parameters", 100, 60000, self.empty)
 
@@ -152,15 +181,15 @@ class App:
     def update(self):
         """To update interface"""
         # TODO MAMOS: LED OUTPUT
-        try:
-            if not GPIO.input(BTN_input) and not self.prev_input:
-                self.snapshot("compare")
-                print("click")
-                self.prev_input = True
-            elif GPIO.input(BTN_input) and self.prev_input:
-                self.prev_input = False
-        except KeyboardInterrupt:
-            GPIO.cleanup()  # Get a frame from the video source
+        # try:
+        #     if not GPIO.input(BTN_input) and not self.prev_input:
+        #         self.snapshot("compare")
+        #         print("click")
+        #         self.prev_input = True
+        #     elif GPIO.input(BTN_input) and self.prev_input:
+        #         self.prev_input = False
+        # except KeyboardInterrupt:
+        #     GPIO.cleanup()  # Get a frame from the video source
         ret, frame = self.vid.get_frame()
 
         if ret:
@@ -334,12 +363,16 @@ class App:
                     (val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3]))  # // = image_o fill
                 image_o_area = np.array(image_o_area, dtype=np.uint8)
                 image_cp_area = np.array(image_area, dtype=np.uint8)
-                # cv2.imshow("result1", image_o_area)  # to show prepossess image result
-                # cv2.imshow("result2", image_cp_area)  # to show prepossess image result
 
+                pp_image_o_area = self.image_preprocessors(image_o_area)
+                pp_image_cp_area = self.image_preprocessors(image_cp_area)
 
-                # image_o_area = self.image_preprocessors(image_o_area)
-                # image_cp_area = self.image_preprocessors(image_cp_area)
+                if key == "3":
+                    # get_contours(image_o_area, pp_image_o_area)
+                    # get_contours(image_cp_area, pp_image_cp_area)
+                    cv2.imshow("result1", image_o_area)  # to show prepossess image result
+                    cv2.imshow("result2", image_cp_area)  # to show prepossess image result
+
 
                 score = self.cp_similarity(image_o_area, image_cp_area)
                 # print("score", score)
@@ -400,6 +433,11 @@ class App:
             for m, n in matches:
                 if m.distance < ratio * n.distance:
                     good_points.append(m)
+
+            gray = cv2.cvtColor(original, cv2.COLOR_BGR2GRAY)
+            img = cv2.drawKeypoints(gray, kp_1, original, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+            cv2.imwrite('sift_keypoints.jpg', img)
+
             return (len(good_points) * 100) / len(matches)
         elif len(kp_1) != len(kp_2):
             return 0
@@ -410,15 +448,15 @@ class App:
     def image_preprocessors(img):
         """Image preprocessing"""
         # img = cv2.convertScaleAbs(img, alpha=1, beta=10)
-        # img_blur = cv2.GaussianBlur(img, (7, 7), 1)
-        # img_gray = cv2.cvtColor(img_blur, cv2.COLOR_BGR2GRAY)
-        # threshold1 = cv2.getTrackbarPos("Threshold1", "Parameters")
-        # threshold2 = cv2.getTrackbarPos("Threshold2", "Parameters")
-        # img_canny = cv2.Canny(img_gray, threshold1, threshold2)  # 255 # todo create tuning bar gui
-        # kernel = np.ones((5, 5))
-        # img_dil = cv2.dilate(img_canny, kernel, iterations=1)
+        img_blur = cv2.GaussianBlur(img, (7, 7), 1)
+        img_gray = cv2.cvtColor(img_blur, cv2.COLOR_BGR2GRAY)
+        threshold1 = cv2.getTrackbarPos("Threshold1", "Parameters")
+        threshold2 = cv2.getTrackbarPos("Threshold2", "Parameters")
+        img_canny = cv2.Canny(img_gray, threshold1, threshold2)  # 255 # todo create tuning bar gui
+        kernel = np.ones((5, 5))
+        img_dil = cv2.dilate(img_canny, kernel, iterations=1)
 
-        return img
+        return img_canny
 
     # << image processing
 
