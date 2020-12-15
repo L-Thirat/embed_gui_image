@@ -24,8 +24,8 @@ camera_h = 480
 camera_w = 640
 
 # fix
-out_path = "output/original/"
-cp_path = "output/compare/"
+out_path = "output/temp_essembly/original/"
+cp_path = "output/temp_essembly/compare/"
 
 # TODO MAMOS
 if TEST_MAMOS:
@@ -47,19 +47,19 @@ if TEST_MAMOS:
 
 def control(pin):
     """Control GPIO output"""
-    #if signal:
+    # if signal:
     GPIO.output(pin, GPIO.HIGH)
     print("LED ON")
     time.sleep(0.1)
     GPIO.output(pin, GPIO.LOW)
-    #time.sleep(0.1)
+    # time.sleep(0.1)
 
 
 class App:
     def __init__(self, window, window_title):
         self.prev_input = False
         self.prev_rect = []
-        
+
         self.file_path_o = ""
         self.file_path_c = ""
         self.photo_rt = None
@@ -218,7 +218,7 @@ class App:
         start_task = time.time()
         ret, frame = self.vid.get_frame()
         end = time.time()
-        print("Capture time: %f"%(end-start_task))
+        print("Capture time: %f" % (end - start_task))
         ts = datetime.datetime.now()
         filename = "{}.jpg".format(ts.strftime("%Y-%m-%d_%H-%M-%S"))
 
@@ -249,14 +249,13 @@ class App:
                     else:
                         control(LED_NG)
                 end = time.time()
-                print("Calculate time: %f"%(end-start))
+                print("Calculate time: %f" % (end - start))
                 self.photo_cp = ImageTk.PhotoImage(image=self.load_img_cp)
                 self.canvas3.create_image(size[2], size[3], image=self.photo_cp, anchor=tki.NW)
                 self.load_rect(self.canvas3, self.load_draw, cp_result)
                 self.load_draw = {}
                 end_task = time.time()
-                print("Calculate event time: %f"%(end_task-start_task))
-
+                print("Calculate event time: %f" % (end_task - start_task))
 
     @staticmethod
     def load_rect(cvs, data, result=None):
@@ -337,7 +336,6 @@ class App:
                 # cv2.imshow("result1", image_o_area)  # to show prepossess image result
                 # cv2.imshow("result2", image_cp_area)  # to show prepossess image result
 
-
                 # image_o_area = self.image_preprocessors(image_o_area)
                 # image_cp_area = self.image_preprocessors(image_cp_area)
 
@@ -345,13 +343,13 @@ class App:
                 # print("score", score)
                 thershold_score = 20
                 if score >= thershold_score:
-                   result[key] = "green"
+                    result[key] = "green"
                 else:
-                   print("item %s => " % key + "False" + " SCORE: %f" % score)
-                   result[key] = "red"
-                   summary = False
-                   # cv2.imshow("result1", image_o_area)  # to show prepossess image result
-                   # cv2.imshow("result2", image_cp_area)  # to show prepossess image result
+                    print("item %s => " % key + "False" + " SCORE: %f" % score)
+                    result[key] = "red"
+                    summary = False
+                    # cv2.imshow("result1", image_o_area)  # to show prepossess image result
+                    # cv2.imshow("result2", image_cp_area)  # to show prepossess image result
 
         return result, summary
 
@@ -456,6 +454,7 @@ class MyVideoCapture:
 def exit_handler():
     print("Ending ..")
     # GPIO.cleanup()
+
 
 atexit.register(exit_handler)
 App(tki.Tk(), "Tkinter and OpenCV")

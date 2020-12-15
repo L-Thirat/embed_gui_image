@@ -1,0 +1,9 @@
+cam_height: 480
+cam_width: 640
+out_path: output/original/
+cp_path : output/compare/
+
+# Mamos setting
+LED_OK: 161
+LED_NG: 184
+BTN_INPUT: 167
