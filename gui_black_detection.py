@@ -16,23 +16,14 @@ import PIL.Image as Image
 import PIL.ImageTk as ImageTk
 import imutils
 import datetime
-import numpy as np
 import json
 import glob
 import os
 import time
 import atexit
 import yaml
-from itertools import tee
-from scipy.stats import linregress
-from statistics import mean
-import math
-from scipy import interpolate
-import matplotlib.pyplot as plt
 
-from src import preprocess as pp
 from src import extraction as et
-from src import linear_processing as lp
 from src.video_capture import MyVideoCapture as vc
 
 global t_dist
