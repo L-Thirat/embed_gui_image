@@ -20,21 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bd4f7730-c471-4fd2-9772-64ddef4dec41" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/plastic_detection.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/data_o_2020-12-15_15-41-16.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Untitled.png" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Untitled.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui_black_detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui_black_detection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/compare/c_temp_filename.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/output/compare/c_temp_filename.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/original/o_2020-12-15_15-41-16.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/preprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/preprocess.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/video_capture.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/video_capture.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pages_gui_black_detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pages_gui_black_detection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mamos.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/mamos.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -245,30 +233,30 @@
     </state>
     <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1608168884402" />
     <state x="2660" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1605241639115" />
-    <state width="1899" height="232" key="GridCell.Tab.0.bottom" timestamp="1608267955823">
+    <state width="1899" height="232" key="GridCell.Tab.0.bottom" timestamp="1608268062247">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1345" height="283" key="GridCell.Tab.0.bottom/0.0.1366.728@0.0.1366.728" timestamp="1607563730006" />
     <state width="1899" height="232" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1608183875369" />
-    <state width="1899" height="232" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608267955823" />
-    <state width="1899" height="232" key="GridCell.Tab.0.center" timestamp="1608267955823">
+    <state width="1899" height="232" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608268062247" />
+    <state width="1899" height="232" key="GridCell.Tab.0.center" timestamp="1608268062247">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1345" height="283" key="GridCell.Tab.0.center/0.0.1366.728@0.0.1366.728" timestamp="1607563730006" />
     <state width="1899" height="232" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1608183875369" />
-    <state width="1899" height="232" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608267955823" />
-    <state width="1899" height="232" key="GridCell.Tab.0.left" timestamp="1608267955823">
+    <state width="1899" height="232" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608268062247" />
+    <state width="1899" height="232" key="GridCell.Tab.0.left" timestamp="1608268062246">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1345" height="283" key="GridCell.Tab.0.left/0.0.1366.728@0.0.1366.728" timestamp="1607563730005" />
     <state width="1899" height="232" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1608183875369" />
-    <state width="1899" height="232" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608267955823" />
-    <state width="1899" height="232" key="GridCell.Tab.0.right" timestamp="1608267955823">
+    <state width="1899" height="232" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608268062246" />
+    <state width="1899" height="232" key="GridCell.Tab.0.right" timestamp="1608268062247">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1345" height="283" key="GridCell.Tab.0.right/0.0.1366.728@0.0.1366.728" timestamp="1607563730006" />
     <state width="1899" height="232" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1608183875369" />
-    <state width="1899" height="232" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608267955823" />
+    <state width="1899" height="232" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608268062247" />
     <state x="839" y="187" key="SettingsEditor" timestamp="1608169654165">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

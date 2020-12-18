@@ -421,7 +421,9 @@ class Page1(Page):
             if error_cnt or error_lack:
                 mm.control(LED_NG)
             else:
-                mm.control(LED_OK)
+                pass
+                # todo test 1 pin
+                # mm.control(LED_OK)
         return error_cnt, error_lack
 
     def read_raw_data(self, filename):
