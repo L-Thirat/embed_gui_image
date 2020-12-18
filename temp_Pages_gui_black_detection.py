@@ -26,9 +26,6 @@ import yaml
 from src import extraction as et
 from src.video_capture import MyVideoCapture as vc
 
-global t_dist
-global t_num_error
-
 # Setting
 with open(r'setting.yaml') as file:
     # The FullLoader parameter handles the conversion from YAML
@@ -44,8 +41,10 @@ with open(r'setting.yaml') as file:
     BTN_input = setting_data["BTN_INPUT"]
 
     # Testing
-    DEBUG = {"sample_img": 'WIN_20201210_10_12_37_Pro.jpg', "cam_width": cam_width,
+    DEBUG = {"sample_img": 'test/test_lack2.png', "cam_width": cam_width,
              "cam_height": cam_height}  # Debug mode -> test from video source
+    # DEBUG = {"sample_img": 'WIN_20201210_10_12_37_Pro.jpg', "cam_width": cam_width,
+    #          "cam_height": cam_height}  # Debug mode -> test from video source
     TEST_MAMOS = False  # TEST MAMOS mode -> use Mamos's button instead GUI
 
     if TEST_MAMOS:
@@ -53,7 +52,7 @@ with open(r'setting.yaml') as file:
 
         mm = Mamos(LED_OK, LED_NG, BTN_input)
 
-original_threshold_dist = 4
+original_threshold_dist = [0, 0]
 mini_sampling = 4
 
 
@@ -62,7 +61,7 @@ def empty(area):
 
 
 def fix_width(error_width=0):
-    width = original_threshold_dist
+    width = original_threshold_dist[1]
     if width > error_width:
         width -= error_width
     return width
@@ -76,15 +75,20 @@ cv2.createTrackbar("green", "Parameters", 255, 255, empty)
 cv2.createTrackbar("blue", "Parameters", 105, 255, empty)
 cv2.createTrackbar("light", "Parameters", 0, 255, empty)
 cv2.createTrackbar("contrast", "Parameters", 0, 255, empty)
-cv2.createTrackbar("distance", "Parameters", 15, 100, empty)
+cv2.createTrackbar("width min", "Parameters", 0, 100, empty)
+cv2.createTrackbar("width max", "Parameters", 15, 100, empty)
 cv2.createTrackbar("error %", "Parameters", 10, 100, empty)
+cv2.createTrackbar("space", "Parameters", 15, 100, empty)
 
 
-class App:
-    def __init__(self, window, window_title):
-        self.config = None
+class Page(tki.Frame):
+    def __init__(self, *args, **kwargs):
+        window = self
+        self.window = window
+        tki.Frame.__init__(self, *args, **kwargs)
 
         # Load data
+        self.config = None
         self.file_path_o = ""
         self.file_path_c = ""
         self.tk_photo_line = None
@@ -100,52 +104,34 @@ class App:
         self.error_box = {}
         self.error_line = {}
 
-        # Tkinter setting
-        self.window = window
-        self.window.geometry("1800x900")
-        self.window.title(window_title)
-        self.window.resizable(1, 1)
-        self.window.configure(background="#d9d9d9")
-
         # open video source (by default this will try to open the computer webcam)
         self.vid = vc(DEBUG)
 
         # Button that lets the user take a snapshot
         self.btn_snapshot = tki.Button(window, text="Snapshot", width=40, height=3, command=self.snapshot_origin)
-        self.btn_snapshot.place(relx=0.41, rely=0.05)
 
         self.btn_save = tki.Button(window, text="Save", width=40, height=3, command=self.save_draw)
-        self.btn_save.place(relx=0.61, rely=0.05)
 
         self.load_filename = None
-        self.browsebutton = tki.Button(window, text="Browse", width=40, height=3, command=self.browsefunc)
-        self.browsebutton.place(relx=0.81, rely=0.05)
+        self.browsebutton = tki.Button(window, text="Browse", width=20, height=3, command=self.browsefunc)
 
         self.btn_compare = tki.Button(window, text="Compare", width=40, height=3, command=self.snapshot_compare)
-        self.btn_compare.place(relx=0.41, rely=0.15)
 
         self.btn_reset = tki.Button(window, text="Reset", width=40, height=3, command=self.reset)
-        self.btn_reset.place(relx=0.61, rely=0.15)
 
-        # todo 3 modes for draw
+        # 3 modes for draw
         self.btn_drawmode_detect = tki.Button(window, text="Detect", width=10, height=3, command=self.drawmode_detect,
                                               bg='green')
-        self.btn_drawmode_detect.place(relx=0.81, rely=0.15)
         self.btn_drawmode_area = tki.Button(window, text="Area", width=10, height=3, command=self.drawmode_area)
-        self.btn_drawmode_area.place(relx=0.86, rely=0.15)
         self.btn_drawmode_ignore = tki.Button(window, text="Ignore", width=10, height=3, command=self.drawmode_ignore)
-        self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
 
         self.pathlabel = tki.Label(window)
-        self.pathlabel.place(relx=0.41, rely=0.25)
 
         # Create a canvas that can fit the above video source size
-        self.canvas_rt = tki.Canvas(window)
-        self.canvas_rt.place(relx=0.01, rely=0.05)
-        self.canvas_rt.config(width=cam_width / 2, height=cam_height / 2)
+        # self.canvas_rt = tki.Canvas(self)
+        # self.canvas_rt2 = tki.Canvas(self)
 
         self.canvas2 = tki.Canvas(window, cursor="cross")
-        self.canvas2.place(relx=0.1, rely=0.4)
 
         # Drawing cv2
         self.canvas2.bind("<ButtonPress-1>", self.on_button_press)
@@ -170,26 +156,20 @@ class App:
             self.read_raw_data(latest_file)
 
         self.canvas3 = tki.Canvas(window)
-        self.canvas3.place(relx=0.5, rely=0.4)
         self.canvas3.config(width=cam_width, height=cam_height)
 
-        # # After it is called once, the update method will be automatically called every delay milliseconds
-        self.delay = 15
-        self.update()
-
-        self.window.mainloop()
-
-    def update(self):
+    def update(self, delay=15):
         global original_threshold_dist
-        global t_dist
-        global t_num_error
+
         t_red = cv2.getTrackbarPos("red", "Parameters")
         t_green = cv2.getTrackbarPos("green", "Parameters")
         t_blue = cv2.getTrackbarPos("blue", "Parameters")
         t_contrast = cv2.getTrackbarPos("contrast", "Parameters")
         t_light = cv2.getTrackbarPos("light", "Parameters")
         t_num_error = cv2.getTrackbarPos("error %", "Parameters")
-        t_dist = cv2.getTrackbarPos("distance", "Parameters")
+        t_width_min = cv2.getTrackbarPos("width min", "Parameters")
+        t_width_max = cv2.getTrackbarPos("width max", "Parameters")
+        t_space = cv2.getTrackbarPos("space", "Parameters")
 
         self.config = {
             "t_red": t_red,
@@ -198,30 +178,45 @@ class App:
             "t_contrast": t_contrast,
             "t_light": t_light,
             "t_num_error": t_num_error,
-            "t_dist": t_dist
+            "t_width_min": t_width_min,
+            "t_width_max": t_width_max,
+            "t_space": t_space
         }
         if TEST_MAMOS:
             if mm.output():
                 self.snapshot("compare")
 
         ret, frame, _, mask = self.vid.get_frame(self.config, self.raw_data_draw)
-
         if ret:
             mask = imutils.resize(mask, height=int(cam_height / 2), width=int(cam_width / 2))
             mask = Image.fromarray(mask)
             self.tk_photo_line = ImageTk.PhotoImage(image=mask)
             self.canvas_rt.create_image(0, 0, image=self.tk_photo_line, anchor=tki.NW)
+
             if self.raw_data_draw:
-                if t_dist != original_threshold_dist:
-                    original_threshold_dist = t_dist
+                if (t_width_min, t_width_max) != original_threshold_dist:
+                    original_threshold_dist = (t_width_min, t_width_max)
                     self.load_line(self.canvas2, self.raw_data_draw)
-        self.window.after(self.delay, self.update)
+
+        self.window.after(delay, self.update)
+
+    def update2(self, delay=15):
+        self.config = {"t_red": 255, "t_green": 255, "t_blue": 255, "t_contrast": 0, "t_light": 0}
+        ret, frame, _, mask = self.vid.get_frame(self.config, self.raw_data_draw)
+        if ret:
+            mask = imutils.resize(mask, height=int(cam_height / 2), width=int(cam_width / 2))
+            mask = Image.fromarray(mask)
+            self.tk_photo_line = ImageTk.PhotoImage(image=mask)
+            self.canvas_rt2.create_image(0, 0, image=self.tk_photo_line, anchor=tki.NW)
+
+        self.window.after(delay, self.update2)
 
     def reset(self):
         """Reset screen and parameters"""
         self.canvas2.delete("all")
         self.canvas3.delete("all")
         self.raw_data_draw = {"filename": ""}
+        self.file_path_o = ""
         self.pathlabel.config(text="")
         self.count_draw_line = 0
         self.count_draw_sub_pol = 0
@@ -263,7 +258,7 @@ class App:
             if self.drawmode == "detect":
                 self.count_draw_line += 1
                 self.prev_line.append(
-                    self.canvas2.create_line(x, y, self.start_x, self.start_y, width=original_threshold_dist,
+                    self.canvas2.create_line(x, y, self.start_x, self.start_y, width=original_threshold_dist[1],
                                              fill='green'))
                 self.raw_data_draw[str(self.count_draw_line)] = {"rect": [self.start_x, self.start_y, x, y]}
                 self.start_x, self.start_y = 0, 0
@@ -353,12 +348,7 @@ class App:
                     msg = "No detect line"
                     messagebox.showerror(msg_type, msg)
                     raise msg_type + ": " + msg
-                error_cnt, error_lack = self.load_json_data(contours)
-                if TEST_MAMOS:
-                    if error_cnt:
-                        mm.control(LED_NG)
-                    else:
-                        mm.control(LED_OK)
+                error_cnt, error_lack = self.get_result(contours)
                 end = time.time()
                 print("Calculate time: %f" % (end - start))
                 self.tk_photo_cp = ImageTk.PhotoImage(image=self.load_img_cp)
@@ -460,7 +450,7 @@ class App:
         self.read_raw_data(filename)
         self.load_line(self.canvas2, self.raw_data_draw)
 
-    def load_json_data(self, contours):
+    def get_result(self, contours):
         """Load rectangle and filename data from json file"""
         if self.load_filename:
             with open(self.load_filename, 'r') as fp:
@@ -470,10 +460,17 @@ class App:
                 with open('data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", ""), 'r') as fp:
                     self.raw_data_draw = json.load(fp)
             except Exception as e:
-                print("ERROR: " + self.file_path_o)
-                messagebox.showerror("Error", "Click <Save button> before <compare>")
-                raise e
-        return et.detect_error_cnt(contours, self.raw_data_draw, (t_dist * mini_sampling), t_num_error, t_dist)
+                msg_type = "Error"
+                msg = "Click <Save button> before <compare>"
+                raise Exception(msg_type + ": " + msg)
+        error_cnt, error_lack = et.detect_error_cnt(contours, self.raw_data_draw,
+                                                    (mini_sampling * self.config["t_width_max"]), self.config)
+        if TEST_MAMOS:
+            if error_cnt or error_lack:
+                mm.control(LED_NG)
+            else:
+                mm.control(LED_OK)
+        return error_cnt, error_lack
 
     def read_raw_data(self, filename):
         """Read json data and update canvas"""
@@ -498,7 +495,90 @@ class App:
         """Find json data from Local PC"""
         self.load_filename = filedialog.askopenfilename()
         self.pathlabel.config(text=self.load_filename)
+        self.reset()
         self.read_raw_data(self.load_filename)
+        self.load_line(self.canvas2, self.raw_data_draw)
+
+    def show(self):
+        self.lift()
+
+
+class Page1(Page):
+    def __init__(self, run_page, *args, **kwargs):
+        Page.__init__(self, *args, **kwargs)
+        self.run_page1 = True
+        # self.canvas_rt.place(relx=0.01, rely=0.05)
+        # self.canvas_rt.config(width=cam_width * 0.5, height=cam_height * 0.5)
+        # self.setting = tki.Button(self, text="Setting", width=20, height=3, command=self.go_setting)
+
+        self.btn_snapshot.place(relx=0.41, rely=0.05)
+        self.btn_save.place(relx=0.61, rely=0.05)
+        self.browsebutton.place(relx=0.81, rely=0.05)
+        # self.setting.place(relx=0.91, rely=0.05)
+        self.btn_compare.place(relx=0.41, rely=0.15)
+        self.btn_reset.place(relx=0.61, rely=0.15)
+        self.btn_drawmode_detect.place(relx=0.81, rely=0.15)
+        self.btn_drawmode_area.place(relx=0.86, rely=0.15)
+        self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
+        self.pathlabel.place(relx=0.41, rely=0.25)
+        self.canvas2.place(relx=0.1, rely=0.4)
+        self.canvas3.place(relx=0.5, rely=0.4)
+
+        # # # After it is called once, the update method will be automatically called every delay milliseconds
+        if run_page:
+            self.update()
+            print(1)
+
+
+class Page2(Page):
+    def __init__(self, run_page, *args, **kwargs):
+        Page.__init__(self, *args, **kwargs)
+        # self.canvas_rt2.place(relx=0.01, rely=0.05)
+        # self.canvas_rt2.config(width=cam_width * 0.5, height=cam_height * 0.5)
+        lbl_topic = tki.Label(self, text="Colour", font=("Courier", 55))
+        lbl_topic.place(relx=0.01, rely=0.61)
+        lbl_red = tki.Label(self, text="Red", font=("Courier", 44))
+        lbl_red.place(relx=0.01, rely=0.71)
+        pad_half_width = 300
+        scale_red = tki.Scale(self, from_=0, to=255, tickinterval=51, orient=tki.HORIZONTAL, length=(self.winfo_screenwidth()/2)-pad_half_width)
+        scale_red.place(relx=0.1, rely=0.71)
+        config = {"anc": "asd"}
+
+        # # # After it is called once, the update method will be automatically called every delay milliseconds
+        # if run_page:
+        #     print(2)
+        #     self.update2()
+
+
+class App(tki.Frame):
+    def __init__(self, window, window_title, *args, **kwargs):
+        self.window = window
+        tki.Frame.__init__(self, *args, **kwargs)
+
+        buttonframe = tki.Frame(self)
+        container = tki.Frame(self)
+        buttonframe.pack(side="top", fill="x", expand=False)
+        container.pack(side="bottom", fill="both", expand=True)
+
+        self.canvas_rt = tki.Canvas(self)
+        self.canvas_rt.place(relx=0.01, rely=0.05)
+        self.canvas_rt.config(width=cam_width * 0.5, height=cam_height * 0.5)
+
+        self.p1 = Page1(True, self)
+        self.p2 = Page2(False, self)
+        self.p1.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
+        self.p2.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
+
+        b1 = tki.Button(buttonframe, text="Page 1", command=self.p1.lift)
+        b2 = tki.Button(buttonframe, text="Page 2", command=self.go_page2)
+        b1.pack(side="left")
+        b2.pack(side="left")
+        self.p1.show()
+
+    def go_page2(self):
+        self.p1 = Page1(False, self)
+        self.p2 = Page2(True, self)
+        self.p2.show()
 
 
 def exit_handler():
@@ -507,5 +587,27 @@ def exit_handler():
         mm.clean()
 
 
-atexit.register(exit_handler)
-App(tki.Tk(), "Tkinter and OpenCV")
+def toggle_geom(self, event):
+    geom = self.master.winfo_geometry()
+    print(geom, self._geom)
+    self.master.geometry(self._geom)
+    self._geom = geom
+
+
+if __name__ == "__main__":
+    atexit.register(exit_handler)
+
+    root = tki.Tk()
+    main = App(root, "Tkinter and OpenCV")
+    main.pack(side="top", fill="both", expand=True)
+
+    # Tkinter setting
+    pad = 3
+    tki.Frame._geom = '200x200+0+0'
+    root.geometry("{0}x{1}+0+0".format(
+        root.winfo_screenwidth() - pad, root.winfo_screenheight() - pad))
+    root.bind('<Escape>', toggle_geom)
+    root.title("Tkinter and OpenCV")
+    root.resizable(1, 1)
+    root.configure(background="#d9d9d9")
+    root.mainloop()

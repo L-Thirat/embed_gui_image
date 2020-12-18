@@ -17,7 +17,7 @@ def apply_brightness_contrast(input_img, brightness=0, contrast=0):
     else:
         buf = input_img.copy()
 
-    if contrast != 0:
+    if contrast != 0 and (127 * (131 - contrast)) != 0:
         f = 131 * (contrast + 127) / (127 * (131 - contrast))
         alpha_c = f
         gamma_c = 127 * (1 - f)
