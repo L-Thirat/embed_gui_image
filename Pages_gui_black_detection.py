@@ -366,7 +366,7 @@ class Page1(Page):
                             self.canvas3.create_text((lack_line[2] + 10, lack_line[3]), text=i + 1,
                                                      font=('Impact', -15),
                                                      fill="orange")
-                        else:
+                        elif len(lack_line) == 2:
                             self.canvas3.create_text((lack_line[0] + 10, lack_line[1]), text=i + 1,
                                                      font=('Impact', -15),
                                                      fill="orange")
@@ -387,8 +387,7 @@ class Page1(Page):
                 cur_time = datetime.datetime.now()
                 file_time_form = cur_time.strftime("%Y%m%d_%H%M%S")
                 log_time_form = cur_time.strftime("%Y:%m:%d %H:%M:%S")
-                msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (
-                len(error_over), len(error_under))
+                msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (len(error_over), len(error_under))
                 log.info(msg)
 
                 # use PIL to convert  PS to PNG
@@ -500,9 +499,7 @@ class Page1(Page):
             if error_cnt or error_lack:
                 mm.control(LED_NG)
             else:
-                pass
-                # todo test 1 pin
-                # mm.control(LED_OK)
+                mm.control(LED_OK)
         return error_cnt, error_lack
 
     def read_raw_data(self, filename):
@@ -562,10 +559,17 @@ class Page2(Page):
 
         lbl_zoom = tki.Label(self.buttonframe, text="Zoom", font=("Courier", 44))
         lbl_zoom.place(relx=0.47, rely=0.31)
-        scale_zoom = tki.Scale(self.buttonframe, from_=1, to=4, tickinterval=1, orient=tki.HORIZONTAL,
-                               length=(self.winfo_screenwidth() * 0.5 - pad_half_width), command=self.change_zoom)
+        scale_zoom = tki.Scale(self.buttonframe, from_=1, to=2, tickinterval=1, orient=tki.HORIZONTAL,
+                               length=(self.winfo_screenwidth() * 0.05), command=self.change_zoom)
         scale_zoom.set(self.app.config["t_zoom"])
-        scale_zoom.place(relx=0.65, rely=0.31)
+        scale_zoom.place(relx=0.58, rely=0.31)
+
+        lbl_blur = tki.Label(self.buttonframe, text="Blur", font=("Courier", 44))
+        lbl_blur.place(relx=0.65, rely=0.31)
+        scale_blur = tki.Scale(self.buttonframe, from_=1, to=4, tickinterval=1, orient=tki.HORIZONTAL,
+                               length=(self.winfo_screenwidth() * 0.14), command=self.change_blur)
+        scale_blur.set(self.app.config["t_blur"])
+        scale_blur.place(relx=0.753, rely=0.31)
 
         # Colour tab
         lbl_topic = tki.Label(self.buttonframe, text="Colour", font=("Courier", 55))
@@ -598,7 +602,7 @@ class Page2(Page):
 
         lbl_space = tki.Label(self.buttonframe, text="Space", font=("Courier", 44))
         lbl_space.place(relx=0.47, rely=0.5)
-        scale_space = tki.Scale(self.buttonframe, from_=0, to=cam_width, tickinterval=cam_width / 10,
+        scale_space = tki.Scale(self.buttonframe, from_=1, to=cam_width, tickinterval=cam_width / 10,
                                 orient=tki.HORIZONTAL,
                                 length=(self.winfo_screenwidth() * 0.5) - pad_half_width, command=self.change_space)
         scale_space.set(self.app.config["t_space"])
@@ -649,6 +653,9 @@ class Page2(Page):
 
     def change_zoom(self, val):
         self.app.config["t_zoom"] = int(val)
+
+    def change_blur(self, val):
+        self.app.config["t_blur"] = int(val)
 
     def change_space(self, val):
         self.app.config["t_space"] = int(val)

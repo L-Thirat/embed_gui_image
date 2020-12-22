@@ -18,6 +18,7 @@
 
 ## Config
 ### Debian
+* setting.yaml
  ```yaml
 TEST_MAMOS: True
  ```

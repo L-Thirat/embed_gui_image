@@ -56,8 +56,6 @@ def error_line(match_cnt, over_cnt):
                 error.append((ps[0][0], ps[0][1]))
     return error
 
-def error_cnt(match_cnt):
-    pass
 
 def detect_error_cnt(contours, raw_data_draw, sampling, config):
     """Get result from comparing image"""
@@ -119,7 +117,6 @@ def detect_error_cnt(contours, raw_data_draw, sampling, config):
     # find matching line
     not_match_cnt = [[]]
     for line in lines:
-        # start2end_match_cnt[line] = []
         matching_count = 0
         for point in lines[line]:
             matching = False
@@ -127,7 +124,6 @@ def detect_error_cnt(contours, raw_data_draw, sampling, config):
             for cnt in contours:
                 for p in cnt:
                     x, y = p[0][0], p[0][1]
-                    # if (X_comp, Y_comp) not in match_cnt:
                     dist = lp.find_distance((X_comp, Y_comp), (x, y))
                     if (dist >= t_width_min) and (dist <= t_width_max):
                         matching_count += 1
@@ -140,68 +136,8 @@ def detect_error_cnt(contours, raw_data_draw, sampling, config):
                 break
             if not matching:
                 not_match_cnt[-1].append((X_comp, Y_comp))
-
+        not_match_cnt.append([])
         if matching_count != len(lines[line]):
             error_under = error_under + error_line(not_match_cnt, over_cnt=error_over)
-            # space = None
-            # space_point = ()
-            # for over in error_cnt:
-            #     if (over[0][0] < line[0][0]) and (over[0][1] < line[0][1]) and (over[1][0] > line[1][0]) and (
-            #             over[1][1] > line[1][1]):
-            #         break
-            # else:
-            #     if len(start2end_match_cnt[line]) < 2:
-            #         error_lack.append((line[0][0], line[0][1], line[1][0], line[1][1]))
-            #     else:
-            #         for i, cnt1 in enumerate(start2end_match_cnt[line]):
-            #             for cnt2 in start2end_match_cnt[line]:
-            #                 if cnt1 != cnt2:
-            #                     dist = lp.find_distance(cnt1[1], cnt2[0])
-            #                     if space is None:
-            #                         space = dist
-            #                         space_point = (cnt1[1][0], cnt1[1][1], cnt2[0][0], cnt2[0][1])
-            #                     else:
-            #                         if lp.find_distance(cnt1[1], cnt2[0]) < space:
-            #                             space = dist
-            #                             space_point = (cnt1[1][0], cnt1[1][1], cnt2[0][0], cnt2[0][1])
-            #         if space:
-            #             if space > t_space:
-            #                 error_lack.append(space_point)
-            #     continue
-            # break
-            #
-            # lack_sampling = lp.find_start_end([[key] for key, val in lines[line].items() if val == 0])
-    # print(error_lack)
-    # print(start2end_match_cnt)
-
-
-    # summary error lack
-    # for line in start2end_match_cnt:
-    #     space = None
-    #     space_point = ()
-    #     for over in error_cnt:
-    #         if (over[0][0] < line[0][0]) and (over[0][1] < line[0][1]) and (over[1][0] > line[1][0]) and (over[1][1] > line[1][1]):
-    #             break
-    #     else:
-    #         if len(start2end_match_cnt[line]) < 2:
-    #             error_lack.append((line[0][0], line[0][1], line[1][0], line[1][1]))
-    #         else:
-    #             for i, cnt1 in enumerate(start2end_match_cnt[line]):
-    #                 for cnt2 in start2end_match_cnt[line]:
-    #                     if cnt1 != cnt2:
-    #                         dist = lp.find_distance(cnt1[1], cnt2[0])
-    #                         if space is None:
-    #                             space = dist
-    #                             space_point = (cnt1[1][0], cnt1[1][1], cnt2[0][0], cnt2[0][1])
-    #                         else:
-    #                             if lp.find_distance(cnt1[1], cnt2[0]) < space:
-    #                                 space = dist
-    #                                 space_point = (cnt1[1][0], cnt1[1][1], cnt2[0][0], cnt2[0][1])
-    #             if space:
-    #                 if space > t_space:
-    #                     error_lack.append(space_point)
-    #         continue
-    #     break
-    # print(error_lack)
 
     return error_over, error_under

@@ -1,10 +1,11 @@
-t_blue: 255
+t_blue: 31
+t_blur: 4
 t_contrast: 33
-t_error: 0
+t_error: 10
 t_green: 30
-t_light: 119
+t_light: 0
 t_red: 27
 t_space: 3
-t_width_max: 5
+t_width_max: 20
 t_width_min: 0
 t_zoom: 1
