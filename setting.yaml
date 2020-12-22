@@ -1,3 +1,11 @@
+TEST_MAMOS: False
+#DEBUG: {
+#  "sample_img": 'test/rgb.jpg'
+#}
+DEBUG: {}
+
+gs: C:\Program Files\gs\gs9.53.3\bin\gswin64c
+
 cam_height: 480
 cam_width: 640
 out_path: output/original/

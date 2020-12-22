@@ -8,7 +8,7 @@ class MyVideoCapture:
     def __init__(self, DEBUG):
         self.DEBUG = DEBUG
         # Open the video source
-        if DEBUG:
+        if "sample_img" in DEBUG:
             sample_source = DEBUG["sample_img"]
             self.cam_width = DEBUG["cam_width"]
             self.cam_height = DEBUG["cam_height"]
@@ -34,7 +34,7 @@ class MyVideoCapture:
         t_light = config["t_light"]
         t_zoom = config["t_zoom"]
 
-        if self.DEBUG:
+        if "sample_img" in self.DEBUG:
             selected_area = self.vid
             selected_area = cv2.resize(selected_area, (self.cam_width, self.cam_height),
                                        interpolation=cv2.INTER_AREA)
@@ -51,9 +51,13 @@ class MyVideoCapture:
         if "area" in raw_data_draw:
             selected_area = pp.crop_img(selected_area, raw_data_draw["area"])
 
+        # selected_area = cv2.bilateralFilter(selected_area, 21,51,51)
+        selected_area = cv2.medianBlur(selected_area, 7)
+
         # image pre-process
         img = pp.brightness(selected_area, t_light, t_contrast)
-        mask = pp.hue(img, t_red, t_green, t_blue)
+
+        mask = pp.hue(img, t_red, t_green, t_blue )
 
         # contour extraction
         draw_cnt, contours = et.draw_contour(img, mask)

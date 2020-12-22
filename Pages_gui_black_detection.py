@@ -22,9 +22,16 @@ import os
 import time
 import atexit
 import yaml
+import io
 
 from src import extraction as et
+from src import linear_processing as lp
 from src.video_capture import MyVideoCapture as vc
+from src import logger
+
+from PIL import EpsImagePlugin
+
+log = logger.GetSystemLogger()
 
 # Setting
 with open(r'setting.yaml') as file:
@@ -32,21 +39,27 @@ with open(r'setting.yaml') as file:
     # scalar values to Python the dictionary format
     setting_data = yaml.load(file, Loader=yaml.FullLoader)
 
-    cam_height = setting_data["cam_height"]
-    cam_width = setting_data["cam_width"]
+    cam_height = int(setting_data["cam_height"])
+    cam_width = int(setting_data["cam_width"])
     out_path = setting_data["out_path"]
     cp_path = setting_data["cp_path"]
     LED_OK = setting_data["LED_OK"]
     LED_NG = setting_data["LED_NG"]
     BTN_input = setting_data["BTN_INPUT"]
+    EpsImagePlugin.gs_windows_binary = setting_data["gs"]
 
     # Testing
-    # DEBUG = {"sample_img": 'test/test_lack2.png', "cam_width": cam_width,
+    DEBUG = setting_data["DEBUG"]
+    if "sample_img" in DEBUG:
+        DEBUG["cam_width"] = cam_width
+        DEBUG["cam_height"] = cam_height
+    TEST_MAMOS = bool(setting_data["TEST_MAMOS"])
+    # DEBUG = {"sample_img": 'test/rgb.jpg', "cam_width": cam_width,
     #          "cam_height": cam_height}  # Debug mode -> test from video source
     # DEBUG = {"sample_img": 'WIN_20201210_10_12_37_Pro.jpg', "cam_width": cam_width,
     #          "cam_height": cam_height}  # Debug mode -> test from video source
-    DEBUG = {}
-    TEST_MAMOS = False  # TEST MAMOS mode -> use Mamos's button instead GUI
+    # DEBUG = {}
+    # TEST_MAMOS = False  # TEST MAMOS mode -> use Mamos's button instead GUI
 
     if TEST_MAMOS:
         from src.mamos import Mamos
@@ -105,39 +118,45 @@ class Page1(Page):
         buttonframe.pack(side="top", fill="both", expand=True)
 
         # Button that lets the user take a snapshot
-        self.btn_snapshot = tki.Button(buttonframe, text="Snapshot", width=40, height=3, command=self.snapshot_origin)
-        self.btn_snapshot.place(relx=0.41, rely=0.05)
+        self.btn_snapshot = tki.Button(buttonframe, text="Snapshot", font=("Courier", 44), width=9, command=self.snapshot_origin)
+        self.btn_snapshot.place(relx=0.38, rely=0.05)
 
-        self.btn_save = tki.Button(buttonframe, text="Save", width=40, height=3, command=self.save_draw)
-        self.btn_save.place(relx=0.61, rely=0.05)
+        self.btn_save = tki.Button(buttonframe, text="Save", font=("Courier", 44), width=9, command=self.save_draw)
+        self.btn_save.place(relx=0.56, rely=0.05)
 
-        self.browsebutton = tki.Button(buttonframe, text="Browse", width=40, height=3, command=self.browsefunc)
-        self.browsebutton.place(relx=0.81, rely=0.05)
+        self.browsebutton = tki.Button(buttonframe, text="Browse", font=("Courier", 44), width=9, command=self.browsefunc)
+        self.browsebutton.place(relx=0.74, rely=0.05)
 
-        self.btn_compare = tki.Button(buttonframe, text="Compare", width=40, height=3, command=self.snapshot_compare)
-        self.btn_compare.place(relx=0.41, rely=0.15)
+        self.btn_compare = tki.Button(buttonframe, text="Compare", font=("Courier", 44), width=9, command=self.snapshot_compare)
+        self.btn_compare.place(relx=0.38, rely=0.18)
 
-        self.btn_reset = tki.Button(buttonframe, text="Reset", width=40, height=3, command=self.reset)
-        self.btn_reset.place(relx=0.61, rely=0.15)
+        self.btn_reset = tki.Button(buttonframe, text="Reset", font=("Courier", 44), width=9, command=self.reset)
+        self.btn_reset.place(relx=0.56, rely=0.18)
 
-        self.btn_drawmode_detect = tki.Button(buttonframe, text="Detect", width=10, height=3,
+        self.btn_drawmode_detect = tki.Button(buttonframe, text="Detect", font=("Courier", 44),
                                               command=self.drawmode_detect,
                                               bg='green')
-        self.btn_drawmode_detect.place(relx=0.81, rely=0.15)
-        self.btn_drawmode_area = tki.Button(buttonframe, text="Area", width=10, height=3, command=self.drawmode_area)
-        self.btn_drawmode_area.place(relx=0.86, rely=0.15)
+        self.btn_drawmode_detect.place(relx=0.74, rely=0.18)
+        self.btn_drawmode_area = tki.Button(buttonframe, text="Area", font=("Courier", 44), command=self.drawmode_area)
+        self.btn_drawmode_area.place(relx=0.88, rely=0.18)
         # todo ignore modes for draw
-        self.btn_drawmode_ignore = tki.Button(buttonframe, text="Ignore", width=10, height=3,
-                                              command=self.drawmode_ignore)
-        self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
+        # self.btn_drawmode_ignore = tki.Button(buttonframe, text="Ignore", font=("Courier", 44), width=3, height=3,
+        #                                       command=self.drawmode_ignore)
+        # self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
 
+        # todo remove or use ?
         self.pathlabel = tki.Label(buttonframe)
         self.pathlabel.place(relx=0.41, rely=0.25)
 
-        self.canvas2 = tki.Canvas(buttonframe, cursor="cross")
-        self.canvas2.place(relx=0.1, rely=0.4)
+        # Result
+        lbl_result = tki.Label(buttonframe, text="Result", font=("Courier", 44))
+        lbl_result.place(relx=0.83, rely=0.35)
+        self.lbl_result = tki.Label(buttonframe, text="        ", bg="yellow", font=("Courier", 44))
+        self.lbl_result.place(relx=0.83, rely=0.44)
 
-        # Drawing cv2
+        # Drawing cv
+        self.canvas2 = tki.Canvas(buttonframe, cursor="cross")
+        self.canvas2.place(relx=0.05, rely=0.35)
         self.canvas2.bind("<ButtonPress-1>", self.on_button_press)
         # self.canvas2.bind("<B1-Motion>", self.on_move_press)
         # self.canvas2.bind("<ButtonRelease-1>", self.on_button_release)
@@ -160,7 +179,7 @@ class Page1(Page):
             self.read_raw_data(latest_file)
 
         self.canvas3 = tki.Canvas(buttonframe)
-        self.canvas3.place(relx=0.5, rely=0.4)
+        self.canvas3.place(relx=0.45, rely=0.35)
         self.canvas3.config(width=cam_width, height=cam_height)
 
     def reset(self):
@@ -170,49 +189,56 @@ class Page1(Page):
         self.raw_data_draw = {"filename": ""}
         self.file_path_o = ""
         self.pathlabel.config(text="")
+        self.lbl_result.config(text="        ", bg="yellow")
         self.count_draw_line = 0
         self.count_draw_sub_pol = 0
 
     def drawmode_default(self):
-        self.btn_drawmode_detect = tki.Button(self.window, text="Detect", width=10, height=3,
+        self.btn_drawmode_detect = tki.Button(self.window, text="Detect", font=("Courier", 44),
                                               command=self.drawmode_detect)
-        self.btn_drawmode_detect.place(relx=0.81, rely=0.15)
-        self.btn_drawmode_area = tki.Button(self.window, text="Area", width=10, height=3, command=self.drawmode_area)
-        self.btn_drawmode_area.place(relx=0.86, rely=0.15)
-        self.btn_drawmode_ignore = tki.Button(self.window, text="Ignore", width=10, height=3,
-                                              command=self.drawmode_ignore)
-        self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
+        self.btn_drawmode_detect.place(relx=0.74, rely=0.18)
+        self.btn_drawmode_area = tki.Button(self.window, text="Area", font=("Courier", 44), command=self.drawmode_area)
+        self.btn_drawmode_area.place(relx=0.88, rely=0.18)
+        # self.btn_drawmode_ignore = tki.Button(self.window, text="Ignore", width=10, height=3,
+        #                                       command=self.drawmode_ignore)
+        # self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
 
     def drawmode_detect(self):
         self.drawmode_default()
-        self.btn_drawmode_detect = tki.Button(self.window, text="Detect", width=10, height=3,
+        self.btn_drawmode_detect = tki.Button(self.window, text="Detect", font=("Courier", 44),
                                               command=self.drawmode_detect, bg='green')
-        self.btn_drawmode_detect.place(relx=0.81, rely=0.15)
+        self.btn_drawmode_detect.place(relx=0.74, rely=0.18)
         self.drawmode = "detect"
 
     def drawmode_area(self):
         self.drawmode_default()
-        self.btn_drawmode_area = tki.Button(self.window, text="Area", width=10, height=3, command=self.drawmode_area,
+        self.btn_drawmode_area = tki.Button(self.window, text="Area", font=("Courier", 44), command=self.drawmode_area,
                                             bg='red')
-        self.btn_drawmode_area.place(relx=0.86, rely=0.15)
+        self.btn_drawmode_area.place(relx=0.88, rely=0.18)
         self.drawmode = "area"
 
-    def drawmode_ignore(self):
-        self.drawmode_default()
-        self.btn_drawmode_ignore = tki.Button(self.window, text="Ignore", width=10, height=3,
-                                              command=self.drawmode_ignore, bg='blue')
-        self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
-        self.drawmode = "ignore"
+    # def drawmode_ignore(self):
+    #     self.drawmode_default()
+    #     self.btn_drawmode_ignore = tki.Button(self.window, text="Ignore", width=10, height=3,
+    #                                           command=self.drawmode_ignore, bg='blue')
+    #     self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
+    #     self.drawmode = "ignore"
 
     def on_button_press(self, event):
         x, y = event.x, event.y
         if self.start_x and self.start_y:
             if self.drawmode == "detect":
                 self.count_draw_line += 1
+                x1, y1, x2, y2 = lp.length2points((x, y), (self.start_x, self.start_y),
+                                                  original_threshold_dist[1])
                 self.prev_line.append(
-                    self.canvas2.create_line(x, y, self.start_x, self.start_y, width=original_threshold_dist[1],
+                    self.canvas2.create_line(x1, y1, x2, y2, width=original_threshold_dist[1],
                                              fill='green'))
-                self.raw_data_draw[str(self.count_draw_line)] = {"rect": [self.start_x, self.start_y, x, y]}
+                if self.start_x < x:
+                    green_line = {"rect": [self.start_x, self.start_y, x, y]}
+                else:
+                    green_line = {"rect": [x, y, self.start_x, self.start_y]}
+                self.raw_data_draw[str(self.count_draw_line)] = green_line
                 self.start_x, self.start_y = 0, 0
             else:
                 if abs(x - self.start_x) < 20 and abs(y - self.start_y) < 20:
@@ -287,6 +313,7 @@ class Page1(Page):
                 self.load_img_o = self.load_img_o.resize((size[0], size[1]), Image.ANTIALIAS)
                 self.tk_photo_org = ImageTk.PhotoImage(image=self.load_img_o)
                 self.canvas2.create_image(size[2], size[3], image=self.tk_photo_org, anchor=tki.NW)
+
             elif mode == "compare":
                 start = time.time()
                 self.file_path_c = cp_path + "c_" + "temp_filename.jpg"
@@ -300,26 +327,32 @@ class Page1(Page):
                     msg = "No detect line"
                     messagebox.showerror(msg_type, msg)
                     raise msg_type + ": " + msg
-                error_cnt, error_lack = self.get_result(contours)
+                error_over, error_under = self.get_result(contours)
                 end = time.time()
                 print("Calculate time: %f" % (end - start))
                 self.tk_photo_cp = ImageTk.PhotoImage(image=self.load_img_cp)
                 self.canvas3.create_image(size[2], size[3], image=self.tk_photo_cp, anchor=tki.NW)
-                if error_cnt:
+                output_status = "        "
+                if error_over:
+                    output_status = "NG:OVER"
                     for key in self.error_box:
                         self.canvas3.delete(self.error_box[key])
-                    for i, cnt in enumerate(error_cnt):
+                    for i, cnt in enumerate(error_over):
                         polygon = [(cnt[0][0], cnt[0][1]), (cnt[1][0], cnt[0][1]), (cnt[1][0], cnt[1][1]),
                                    (cnt[0][0], cnt[1][1])]
                         self.error_box[i] = self.canvas3.create_polygon(polygon, outline='red', fill="", width=2)
                         self.canvas3.create_text((cnt[1][0] + 10, cnt[1][1]), text=i + 1, font=('Impact', -15),
                                                  fill="red")
 
-                if error_lack:
+                if error_under:
+                    if output_status == "NG:OVER":
+                        output_status = "NG:BOTH"
+                    else:
+                        output_status = "NG:UNDER"
                     width = fix_width()
                     for key in self.error_line:
                         self.canvas3.delete(self.error_line[key])
-                    for i, lack_line in enumerate(error_lack):
+                    for i, lack_line in enumerate(error_under):
                         if len(lack_line) > 2:
                             self.error_box[i] = self.canvas3.create_line(lack_line, fill='orange', width=width)
                             self.canvas3.create_text((lack_line[2] + 10, lack_line[3]), text=i + 1,
@@ -330,8 +363,36 @@ class Page1(Page):
                                                      font=('Impact', -15),
                                                      fill="orange")
 
+                if not error_under and not error_over:
+                    output_status = "OK"
+
                 # self.load_rect(self.canvas3, self.raw_data_draw, cp_result)
                 # self.raw_data_draw = {}
+
+                # Output Screen
+                if output_status == "OK":
+                    self.lbl_result.config(text=output_status, bg="green")
+                else:
+                    self.lbl_result.config(text=output_status, bg="red")
+
+                # Output log
+                cur_time = datetime.datetime.now()
+                file_time_form = cur_time.strftime("%Y%m%d_%H%M%S")
+                log_time_form = cur_time.strftime("%Y:%m:%d %H:%M:%S")
+                msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (len(error_over), len(error_under))
+                log.info(msg)
+
+                # use PIL to convert  PS to PNG
+                self.canvas3.update()
+                if output_status == "OK":
+                    filename = cp_path + file_time_form + "_" + "OK"
+                else:
+                    filename = cp_path + file_time_form + "_" + "NG"
+                filename_png = filename + ".png"
+                ps = self.canvas3.postscript(colormode='color')
+                img = Image.open(io.BytesIO(ps.encode('utf-8')))
+                img.save(filename_png)
+
                 end_task = time.time()
                 print("Calculate event time: %f" % (end_task - start_task))
 
@@ -354,8 +415,8 @@ class Page1(Page):
             if key != "filename" and key != "area" and key != "ignore":
                 if key in self.detect_line:
                     cvs.delete(self.detect_line[key])
-                self.detect_line[key] = cvs.create_line(val["rect"][0], val["rect"][1], val["rect"][2], val["rect"][3],
-                                                        width=width, fill='green')
+                x1, y1, x2, y2 = lp.length2points((val["rect"][0], val["rect"][1]), (val["rect"][2], val["rect"][3]), width)
+                self.detect_line[key] = cvs.create_line(x1, y1, x2, y2, width=width, fill='green')
                 cvs.create_text((val["rect"][2] + 10, val["rect"][3]), text=key, font=('Impact', -15), fill="red")
             self.raw_data_draw[key] = val
 
@@ -401,6 +462,14 @@ class Page1(Page):
         self.reset()
         self.read_raw_data(filename)
         self.load_line(self.canvas2, self.raw_data_draw)
+
+        # save setting image
+        # use PIL to convert  PS to PNG
+        self.canvas2.update()
+        filename_png = self.file_path_o.replace("/o_", "/s_")
+        ps = self.canvas2.postscript(colormode='color')
+        img = Image.open(io.BytesIO(ps.encode('utf-8')))
+        img.save(filename_png)
 
     def get_result(self, contours):
         """Load rectangle and filename data from json file"""
@@ -468,14 +537,14 @@ class Page2(Page):
 
         lbl_light = tki.Label(self.buttonframe, text="Light", font=("Courier", 44))
         lbl_light.place(relx=0.47, rely=0.11)
-        scale_light = tki.Scale(self.buttonframe, from_=0, to=255, tickinterval=51, orient=tki.HORIZONTAL,
+        scale_light = tki.Scale(self.buttonframe, from_=-255, to=255, tickinterval=51, orient=tki.HORIZONTAL,
                                 length=(self.winfo_screenwidth() * 0.5 - pad_half_width), command=self.change_light)
         scale_light.set(self.app.config["t_light"])
         scale_light.place(relx=0.65, rely=0.11)
 
         lbl_contrast = tki.Label(self.buttonframe, text="Contrast", font=("Courier", 44))
         lbl_contrast.place(relx=0.47, rely=0.21)
-        scale_contrast = tki.Scale(self.buttonframe, from_=0, to=255, tickinterval=51, orient=tki.HORIZONTAL,
+        scale_contrast = tki.Scale(self.buttonframe, from_=-255, to=255, tickinterval=51, orient=tki.HORIZONTAL,
                                    length=(self.winfo_screenwidth() * 0.5 - pad_half_width),
                                    command=self.change_contrast)
         scale_contrast.set(self.app.config["t_contrast"])
@@ -609,16 +678,16 @@ class App(tki.Frame):
         self.p1.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
         self.p2.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
 
-        b1 = tki.Button(buttonframe, text="Home", command=self.p1.lift)
-        b2 = tki.Button(buttonframe, text="Setting", command=self.p2.lift)
+        b1 = tki.Button(buttonframe, text="Home", font=("Courier", 44), command=self.p1.lift)
+        b2 = tki.Button(buttonframe, text="Setting", font=("Courier", 44), command=self.p2.lift)
 
         b1.pack(side="right")
         b2.pack(side="right")
 
         # Create a canvas that can fit the above video source size
         self.canvas_rt = tki.Canvas(window)
-        self.canvas_rt.place(relx=0.07, rely=0.05)
-        self.canvas_rt.config(width=int(cam_width * 0.7), height=int(cam_height * 0.7))
+        self.canvas_rt.place(relx=0.05, rely=0.01)
+        self.canvas_rt.config(width=int(cam_width * 0.8), height=int(cam_height * 0.8))
 
         # # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
@@ -633,9 +702,8 @@ class App(tki.Frame):
                 self.p1.snapshot("compare")
 
         ret, frame, _, mask = self.vid.get_frame(self.this.config, self.p1.raw_data_draw)
-        # print(self.this.config)
         if ret:
-            mask = imutils.resize(mask, height=int(cam_height * 0.7), width=int(cam_width * 0.7))
+            mask = imutils.resize(mask, height=int(cam_height * 0.8), width=int(cam_width * 0.8))
             mask = Image.fromarray(mask)
             self.p1.tk_photo_line = ImageTk.PhotoImage(image=mask)
             self.canvas_rt.create_image(0, 0, image=self.p1.tk_photo_line, anchor=tki.NW)

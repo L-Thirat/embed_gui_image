@@ -30,9 +30,41 @@ def linear_formula(p1, p2):
     return m, c
 
 
+def diff_xy(x1, y1, x2, y2, l):
+    red = math.atan(abs(y2 - y1) / abs(x2 - x1))
+    dx = math.cos(red) * l
+    dy = math.sin(red) * l
+    return dx, dy
+
+
+def length2points(p1, p2, l):
+    x1 = p1[0]
+    y1 = p1[1]
+    x2 = p2[0]
+    y2 = p2[1]
+
+    dx, dy = diff_xy(x1, y1, x2, y2, l)
+
+    if x1 < x2:
+        new_p1x = p1[0] - dx
+        new_p2x = p2[0] + dx
+    else:
+        new_p1x = p1[0] + dx
+        new_p2x = p2[0] - dx
+
+    if y1 < y2:
+        new_p1y = p1[1] - dy
+        new_p2y = p2[1] + dy
+    else:
+        new_p1y = p1[1] + dy
+        new_p2y = p2[1] - dy
+
+    return new_p1x, new_p1y, new_p2x, new_p2y
+
+
 # > find
 def dist2(start, end):
-    return (start[0] - end[0])**2 + (start[1] - end[1])**2
+    return (start[0] - end[0]) ** 2 + (start[1] - end[1]) ** 2
 
 
 def point2line_match(p, start, end):

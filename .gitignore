@@ -1,3 +1,7 @@
+data/
+output/
+log/
+.idea
 temp_data_essembly/
 output/temp_essembly
 # Byte-compiled / optimized / DLL files
