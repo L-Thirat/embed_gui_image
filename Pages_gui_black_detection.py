@@ -24,11 +24,14 @@ import atexit
 import yaml
 import io
 
+import init_project
+
+init_project.create_folders()
+
 from src import extraction as et
 from src import linear_processing as lp
 from src.video_capture import MyVideoCapture as vc
 from src import logger
-import init_project
 
 from PIL import EpsImagePlugin
 
@@ -63,6 +66,7 @@ with open(r'setting.yaml') as file:
 
     if TEST_MAMOS:
         from src.mamos import Mamos
+
         mm = Mamos(LED_OK, LED_NG, BTN_input)
     else:
         EpsImagePlugin.gs_windows_binary = setting_data["gs"]
@@ -119,16 +123,19 @@ class Page1(Page):
         buttonframe.pack(side="top", fill="both", expand=True)
 
         # Button that lets the user take a snapshot
-        self.btn_snapshot = tki.Button(buttonframe, text="Snapshot", font=("Courier", 44), width=9, command=self.snapshot_origin)
+        self.btn_snapshot = tki.Button(buttonframe, text="Snapshot", font=("Courier", 44), width=9,
+                                       command=self.snapshot_origin)
         self.btn_snapshot.place(relx=0.38, rely=0.05)
 
         self.btn_save = tki.Button(buttonframe, text="Save", font=("Courier", 44), width=9, command=self.save_draw)
         self.btn_save.place(relx=0.56, rely=0.05)
 
-        self.browsebutton = tki.Button(buttonframe, text="Browse", font=("Courier", 44), width=9, command=self.browsefunc)
+        self.browsebutton = tki.Button(buttonframe, text="Browse", font=("Courier", 44), width=9,
+                                       command=self.browsefunc)
         self.browsebutton.place(relx=0.74, rely=0.05)
 
-        self.btn_compare = tki.Button(buttonframe, text="Compare", font=("Courier", 44), width=9, command=self.snapshot_compare)
+        self.btn_compare = tki.Button(buttonframe, text="Compare", font=("Courier", 44), width=9,
+                                      command=self.snapshot_compare)
         self.btn_compare.place(relx=0.38, rely=0.18)
 
         self.btn_reset = tki.Button(buttonframe, text="Reset", font=("Courier", 44), width=9, command=self.reset)
@@ -380,7 +387,8 @@ class Page1(Page):
                 cur_time = datetime.datetime.now()
                 file_time_form = cur_time.strftime("%Y%m%d_%H%M%S")
                 log_time_form = cur_time.strftime("%Y:%m:%d %H:%M:%S")
-                msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (len(error_over), len(error_under))
+                msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (
+                len(error_over), len(error_under))
                 log.info(msg)
 
                 # use PIL to convert  PS to PNG
@@ -416,7 +424,8 @@ class Page1(Page):
             if key != "filename" and key != "area" and key != "ignore":
                 if key in self.detect_line:
                     cvs.delete(self.detect_line[key])
-                x1, y1, x2, y2 = lp.length2points((val["rect"][0], val["rect"][1]), (val["rect"][2], val["rect"][3]), width)
+                x1, y1, x2, y2 = lp.length2points((val["rect"][0], val["rect"][1]), (val["rect"][2], val["rect"][3]),
+                                                  width)
                 self.detect_line[key] = cvs.create_line(x1, y1, x2, y2, width=width, fill='green')
                 cvs.create_text((val["rect"][2] + 10, val["rect"][3]), text=key, font=('Impact', -15), fill="red")
             self.raw_data_draw[key] = val
@@ -605,14 +614,14 @@ class Page2(Page):
         lbl_min = tki.Label(self.buttonframe, text="Width", font=("Courier", 44))
         lbl_min.place(relx=0.47, rely=0.7)
         scale_min = tki.Scale(self.buttonframe, from_=0, to=50, tickinterval=10, orient=tki.HORIZONTAL,
-                                length=(self.winfo_screenwidth() * 0.14), command=self.change_min)
+                              length=(self.winfo_screenwidth() * 0.14), command=self.change_min)
         scale_min.set(self.app.config["t_width_min"])
         scale_min.place(relx=0.58, rely=0.7)
 
         lbl_max = tki.Label(self.buttonframe, text="~", font=("Courier", 44))
         lbl_max.place(relx=0.73, rely=0.7)
         scale_max = tki.Scale(self.buttonframe, from_=0, to=50, tickinterval=10, orient=tki.HORIZONTAL,
-                                length=(self.winfo_screenwidth() * 0.14), command=self.change_max)
+                              length=(self.winfo_screenwidth() * 0.14), command=self.change_max)
         scale_max.set(self.app.config["t_width_max"])
         scale_max.place(relx=0.753, rely=0.7)
 
@@ -729,7 +738,6 @@ def toggle_geom(self, event):
 
 
 if __name__ == "__main__":
-    init_project.create_folders()
     atexit.register(exit_handler)
 
     root = tki.Tk()

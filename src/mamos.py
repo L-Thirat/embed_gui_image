@@ -13,8 +13,7 @@ class Mamos:
             GPIO.setwarnings(False)
             GPIO.setmode(GPIO.ASUS)
             GPIO.setup(LED_OK, GPIO.OUT)
-            # todo test 1 pin
-            # GPIO.setup(LED_NG, GPIO.OUT)
+            GPIO.setup(LED_NG, GPIO.OUT)
             GPIO.setup(BTN_input, GPIO.IN)
         except:
             pass
