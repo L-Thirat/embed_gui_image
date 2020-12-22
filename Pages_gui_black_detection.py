@@ -28,6 +28,7 @@ from src import extraction as et
 from src import linear_processing as lp
 from src.video_capture import MyVideoCapture as vc
 from src import logger
+import init_project
 
 from PIL import EpsImagePlugin
 
@@ -46,7 +47,6 @@ with open(r'setting.yaml') as file:
     LED_OK = setting_data["LED_OK"]
     LED_NG = setting_data["LED_NG"]
     BTN_input = setting_data["BTN_INPUT"]
-    EpsImagePlugin.gs_windows_binary = setting_data["gs"]
 
     # Testing
     DEBUG = setting_data["DEBUG"]
@@ -63,8 +63,9 @@ with open(r'setting.yaml') as file:
 
     if TEST_MAMOS:
         from src.mamos import Mamos
-
         mm = Mamos(LED_OK, LED_NG, BTN_input)
+    else:
+        EpsImagePlugin.gs_windows_binary = setting_data["gs"]
 
 original_threshold_dist = [0, 0]
 mini_sampling = 4
@@ -728,6 +729,7 @@ def toggle_geom(self, event):
 
 
 if __name__ == "__main__":
+    init_project.create_folders()
     atexit.register(exit_handler)
 
     root = tki.Tk()
