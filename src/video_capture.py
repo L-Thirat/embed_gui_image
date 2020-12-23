@@ -63,6 +63,7 @@ class MyVideoCapture:
         # todo no control
         mask = pp.hue(img, t_red, t_green, t_blue)
 
+        # todo run on RUN mode
         # todo rgb control -> gui slow**
         # b, g, r = cv2.split(img)
         # cur_red = int(sum(r.ravel()/len(r.ravel())))
