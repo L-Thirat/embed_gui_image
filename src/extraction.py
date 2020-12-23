@@ -81,7 +81,7 @@ def detect_error_cnt(contours, raw_data_draw, sampling, config):
                 y = m * x + c
             else:
                 y = np.arange(start_line[1], end_line[1], dy)
-                x = (y - c)/m
+                x = (y - c) / m
             f = interpolate.interp1d(x, y)
             xnew = np.arange(start_line[0], end_line[0], dx)
             ynew = f(xnew)  # use interpolation function returned by `interp1d`
@@ -111,7 +111,7 @@ def detect_error_cnt(contours, raw_data_draw, sampling, config):
 
             if not matching:
                 num_error += 1
-        if (num_error*100)/len(cnt) > t_error:
+        if (num_error * 100) / len(cnt) > t_error:
             error_over.append((start_point, end_point))
 
     # find matching line
@@ -141,3 +141,17 @@ def detect_error_cnt(contours, raw_data_draw, sampling, config):
             error_under = error_under + error_line(not_match_cnt, over_cnt=error_over)
 
     return error_over, error_under
+
+
+def min_max_color(frame, x, y, range_rgb, half_px):
+    base_min_rgb = range_rgb[-1]["min"]
+    base_max_rgb = range_rgb[-1]["max"]
+    for h in frame[y - half_px:y + half_px]:
+        for w in h[x - half_px:x + half_px]:
+            for i in range(3):
+                if w[i] < base_min_rgb[i]:
+                    base_min_rgb[i] = w[i]
+            for i in range(3):
+                if w[i] > base_max_rgb[i]:
+                    base_max_rgb[i] = w[i]
+    return base_min_rgb, base_max_rgb

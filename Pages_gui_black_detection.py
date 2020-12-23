@@ -1,5 +1,7 @@
 # todo config camera bar gui/cv2 in tkinter
 # todo clear image in "/output/o_.jpg"
+# todo camera moved detection
+# todo program slowed when a lot function update realtime ex hue -> Need RUN/STOP Button when start/STOP
 
 """
 check linear line
@@ -73,6 +75,7 @@ with open(r'setting.yaml') as file:
 
 original_threshold_dist = [0, 0]
 mini_sampling = 4
+half_px = 3
 
 
 def empty(area):
@@ -281,17 +284,17 @@ class Page1(Page):
         if self.count_draw_line:
             if self.drawmode == "detect":
                 self.canvas2.delete(self.prev_line[-1])
-                self.prev_line = self.prev_line[:-1]
+                del self.prev_line[-1]
                 del self.raw_data_draw[str(self.count_draw_line)]
                 self.count_draw_line -= 1
 
         if self.drawmode == "area":
             if self.prev_sub_pol:
                 self.canvas2.delete(self.prev_sub_pol[-1])
-                self.prev_sub_pol = self.prev_sub_pol[:-1]
+                del self.prev_sub_pol[-1]
                 self.count_draw_sub_pol -= 1
                 if self.polygon_data:
-                    self.polygon_data = self.polygon_data[:-1]
+                    del self.polygon_data[-1]
                 if len(self.polygon_data) == 1:
                     self.start_x, self.start_y = 0, 0
                     self.polygon_data = []
@@ -325,7 +328,7 @@ class Page1(Page):
             elif mode == "compare":
                 start = time.time()
                 self.file_path_c = cp_path + "c_" + "temp_filename.jpg"
-                cv2.imwrite(self.file_path_c, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+                cv2.imwrite(self.file_path_c, cv2.cvtColor(self.frame, cv2.COLOR_RGB2BGR))
                 self.load_img_cp = Image.open(self.file_path_c)
 
                 size = [cam_width, cam_height, 0, 0]
@@ -387,7 +390,8 @@ class Page1(Page):
                 cur_time = datetime.datetime.now()
                 file_time_form = cur_time.strftime("%Y%m%d_%H%M%S")
                 log_time_form = cur_time.strftime("%Y:%m:%d %H:%M:%S")
-                msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (len(error_over), len(error_under))
+                msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (
+                len(error_over), len(error_under))
                 log.info(msg)
 
                 # use PIL to convert  PS to PNG
@@ -672,25 +676,29 @@ class Page2(Page):
 
 class App(tki.Frame):
     def __init__(self, window, window_title, *args, **kwargs):
-        self.this = self
         self.window = window
         self.vid = vc(DEBUG)
+        self.frame = None
 
         with open(r'config.yaml') as file:
             # The FullLoader parameter handles the conversion from YAML
             # scalar values to Python the dictionary format
-            self.this.config = yaml.load(file, Loader=yaml.FullLoader)
-
+            self.config = yaml.load(file, Loader=yaml.FullLoader)
+        self.range_rgb = [{
+            "point": None,
+            "min": [255, 255, 255],
+            "max": [0, 0, 0]
+        }]
+        # [self.config["t_red"], self.config["t_green"], self.config["t_blue"]]
         tki.Frame.__init__(self, *args, **kwargs)
         # open video source (by default this will try to open the computer webcam)
-
         buttonframe = tki.Frame(self)
         container = tki.Frame(self)
         buttonframe.pack(side="top", fill="x", expand=False)
         container.pack(side="top", fill="both", expand=True)
 
-        self.p1 = Page1(self.this, self)
-        self.p2 = Page2(self.this, self)
+        self.p1 = Page1(self, self)
+        self.p2 = Page2(self, self)
 
         self.p1.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
         self.p2.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
@@ -702,7 +710,9 @@ class App(tki.Frame):
         b2.pack(side="right")
 
         # Create a canvas that can fit the above video source size
-        self.canvas_rt = tki.Canvas(window)
+        self.canvas_rt = tki.Canvas(window, cursor="cross")
+        self.canvas_rt.bind("<ButtonPress-1>", self.click_rgb)
+        self.canvas_rt.bind("<Button-3>", self.undo_rgb)
         self.canvas_rt.place(relx=0.05, rely=0.01)
         self.canvas_rt.config(width=int(cam_width * 0.8), height=int(cam_height * 0.8))
 
@@ -711,6 +721,22 @@ class App(tki.Frame):
         self.update()
         self.p1.show()
 
+    def click_rgb(self, event):
+        x, y = event.x, event.y
+        rgb_min, rgb_max = et.min_max_color(self.frame, x, y, self.range_rgb, half_px)
+        self.range_rgb.append({
+            "point": (x, y),
+            "min": rgb_min,
+            "max": rgb_max
+        })
+        # self.canvas_rt.create_rectangle(x - half_px, y - half_px, x + half_px, y + half_px, fill='red')
+        print(self.range_rgb)
+
+    def undo_rgb(self, event):
+        # x, y = event.x, event.y
+        if self.range_rgb[-1]["point"] is not None:
+            del self.range_rgb[-1]
+
     def update(self):
         global original_threshold_dist
 
@@ -718,15 +744,20 @@ class App(tki.Frame):
             if mm.output():
                 self.p1.snapshot("compare")
 
-        ret, frame, _, mask = self.vid.get_frame(self.this.config, self.p1.raw_data_draw)
+        ret, self.frame, _, mask = self.vid.get_frame(self.config, self.p1.raw_data_draw)
         if ret:
             mask = imutils.resize(mask, height=int(cam_height * 0.8), width=int(cam_width * 0.8))
             mask = Image.fromarray(mask)
             self.p1.tk_photo_line = ImageTk.PhotoImage(image=mask)
             self.canvas_rt.create_image(0, 0, image=self.p1.tk_photo_line, anchor=tki.NW)
+            if self.range_rgb[-1]["point"] is not None:
+                for rgb_data in self.range_rgb[1:]:
+                    x = rgb_data["point"][0]
+                    y = rgb_data["point"][1]
+                    self.canvas_rt.create_rectangle(x - half_px, y - half_px, x + half_px, y + half_px, fill='red')
             if self.p1.raw_data_draw:
-                if (self.this.config["t_width_min"], self.this.config["t_width_max"]) != original_threshold_dist:
-                    original_threshold_dist = (self.this.config["t_width_min"], self.this.config["t_width_max"])
+                if (self.config["t_width_min"], self.config["t_width_max"]) != original_threshold_dist:
+                    original_threshold_dist = (self.config["t_width_min"], self.config["t_width_max"])
                     self.p1.load_line(self.p1.canvas2, self.p1.raw_data_draw)
         self.window.after(self.delay, self.update)
 

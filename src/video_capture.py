@@ -52,25 +52,34 @@ class MyVideoCapture:
 
         if "area" in raw_data_draw:
             selected_area = pp.crop_img(selected_area, raw_data_draw["area"])
-
+        # print(len(selected_area))
+        # print(selected_area[240][320])
         # selected_area = cv2.bilateralFilter(selected_area, 21,51,51)
         selected_area = cv2.medianBlur(selected_area, t_blur)
 
         # image pre-process
         img = pp.brightness(selected_area, t_light, t_contrast)
 
-        b, g, r = cv2.split(img)
-        cur_red = int(sum(r.ravel()/len(r.ravel())))
-        cur_green = int(sum(g.ravel()/len(g.ravel())))
-        cur_blue = int(sum(b.ravel()/len(b.ravel())))
-        if self.prev_rgb == (0, 0, 0):
-            diff_rgb = (0, 0, 0)
-            self.prev_rgb = (cur_red, cur_green, cur_blue)
-        else:
-            diff_rgb = (self.prev_rgb[0] - cur_red, self.prev_rgb[1] - cur_green, self.prev_rgb[2] - cur_blue)
+        # todo no control
+        mask = pp.hue(img, t_red, t_green, t_blue)
+
+        # todo rgb control -> gui slow**
+        # b, g, r = cv2.split(img)
+        # cur_red = int(sum(r.ravel()/len(r.ravel())))
+        # cur_green = int(sum(g.ravel()/len(g.ravel())))
+        # cur_blue = int(sum(b.ravel()/len(b.ravel())))
+        # if self.prev_rgb == (0, 0, 0):
+        #     diff_rgb = (0, 0, 0)
+        #     self.prev_rgb = (cur_red, cur_green, cur_blue)
+        # else:
+        #     diff_rgb = (self.prev_rgb[0] - cur_red, self.prev_rgb[1] - cur_green, self.prev_rgb[2] - cur_blue)
+        # mask = pp.hue(img, (t_red - diff_rgb[0])*3, (t_green - diff_rgb[1])*3, (t_blue - diff_rgb[2])*3)
+
+        # todo lightness control
+        # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        # diff_rgb = 255 - int(hsv[-1][-1][-1])
         # print(diff_rgb)
-        # mask = pp.hue(img, t_red, t_green, t_blue)
-        mask = pp.hue(img, (t_red-diff_rgb[0])*2, (t_green-diff_rgb[1])*2, (t_blue-diff_rgb[2])*2)
+        # mask = pp.hue(img, t_red-diff_rgb, t_green-diff_rgb, t_blue-diff_rgb)
 
         # contour extraction
         draw_cnt, contours = et.draw_contour(img, mask)
