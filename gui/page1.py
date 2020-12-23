@@ -1,6 +1,9 @@
+from typing import Dict, List, Any
+
 import tkinter as tki
 from tkinter import filedialog
 from tkinter import messagebox
+
 import cv2
 import PIL.Image as Image
 import PIL.ImageTk as ImageTk
@@ -9,7 +12,6 @@ import json
 import glob
 import os
 import time
-import yaml
 import io
 
 from src import extraction as et
@@ -18,6 +20,8 @@ from gui.page_control import Page
 
 
 class Page1(Page):
+    raw_data_draw = ...  # type: Dict["filename":str, "area":List[str, List[Any]], "draws":Dict[List[int]]]
+
     def __init__(self, app, *args, **kwargs):
         self.vid = app.vid
         self.config = app.config
@@ -35,7 +39,11 @@ class Page1(Page):
         self.load_img_o = None
         self.load_img_cp = None
         self.load_filename = None
-        self.raw_data_draw = {"filename": ""}
+        self.raw_data_draw = {
+            "filename": "",
+            "area": [],
+            "draws": {},
+        }
 
         # Visualize output
         self.contour = []
@@ -55,7 +63,7 @@ class Page1(Page):
         self.btn_save.place(relx=0.56, rely=0.05)
 
         self.browsebutton = tki.Button(buttonframe, text="Browse", font=("Courier", 44), width=9,
-                                       command=self.browsefunc)
+                                       command=self.browse)
         self.browsebutton.place(relx=0.74, rely=0.05)
 
         self.btn_compare = tki.Button(buttonframe, text="Compare", font=("Courier", 44), width=9,
@@ -118,7 +126,18 @@ class Page1(Page):
         """Reset screen and parameters"""
         self.canvas2.delete("all")
         self.canvas3.delete("all")
-        self.raw_data_draw = {"filename": ""}
+        self.raw_data_draw = {
+            "filename": "",
+            "area": [],
+            "draws": {}
+        }
+        self.app.range_rgb = [{
+            "point": None,
+            "min": [255, 255, 255],
+            "max": [0, 0, 0]
+        }]
+        self.app.undo_rgb(None)
+
         self.file_path_o = ""
         self.pathlabel.config(text="")
         self.lbl_result.config(text="        ", bg="yellow")
@@ -167,10 +186,10 @@ class Page1(Page):
                     self.canvas2.create_line(x1, y1, x2, y2, width=self.app.original_threshold_dist[1],
                                              fill='green'))
                 if self.start_x < x:
-                    green_line = {"rect": [self.start_x, self.start_y, x, y]}
+                    green_line = [self.start_x, self.start_y, x, y]
                 else:
-                    green_line = {"rect": [x, y, self.start_x, self.start_y]}
-                self.raw_data_draw[str(self.count_draw_line)] = green_line
+                    green_line = [x, y, self.start_x, self.start_y]
+                self.raw_data_draw["draws"][str(self.count_draw_line)] = green_line
                 self.start_x, self.start_y = 0, 0
             else:
                 if abs(x - self.start_x) < 20 and abs(y - self.start_y) < 20:
@@ -190,10 +209,10 @@ class Page1(Page):
                         self.prev_sub_pol.append(
                             self.canvas2.create_line(x, y, self.polygon_data[-1][0], self.polygon_data[-1][1], width=2,
                                                      fill='red'))
-                    else:
-                        # todo
-                        self.canvas2.create_line(x, y, self.polygon_data[-1][0], self.polygon_data[-1][1], width=2,
-                                                 fill='blue')
+                    # else:
+                    #     # todo
+                    #     self.canvas2.create_line(x, y, self.polygon_data[-1][0], self.polygon_data[-1][1], width=2,
+                    #                              fill='blue')
                     self.polygon_data.append([x, y])
         else:
             self.start_x, self.start_y = x, y
@@ -206,7 +225,7 @@ class Page1(Page):
             if self.drawmode == "detect":
                 self.canvas2.delete(self.prev_line[-1])
                 del self.prev_line[-1]
-                del self.raw_data_draw[str(self.count_draw_line)]
+                del self.raw_data_draw["draws"][str(self.count_draw_line)]
                 self.count_draw_line -= 1
 
         if self.drawmode == "area":
@@ -221,13 +240,12 @@ class Page1(Page):
                     self.polygon_data = []
             else:
                 if "area" in self.raw_data_draw:
-                    del self.raw_data_draw["area"]
+                    self.raw_data_draw["area"] = []
                     self.canvas2.delete(self.prev_sub_pol)
                     self.canvas2.delete(self.prev_pol)
 
     def snapshot(self, mode):
-        """Take a photo"""
-        # Get a frame from the video source
+        """Get a frame from the video source"""
         start_task = time.time()
         ret, frame, contours, _ = self.vid.get_frame(self.config, self.raw_data_draw)
 
@@ -298,9 +316,6 @@ class Page1(Page):
                 if not error_under and not error_over:
                     output_status = "OK"
 
-                # self.load_rect(self.canvas3, self.raw_data_draw, cp_result)
-                # self.raw_data_draw = {}
-
                 # Output Screen
                 if output_status == "OK":
                     self.lbl_result.config(text=output_status, bg="green")
@@ -329,30 +344,26 @@ class Page1(Page):
                 end_task = time.time()
                 print("Calculate event time: %f" % (end_task - start_task))
 
-    def load_rect(self, cvs, data):
+    def load_rect(self, cvs):
         """Load rectangle data from json"""
-        for key, val in data.items():
-            if key == "area":
-                for i in range(1, len(val)):
-                    cvs.create_line(val[i - 1][0], val[i - 1][1], val[i][0], val[i][1], width=2, fill='red')
-                cvs.create_line(val[0][0], val[0][1], val[-1][0], val[-1][1], width=2, fill='red')
-            elif key == "ignore":
-                for i in range(3, len(val) + 1, 2):
-                    cvs.create_line(val[i - 3], val[i - 2], val[i - 1], val[i], width=2, fill='blue')
-            self.raw_data_draw[key] = val
+        val = self.raw_data_draw["area"]
+        for i in range(1, len(val)):
+            cvs.create_line(val[i - 1][0], val[i - 1][1], val[i][0], val[i][1], width=2, fill='red')
+        cvs.create_line(val[0][0], val[0][1], val[-1][0], val[-1][1], width=2, fill='red')
+        # elif key == "ignore":
+        #     for i in range(3, len(val) + 1, 2):
+        #         cvs.create_line(val[i - 3], val[i - 2], val[i - 1], val[i], width=2, fill='blue')
 
-    def load_line(self, cvs, data):
+    def load_line(self, cvs):
         """Load line data from json"""
         width = self.app.original_threshold_dist[1]
-        for key, val in data.items():
-            if key != "filename" and key != "area" and key != "ignore":
-                if key in self.detect_line:
-                    cvs.delete(self.detect_line[key])
-                x1, y1, x2, y2 = lp.length2points((val["rect"][0], val["rect"][1]), (val["rect"][2], val["rect"][3]),
-                                                  width)
-                self.detect_line[key] = cvs.create_line(x1, y1, x2, y2, width=width, fill='green')
-                cvs.create_text((val["rect"][2] + 10, val["rect"][3]), text=key, font=('Impact', -15), fill="red")
-            self.raw_data_draw[key] = val
+        for key, val in self.raw_data_draw["draws"].items():
+            if key in self.detect_line:
+                cvs.delete(self.detect_line[key])
+            x1, y1, x2, y2 = lp.length2points((val[0], val[1]), (val[2], val[3]),
+                                              width)
+            self.detect_line[key] = cvs.create_line(x1, y1, x2, y2, width=width, fill='green')
+            cvs.create_text((val[2] + 10, val[3]), text=key, font=('Impact', -15), fill="red")
 
     def snapshot_origin(self):
         """Call snapshot function with original image(LEFT)"""
@@ -363,7 +374,7 @@ class Page1(Page):
         self.snapshot("compare")
 
     def save_draw(self):
-        if ("1" not in self.raw_data_draw) or ("area" not in self.raw_data_draw):
+        if (not self.raw_data_draw["draws"]) or (not self.raw_data_draw["area"]):
             msg_type = "Error"
             msg = "Need <draw> and <area> before <save>"
             messagebox.showerror(msg_type, msg)
@@ -371,34 +382,34 @@ class Page1(Page):
 
         self.count_draw_line = 0
         copy_image = self.load_img_o.copy()
-        for key, val in self.raw_data_draw.items():
-            if key == "filename":
-                self.raw_data_draw["filename"] = self.file_path_o
-            elif key == "area" or key == "ignore":
-                pass
-            else:
-                # start point = top-left
-                x1, y1, x2, y2 = val["rect"]
-                if (x1 > x2) and (y1 > y2):
-                    x1, x2 = x2, x1
-                    y1, y2 = y2, y1
-                image_area = copy_image.crop((x1, y1, x2, y2))
-                if (image_area.size[0] != 0) and (image_area.size[1] != 0):
-                    self.raw_data_draw[key]["rect"] = [x1, y1, x2, y2]
 
-        # todo need test
+        self.raw_data_draw["filename"] = self.file_path_o
+        for n in self.raw_data_draw["draws"]:
+            # start point = left-top
+            [x1, y1, x2, y2] = self.raw_data_draw["draws"][n]
+            if (x1 > x2) and (y1 > y2):
+                x1, x2 = x2, x1
+                y1, y2 = y2, y1
+            image_area = copy_image.crop((x1, y1, x2, y2))
+            if (image_area.size[0] != 0) and (image_area.size[1] != 0):
+                self.raw_data_draw["draws"][n] = [x1, y1, x2, y2]
+
+        # Save setting data
         data = json.dumps(self.raw_data_draw)
         filename = 'data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", "")
         with open(filename, 'w') as fp:
             fp.write(data)
         print("SAVE !", 'data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", ""))
-        self.raw_data_draw = {"filename": filename}
+        self.raw_data_draw = {
+            "filename": filename,
+            "area": [],
+            "draws": {}
+        }
         self.reset()
         self.read_raw_data(filename)
-        self.load_line(self.canvas2, self.raw_data_draw)
+        self.load_line(self.canvas2)
 
-        # save setting image
-        # use PIL to convert  PS to PNG
+        # Save setting image
         self.canvas2.update()
         filename_png = self.file_path_o.replace("/o_", "/s_")
         ps = self.canvas2.postscript(colormode='color')
@@ -414,12 +425,11 @@ class Page1(Page):
             try:
                 with open('data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", ""), 'r') as fp:
                     self.raw_data_draw = json.load(fp)
-            except Exception as e:
+            except Exception:
                 msg_type = "Error"
                 msg = "Click <Save button> before <compare>"
                 raise Exception(msg_type + ": " + msg)
-        error_cnt, error_lack = et.detect_error_cnt(contours, self.raw_data_draw,
-                                                    (self.app.mini_sampling * self.config["t_width_max"]), self.config)
+        error_cnt, error_lack = et.detect_error_cnt(contours, self.raw_data_draw, self.config)
         if self.app.TEST_MAMOS:
             if error_cnt or error_lack:
                 self.app.mm.control(self.app.LED_NG)
@@ -444,14 +454,12 @@ class Page1(Page):
                 self.canvas2.create_image(size[2], size[3], image=self.tk_photo_org, anchor=tki.NW)
 
                 # load draw
-                self.load_rect(self.canvas2, self.raw_data_draw)
+                self.load_rect(self.canvas2)
 
-    def browsefunc(self):
+    def browse(self):
         """Find json data from Local PC"""
         self.load_filename = filedialog.askopenfilename()
         self.pathlabel.config(text=self.load_filename)
         self.reset()
         self.read_raw_data(self.load_filename)
-        self.load_line(self.canvas2, self.raw_data_draw)
-
-
+        self.load_line(self.canvas2)

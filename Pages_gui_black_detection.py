@@ -2,7 +2,7 @@
 # todo clear image in "/output/o_.jpg"
 # todo camera moved detection
 # todo program slowed when a lot function update realtime ex hue -> Need RUN/STOP Button when start/STOP
-
+# todo auto set colour
 """
 check linear line
 http://www.webmath.com/_answer.php
@@ -16,25 +16,25 @@ import PIL.ImageTk as ImageTk
 import imutils
 import atexit
 import yaml
+import numpy as np
 
 import init_project
 
 init_project.create_folders()
 
 from src import extraction as et
-from src.video_capture import MyVideoCapture as vc
+from src.video_capture import MyVideoCapture as Vdo
 from src import logger
 from gui import Page1, Page2
-
 from PIL import EpsImagePlugin
-
 
 # Global variable
 half_px = 3
+delay = 15
 
 
 class App(tki.Frame):
-    def __init__(self, window, window_title, *args, **kwargs):
+    def __init__(self, window, *args, **kwargs):
         # Project variable
         self.log = logger.GetSystemLogger()
 
@@ -84,8 +84,9 @@ class App(tki.Frame):
         # <<<
 
         self.window = window
-        self.vid = vc(self.DEBUG)
+        self.vid = Vdo(self.DEBUG)
         self.frame = None
+        self.mask = None
 
         tki.Frame.__init__(self, *args, **kwargs)
         # open video source (by default this will try to open the computer webcam)
@@ -114,34 +115,42 @@ class App(tki.Frame):
         self.canvas_rt.config(width=int(self.cam_width * 0.8), height=int(self.cam_height * 0.8))
 
         # # After it is called once, the update method will be automatically called every delay milliseconds
-        self.delay = 15
         self.update()
         self.p1.show()
 
     def click_rgb(self, event):
         x, y = event.x, event.y
-        rgb_min, rgb_max = et.min_max_color(self.frame, x, y, self.range_rgb, half_px)
+        open_cv_image = np.array(self.mask)
+        rgb_min, rgb_max = et.min_max_color(open_cv_image, x, y, self.range_rgb, half_px)
         self.range_rgb.append({
             "point": (x, y),
             "min": rgb_min,
             "max": rgb_max
         })
+        txt_range = "Range: " + str(self.range_rgb[-1]["min"]) + " ~ " + str(self.range_rgb[-1]["max"])
+        self.p2.lbl_rgb.config(text=txt_range, font=("Courier", 22))
 
     def undo_rgb(self, event):
         # x, y = event.x, event.y
         if self.range_rgb[-1]["point"] is not None:
             del self.range_rgb[-1]
+        txt_range = "Range: " + str(self.range_rgb[-1]["min"]) + " ~ " + str(self.range_rgb[-1]["max"])
+        if self.range_rgb[-1]["point"] is not None:
+            self.p2.lbl_rgb.config(text=txt_range, font=("Courier", 22))
+        else:
+            self.p2.lbl_rgb.config(text="", font=("Courier", 22))
 
     def update(self):
         if self.TEST_MAMOS:
             if self.mm.output():
                 self.p1.snapshot("compare")
 
-        ret, self.frame, _, mask = self.vid.get_frame(self.config, self.p1.raw_data_draw)
+        ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw)
         if ret:
-            mask = imutils.resize(mask, height=int(self.cam_height * 0.8), width=int(self.cam_width * 0.8))
-            mask = Image.fromarray(mask)
-            self.p1.tk_photo_line = ImageTk.PhotoImage(image=mask)
+            self.mask = imutils.resize(self.mask, height=int(self.cam_height * 0.8), width=int(self.cam_width * 0.8))
+            self.mask = Image.fromarray(self.mask)
+            self.p1.tk_photo_line = ImageTk.PhotoImage(image=self.mask)
+            self.canvas_rt.delete("all")
             self.canvas_rt.create_image(0, 0, image=self.p1.tk_photo_line, anchor=tki.NW)
             # todo run on RUN mode
             if self.range_rgb[-1]["point"] is not None:
@@ -149,11 +158,12 @@ class App(tki.Frame):
                     x = rgb_data["point"][0]
                     y = rgb_data["point"][1]
                     self.canvas_rt.create_rectangle(x - half_px, y - half_px, x + half_px, y + half_px, fill='red')
+
             if self.p1.raw_data_draw:
                 if (self.config["t_width_min"], self.config["t_width_max"]) != self.original_threshold_dist:
                     self.original_threshold_dist = (self.config["t_width_min"], self.config["t_width_max"])
-                    self.p1.load_line(self.p1.canvas2, self.p1.raw_data_draw)
-        self.window.after(self.delay, self.update)
+                    self.p1.load_line(self.p1.canvas2)
+        self.window.after(delay, self.update)
 
     def exit_handler(self):
         print("Ending ..")
@@ -170,7 +180,7 @@ def toggle_geom(self, event):
 
 if __name__ == "__main__":
     root = tki.Tk()
-    main = App(root, "Tkinter and OpenCV")
+    main = App(root)
     atexit.register(main.exit_handler)
     main.pack(side="top", fill="both", expand=True)
 

@@ -1,20 +1,6 @@
 from gui.page_control import Page
 import tkinter as tki
-from tkinter import filedialog
-from tkinter import messagebox
-import cv2
-import PIL.Image as Image
-import PIL.ImageTk as ImageTk
-import datetime
-import json
-import glob
-import os
-import time
 import yaml
-import io
-
-from src import extraction as et
-from src import linear_processing as lp
 
 
 class Page2(Page):
@@ -65,23 +51,47 @@ class Page2(Page):
         lbl_red = tki.Label(self.buttonframe, text="Red", font=("Courier", 44))
         lbl_red.place(relx=0.01, rely=0.5)
         scale_red = tki.Scale(self.buttonframe, from_=0, to=255, tickinterval=51, orient=tki.HORIZONTAL,
-                              length=(self.winfo_screenwidth() * 0.5) - pad_half_width, command=self.change_red)
-        scale_red.set(self.app.config["t_red"])
+                              length=(self.winfo_screenwidth() * 0.11), command=self.change_red)
+        scale_red.set(self.app.config["t_red"]["min"])
         scale_red.place(relx=0.12, rely=0.5)
+
+        lbl_red_max = tki.Label(self.buttonframe, text="~", font=("Courier", 44))
+        lbl_red_max.place(relx=0.23, rely=0.5)
+        scale_red_max = tki.Scale(self.buttonframe, from_=0, to=255, tickinterval=51, orient=tki.HORIZONTAL,
+                                  length=(self.winfo_screenwidth() * 0.11), command=self.change_red_max)
+        scale_red_max.set(self.app.config["t_red"]["max"])
+        scale_red_max.place(relx=0.25, rely=0.5)
 
         lbl_green = tki.Label(self.buttonframe, text="Green", font=("Courier", 44))
         lbl_green.place(relx=0.01, rely=0.6)
         scale_green = tki.Scale(self.buttonframe, from_=0, to=255, tickinterval=51, orient=tki.HORIZONTAL,
-                                length=(self.winfo_screenwidth() * 0.5) - pad_half_width, command=self.change_green)
-        scale_green.set(self.app.config["t_green"])
+                                length=(self.winfo_screenwidth() * 0.11), command=self.change_green)
+        scale_green.set(self.app.config["t_green"]["min"])
         scale_green.place(relx=0.12, rely=0.6)
+
+        lbl_green_max = tki.Label(self.buttonframe, text="~", font=("Courier", 44))
+        lbl_green_max.place(relx=0.23, rely=0.6)
+        scale_green_max = tki.Scale(self.buttonframe, from_=0, to=255, tickinterval=51, orient=tki.HORIZONTAL,
+                                    length=(self.winfo_screenwidth() * 0.11), command=self.change_green_max)
+        scale_green_max.set(self.app.config["t_green"]["max"])
+        scale_green_max.place(relx=0.25, rely=0.6)
 
         lbl_blue = tki.Label(self.buttonframe, text="Blue", font=("Courier", 44))
         lbl_blue.place(relx=0.01, rely=0.7)
         scale_blue = tki.Scale(self.buttonframe, from_=0, to=255, tickinterval=51, orient=tki.HORIZONTAL,
-                               length=(self.winfo_screenwidth() * 0.5) - pad_half_width, command=self.change_blue)
-        scale_blue.set(self.app.config["t_blue"])
+                               length=(self.winfo_screenwidth() * 0.11), command=self.change_blue)
+        scale_blue.set(self.app.config["t_blue"]["min"])
         scale_blue.place(relx=0.12, rely=0.7)
+
+        lbl_blue_max = tki.Label(self.buttonframe, text="~", font=("Courier", 44))
+        lbl_blue_max.place(relx=0.23, rely=0.7)
+        scale_blue_max = tki.Scale(self.buttonframe, from_=0, to=255, tickinterval=51, orient=tki.HORIZONTAL,
+                                   length=(self.winfo_screenwidth() * 0.11), command=self.change_blue_max)
+        scale_blue_max.set(self.app.config["t_blue"]["max"])
+        scale_blue_max.place(relx=0.25, rely=0.7)
+
+        self.lbl_rgb = tki.Label(self.buttonframe)
+        self.lbl_rgb.place(relx=0.01, rely=0.8)
 
         # Detection tab
         lbl_topic = tki.Label(self.buttonframe, text="Detection", font=("Courier", 55))
@@ -125,13 +135,22 @@ class Page2(Page):
             yaml.dump(self.app.config, outfile, default_flow_style=False)
 
     def change_red(self, val):
-        self.app.config["t_red"] = int(val)
+        self.app.config["t_red"]["min"] = int(val)
+
+    def change_red_max(self, val):
+        self.app.config["t_red"]["max"] = int(val)
 
     def change_green(self, val):
-        self.app.config["t_green"] = int(val)
+        self.app.config["t_green"]["min"] = int(val)
+
+    def change_green_max(self, val):
+        self.app.config["t_green"]["max"] = int(val)
 
     def change_blue(self, val):
-        self.app.config["t_blue"] = int(val)
+        self.app.config["t_blue"]["min"] = int(val)
+
+    def change_blue_max(self, val):
+        self.app.config["t_blue"]["max"] = int(val)
 
     def change_light(self, val):
         self.app.config["t_light"] = int(val)

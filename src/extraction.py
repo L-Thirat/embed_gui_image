@@ -57,7 +57,7 @@ def error_line(match_cnt, over_cnt):
     return error
 
 
-def detect_error_cnt(contours, raw_data_draw, sampling, config):
+def detect_error_cnt(contours, raw_data_draw, config):
     """Get result from comparing image"""
     t_error = config["t_error"]
     t_width_min = config["t_width_min"]
@@ -68,27 +68,26 @@ def detect_error_cnt(contours, raw_data_draw, sampling, config):
     error_under = []
     lines = {}
 
-    for key, val in raw_data_draw.items():
-        if key != "filename" and key != "area" and key != "ignore":
-            # https://www.geeksforgeeks.org/solving-linear-regression-in-python/
-            start_line = (val["rect"][0], val["rect"][1])
-            end_line = (val["rect"][2], val["rect"][3])
-            m, c = lp.linear_formula(start_line, end_line)
+    for val in raw_data_draw["draws"].values():
+        # https://www.geeksforgeeks.org/solving-linear-regression-in-python/
+        start_line = (val[0], val[1])
+        end_line = (val[2], val[3])
+        m, c = lp.linear_formula(start_line, end_line)
 
-            dx, dy = lp.diff_xy(start_line[0], start_line[1], end_line[0], end_line[1], t_space)
-            if end_line[0] - start_line[0] != 0:
-                x = np.arange(start_line[0], end_line[0], dx)
-                y = m * x + c
-            else:
-                y = np.arange(start_line[1], end_line[1], dy)
-                x = (y - c) / m
-            f = interpolate.interp1d(x, y)
-            xnew = np.arange(start_line[0], end_line[0], dx)
-            ynew = f(xnew)  # use interpolation function returned by `interp1d`
-            # plt.plot(x, y, 'o', xnew, ynew, '-')
-            # plt.show()
-            sampling_point = [(x, y) for x, y in zip(xnew, ynew)]
-            lines[(start_line, end_line)] = sampling_point
+        dx, dy = lp.diff_xy(start_line[0], start_line[1], end_line[0], end_line[1], t_space)
+        if end_line[0] - start_line[0] != 0:
+            x = np.arange(start_line[0], end_line[0], dx)
+            y = m * x + c
+        else:
+            y = np.arange(start_line[1], end_line[1], dy)
+            x = (y - c) / m
+        f = interpolate.interp1d(x, y)
+        xnew = np.arange(start_line[0], end_line[0], dx)
+        ynew = f(xnew)  # use interpolation function returned by `interp1d`
+        # plt.plot(x, y, 'o', xnew, ynew, '-')
+        # plt.show()
+        sampling_point = [(x, y) for x, y in zip(xnew, ynew)]
+        lines[(start_line, end_line)] = sampling_point
 
     # find over contour
     for cnt in contours:

@@ -2,12 +2,12 @@ import cv2
 from src import preprocess as pp
 from src import extraction as et
 import imutils
-
+import numpy as np
 
 class MyVideoCapture:
     def __init__(self, DEBUG):
         self.DEBUG = DEBUG
-        self.prev_rgb = (0, 0, 0)
+        self.start_rgb = (0, 0, 0)
         # Open the video source
         if "sample_img" in DEBUG:
             sample_source = DEBUG["sample_img"]
@@ -27,14 +27,17 @@ class MyVideoCapture:
     def get_frame(self, config, raw_data_draw=None):
         if raw_data_draw is None:
             raw_data_draw = {}
-
-        t_red = config["t_red"]
-        t_green = config["t_green"]
-        t_blue = config["t_blue"]
+        t_red_min, t_red_max = config["t_red"]["min"], config["t_red"]["max"]
+        t_green_min, t_green_max = config["t_green"]["min"], config["t_green"]["max"]
+        t_blue_min, t_blue_max = config["t_blue"]["min"], config["t_blue"]["max"]
         t_contrast = config["t_contrast"]
         t_light = config["t_light"]
         t_zoom = config["t_zoom"]
         t_blur = (2*(config["t_blur"]-1)) + 1
+
+        # define range of a color in HSV
+        lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
+        upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
 
         if "sample_img" in self.DEBUG:
             selected_area = self.vid
@@ -50,18 +53,20 @@ class MyVideoCapture:
         if t_zoom > 1:
             selected_area = self.zoom(selected_area, t_zoom)
 
-        if "area" in raw_data_draw:
+        if raw_data_draw["area"]:
             selected_area = pp.crop_img(selected_area, raw_data_draw["area"])
-        # print(len(selected_area))
-        # print(selected_area[240][320])
-        # selected_area = cv2.bilateralFilter(selected_area, 21,51,51)
+
+        # Remove noise
+        # ## (2) Morph-op to remove noise
+        # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+        # morphed = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         selected_area = cv2.medianBlur(selected_area, t_blur)
 
         # image pre-process
         img = pp.brightness(selected_area, t_light, t_contrast)
 
         # todo no control
-        mask = pp.hue(img, t_red, t_green, t_blue)
+        mask = pp.hue(img, lower_hue, upper_hue)
 
         # todo run on RUN mode
         # todo rgb control -> gui slow**
@@ -69,11 +74,11 @@ class MyVideoCapture:
         # cur_red = int(sum(r.ravel()/len(r.ravel())))
         # cur_green = int(sum(g.ravel()/len(g.ravel())))
         # cur_blue = int(sum(b.ravel()/len(b.ravel())))
-        # if self.prev_rgb == (0, 0, 0):
+        # if self.start_rgb == (0, 0, 0):
         #     diff_rgb = (0, 0, 0)
-        #     self.prev_rgb = (cur_red, cur_green, cur_blue)
+        #     self.start_rgb = (cur_red, cur_green, cur_blue)
         # else:
-        #     diff_rgb = (self.prev_rgb[0] - cur_red, self.prev_rgb[1] - cur_green, self.prev_rgb[2] - cur_blue)
+        #     diff_rgb = (self.start_rgb[0] - cur_red, self.start_rgb[1] - cur_green, self.start_rgb[2] - cur_blue)
         # mask = pp.hue(img, (t_red - diff_rgb[0])*3, (t_green - diff_rgb[1])*3, (t_blue - diff_rgb[2])*3)
 
         # todo lightness control

@@ -32,17 +32,11 @@ def brightness(img, t_light, t_contrast):
     return img
 
 
-def hue(img, t_red, t_green, t_blue):
-    # define range of a color in HSV
-    lower_hue = np.array([0, 0, 0])
-    upper_hue = np.array([t_red, t_green, t_blue])
+def hue(img, lower_hue, upper_hue):
     mask = cv2.inRange(img, lower_hue, upper_hue)
 
     (T, mask) = cv2.threshold(mask, 100, 255, cv2.THRESH_BINARY_INV)
 
-    # ## (2) Morph-op to remove noise
-    # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
-    # morphed = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
     return mask
 
 
