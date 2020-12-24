@@ -360,8 +360,7 @@ class Page1(Page):
         for key, val in self.raw_data_draw["draws"].items():
             if key in self.detect_line:
                 cvs.delete(self.detect_line[key])
-            x1, y1, x2, y2 = lp.length2points((val[0], val[1]), (val[2], val[3]),
-                                              width)
+            x1, y1, x2, y2 = lp.length2points((val[0], val[1]), (val[2], val[3]), width)
             self.detect_line[key] = cvs.create_line(x1, y1, x2, y2, width=width, fill='green')
             cvs.create_text((val[2] + 10, val[3]), text=key, font=('Impact', -15), fill="red")
 
@@ -385,11 +384,15 @@ class Page1(Page):
 
         self.raw_data_draw["filename"] = self.file_path_o
         for n in self.raw_data_draw["draws"]:
-            # start point = left-top
+            # todo *start point = from left + (top) passed?
             [x1, y1, x2, y2] = self.raw_data_draw["draws"][n]
-            if (x1 > x2) and (y1 > y2):
+            if x2 < x1:
                 x1, x2 = x2, x1
                 y1, y2 = y2, y1
+            elif x2 == x1:
+                if y2 > y1:
+                    x1, x2 = x2, x1
+                    y1, y2 = y2, y1
             image_area = copy_image.crop((x1, y1, x2, y2))
             if (image_area.size[0] != 0) and (image_area.size[1] != 0):
                 self.raw_data_draw["draws"][n] = [x1, y1, x2, y2]

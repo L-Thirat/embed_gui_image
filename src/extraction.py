@@ -2,6 +2,9 @@ import cv2
 from scipy import interpolate
 import numpy as np
 from src import linear_processing as lp
+from shapely.geometry import Point, Polygon
+import shapely.speedups
+shapely.speedups.enable()
 
 cv2ver = cv2.__version__
 if "3." in cv2ver:
@@ -12,6 +15,7 @@ else:
 
 def draw_contour(img, mask):
     if cv2ver == 3:
+        # https://qiita.com/anyamaru/items/fd3d894966a98098376c
         mask, contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     else:
         contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -70,8 +74,9 @@ def detect_error_cnt(contours, raw_data_draw, config):
 
     for val in raw_data_draw["draws"].values():
         # https://www.geeksforgeeks.org/solving-linear-regression-in-python/
-        start_line = (val[0], val[1])
-        end_line = (val[2], val[3])
+        x1, y1, x2, y2 = lp.length2points((val[0], val[1]), (val[2], val[3]), t_width_max)
+        start_line = (x1, y1)
+        end_line = (x2, y2)
         m, c = lp.linear_formula(start_line, end_line)
 
         dx, dy = lp.diff_xy(start_line[0], start_line[1], end_line[0], end_line[1], t_space)
@@ -128,7 +133,7 @@ def detect_error_cnt(contours, raw_data_draw, config):
                         matching_count += 1
                         if not_match_cnt[-1]:
                             not_match_cnt.append([])
-                            matching = True
+                        matching = True
                         break
                 else:
                     continue
