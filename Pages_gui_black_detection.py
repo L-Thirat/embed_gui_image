@@ -4,6 +4,7 @@
 # todo program slowed when a lot function update realtime ex hue -> Need RUN/STOP Button when start/STOP
 # todo auto set colour
 # todo **bug result when use browse-> can't call new save
+# todo use intersect cnt
 """
 check linear line
 http://www.webmath.com/_answer.php
@@ -186,7 +187,7 @@ if __name__ == "__main__":
     main.pack(side="top", fill="both", expand=True)
 
     # Tkinter setting
-    pad = 3
+    pad = 0
     tki.Frame._geom = '200x200+0+0'
     root.geometry("{0}x{1}+0+0".format(
         root.winfo_screenwidth() - pad, root.winfo_screenheight() - pad))

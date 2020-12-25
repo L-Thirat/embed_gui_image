@@ -11,7 +11,7 @@ t_light: 49
 t_red:
   max: 27
   min: 0
-t_space: 1
-t_width_max: 10
+t_space: 12
+t_width_max: 18
 t_width_min: 0
 t_zoom: 1

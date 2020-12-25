@@ -95,12 +95,12 @@ def detect_error_cnt(contours, raw_data_draw, config):
         lines[(start_line, end_line)] = sampling_point
 
     # find over contour
+    match_cnt = []
     for cnt in contours:
         start_point, end_point = lp.find_start_end(cnt)
         num_error = 0
         for p in cnt:
             matching = False
-            matching_count = 0
             x, y = p[0][0], p[0][1]
 
             # find matching line
@@ -109,12 +109,12 @@ def detect_error_cnt(contours, raw_data_draw, config):
                 end_line = line[1]
                 dist = lp.point2line_match((x, y), start_line, end_line)
                 if (dist >= t_width_min) and (dist <= t_width_max):
-                    matching_count += 1
                     matching = True
                     break
-
             if not matching:
                 num_error += 1
+        if not num_error:
+            match_cnt.append(cnt)
         if (num_error * 100) / len(cnt) > t_error:
             error_over.append((start_point, end_point))
 
@@ -122,24 +122,25 @@ def detect_error_cnt(contours, raw_data_draw, config):
     not_match_cnt = [[]]
     for line in lines:
         matching_count = 0
+        prev_p = None
+
         for point in lines[line]:
             matching = False
-            (X_comp, Y_comp) = point
-            for cnt in contours:
-                for p in cnt:
-                    x, y = p[0][0], p[0][1]
-                    dist = lp.find_distance((X_comp, Y_comp), (x, y))
-                    if (dist >= t_width_min) and (dist <= t_width_max):
+            if prev_p:
+                sample_rect = lp.line2rect(prev_p, point, t_width_max)
+                for cnt in match_cnt:
+                    poly_cnt = [(item[0][0], item[0][1]) for item in cnt]
+                    if Polygon(poly_cnt).intersects(Polygon(sample_rect)):
                         matching_count += 1
                         if not_match_cnt[-1]:
                             not_match_cnt.append([])
                         matching = True
                         break
-                else:
-                    continue
-                break
-            if not matching:
-                not_match_cnt[-1].append((X_comp, Y_comp))
+                if not matching:
+                    if not not_match_cnt[-1]:
+                        not_match_cnt[-1].append(prev_p)
+                    not_match_cnt[-1].append(point)
+            prev_p = point
         not_match_cnt.append([])
         if matching_count != len(lines[line]):
             error_under = error_under + error_line(not_match_cnt, over_cnt=error_over)
