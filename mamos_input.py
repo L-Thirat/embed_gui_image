@@ -27,5 +27,8 @@ def control(pin):
 
 
 while True:
-    print(GPIO.input(BTN_input))
+    inp = GPIO.input(BTN_input)
+    print("input", inp)
+    if not inp:
+        control(LED_NG)
 

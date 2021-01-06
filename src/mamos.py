@@ -22,7 +22,7 @@ class Mamos:
     def control(pin):
         """Control GPIO output"""
         GPIO.output(pin, GPIO.HIGH)
-        print("LED ON")
+        print("LED ON", pin)
         time.sleep(0.1)
         GPIO.output(pin, GPIO.LOW)
 
@@ -36,7 +36,8 @@ class Mamos:
                 print("click")
                 self.prev_input = True
                 return True
-            elif not GPIO.input(self.BTN_input) and self.prev_input:
+            # elif not GPIO.input(self.BTN_input) and self.prev_input:
+            else:
                 self.prev_input = False
         except KeyboardInterrupt:
             GPIO.cleanup()  # Get a frame from the video source

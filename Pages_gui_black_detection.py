@@ -35,41 +35,11 @@ from PIL import EpsImagePlugin
 half_px = 3
 delay = 15
 
-import time
-
-# TEST_MAMOS = True
-#
-# # TODO MAMOS
-# if TEST_MAMOS:
-#     try:
-#         import ASUS.GPIO as GPIO
-#
-#         LED_OK = 161
-#         LED_NG = 184
-#         BTN_input = 167
-#
-#         GPIO.setwarnings(False)
-#         GPIO.setmode(GPIO.ASUS)
-#         GPIO.setup(LED_OK, GPIO.OUT)
-#         GPIO.setup(LED_NG, GPIO.OUT)
-#         GPIO.setup(BTN_input, GPIO.IN)
-#     except:
-#         pass
-#
-#
-# def control(pin):
-#     """Control GPIO output"""
-#     GPIO.output(pin, GPIO.HIGH)
-#     print("LED ON")
-#     time.sleep(0.1)
-#     GPIO.output(pin, GPIO.LOW)
-
 
 class App(tki.Frame):
     def __init__(self, window, *args, **kwargs):
         # Project variable
         self.log = logger.GetSystemLogger()
-        self.prev_input = False
 
         # Setting
         with open(r'setting.yaml') as file:
@@ -172,22 +142,19 @@ class App(tki.Frame):
             self.p2.lbl_rgb.config(text=txt_range, font=("Courier", 22))
         else:
             self.p2.lbl_rgb.config(text="", font=("Courier", 22))
+            self.range_rgb = [{
+                "point": None,
+                "min": [255, 255, 255],
+                "max": [0, 0, 0]
+            }]
 
     def update(self):
         if self.TEST_MAMOS:
             if self.mm.output():
                 self.p1.snapshot("compare")
-            # # TODO MAMOS: LED OUTPUT
-            # try:
-            #     if not GPIO.input(BTN_input) and not self.prev_input:
-            #         self.p1.snapshot("compare")
-            #         print("click")
-            #         self.prev_input = True
-            #         self.prev_input = False
-            # except KeyboardInterrupt:
-            #     GPIO.cleanup()  # Get a frame from the video source
 
         ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw)
+        # test light calibrate >>, self.p1.save_status
         if ret:
             self.mask = imutils.resize(self.mask, height=int(self.cam_height * 0.8), width=int(self.cam_width * 0.8))
             self.mask = Image.fromarray(self.mask)

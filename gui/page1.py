@@ -46,6 +46,7 @@ class Page1(Page):
         }
 
         # Visualize output
+        self.save_status = False
         self.contour = []
         self.detect_line = {}
         self.error_box = {}
@@ -124,6 +125,8 @@ class Page1(Page):
 
     def reset(self):
         """Reset screen and parameters"""
+        self.btn_save = tki.Button(self.window, text="Save", bg=None, font=("Courier", 44), width=9, command=self.save_draw)
+        self.btn_save.place(relx=0.56, rely=0.05)
         self.canvas2.delete("all")
         self.canvas3.delete("all")
         self.raw_data_draw = {
@@ -137,6 +140,7 @@ class Page1(Page):
             "max": [0, 0, 0]
         }]
         self.app.undo_rgb(None)
+        self.save_status = False
 
         self.file_path_o = ""
         self.load_img_o = None
@@ -249,7 +253,7 @@ class Page1(Page):
     def snapshot(self, mode):
         """Get a frame from the video source"""
         start_task = time.time()
-        ret, frame, contours, _ = self.vid.get_frame(self.config, self.raw_data_draw)
+        ret, frame, contours, _ = self.vid.get_frame(self.config, self.raw_data_draw, self.save_status)
 
         end = time.time()
         print("Capture time: %f" % (end - start_task))
@@ -274,11 +278,7 @@ class Page1(Page):
 
                 size = [self.app.cam_width, self.app.cam_height, 0, 0]
                 self.load_img_cp = self.load_img_cp.resize((size[0], size[1]), Image.ANTIALIAS)
-                if not contours:
-                    msg_type = "ERROR"
-                    msg = "No detect line"
-                    messagebox.showerror(msg_type, msg)
-                    raise msg_type + ": " + msg
+
                 error_over, error_under = self.get_result(contours)
                 end = time.time()
                 print("Calculate time: %f" % (end - start))
@@ -433,6 +433,7 @@ class Page1(Page):
             except Exception:
                 msg_type = "Error"
                 msg = "Click <Save button> before <compare>"
+                messagebox.showerror(msg_type, msg)
                 raise Exception(msg_type + ": " + msg)
         error_cnt, error_lack = et.detect_error_cnt(contours, self.raw_data_draw, self.config)
         if self.app.TEST_MAMOS:
@@ -446,6 +447,10 @@ class Page1(Page):
         """Read json data and update canvas"""
         if filename:
             with open(filename, 'r') as fp:
+                self.save_status = True
+                self.btn_save = tki.Button(self.window, text="Save", bg='green', font=("Courier", 44), width=9, command=self.save_draw)
+                self.btn_save.place(relx=0.56, rely=0.05)
+
                 self.raw_data_draw = json.load(fp)
 
                 # load img
