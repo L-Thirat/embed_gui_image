@@ -182,7 +182,6 @@ class App(tki.Frame):
                     self.p1.snapshot("compare")
                     print("click")
                     self.prev_input = True
-                elif GPIO.input(BTN_input) and self.prev_input:
                     self.prev_input = False
             except KeyboardInterrupt:
                 GPIO.cleanup()  # Get a frame from the video source
