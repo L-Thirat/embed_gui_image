@@ -1,17 +1,17 @@
 t_blue:
-  max: 128
+  max: 233
   min: 0
 t_blur: 4
 t_contrast: 0
 t_error: 10
 t_green:
-  max: 68
+  max: 223
   min: 0
-t_light: 49
+t_light: 0
 t_red:
-  max: 50
+  max: 171
   min: 0
 t_space: 12
-t_width_max: 18
+t_width_max: 20
 t_width_min: 0
 t_zoom: 1

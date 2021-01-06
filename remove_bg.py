@@ -2,57 +2,6 @@ import cv2
 import numpy as np
 
 
-def apply_brightness_contrast(input_img, brightness=0, contrast=0):
-    if brightness != 0:
-        if brightness > 0:
-            shadow = brightness
-            highlight = 255
-        else:
-            shadow = 0
-            highlight = 255 + brightness
-        alpha_b = (highlight - shadow) / 255
-        gamma_b = shadow
-
-        buf = cv2.addWeighted(input_img, alpha_b, input_img, 0, gamma_b)
-    else:
-        buf = input_img.copy()
-
-    if contrast != 0 and (127 * (131 - contrast)) != 0:
-        f = 131 * (contrast + 127) / (127 * (131 - contrast))
-        alpha_c = f
-        gamma_c = 127 * (1 - f)
-
-        buf = cv2.addWeighted(buf, alpha_c, buf, 0, gamma_c)
-
-    return buf
-
-
-def brightness(img, t_light, t_contrast):
-    img = apply_brightness_contrast(img, -t_light, t_contrast)
-    return img
-
-
-def hue(img, lower_hue, upper_hue):
-    mask = cv2.inRange(img, lower_hue, upper_hue)
-
-    (T, mask) = cv2.threshold(mask, 100, 255, cv2.THRESH_BINARY_INV)
-
-    return mask
-
-
-def shadow_remove(img):
-    rgb_planes = cv2.split(img)
-    result_norm_planes = []
-    for plane in rgb_planes:
-        dilated_img = cv2.dilate(plane, np.ones((7, 7), np.uint8))
-        bg_img = cv2.medianBlur(dilated_img, 21)
-        diff_img = 255 - cv2.absdiff(plane, bg_img)
-        norm_img = cv2.normalize(diff_img, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
-        result_norm_planes.append(norm_img)
-    shadowremov = cv2.merge(result_norm_planes)
-    return shadowremov
-
-
 def color_shadow_demove(img):
     # covert the BGR image to an YCbCr image
     y_cb_cr_img = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
@@ -127,19 +76,12 @@ def color_shadow_demove(img):
 
     # covert the YCbCr image to the BGR image
     final_image = cv2.cvtColor(y_cb_cr_img, cv2.COLOR_YCR_CB2BGR)
+    cv2.imshow("im1", img)
+    cv2.imshow("im2", final_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
     return final_image
 
 
-def crop_img(img, area):
-    # contours = [np.array([[333, 147], [320, 329], [361, 464], [411, 425], [382, 164]])]
-    contours = [np.array(area)]
-    fill_color = [255, 255, 255]  # any BGR color value to fill with
-    mask_value = 1  # 1 channel white (can be any non-zero uint8 value)
-
-    stencil = np.zeros(img.shape[:-1]).astype(np.uint8)
-    cv2.fillPoly(stencil, contours, mask_value)
-
-    sel = stencil != mask_value
-    img[sel] = fill_color
-
-    return img
+img = cv2.imread('output/original/o_2020-12-23_15-24-22.jpg')
+color_shadow_demove(img)
