@@ -4,7 +4,8 @@
 # todo program slowed when a lot function update realtime ex hue -> Need RUN/STOP Button when start/STOP
 # todo auto set colour
 # todo **bug result when use browse-> can't call new save
-# todo use intersect cnt
+# todo ** bug input gpio mamos.py
+
 """
 check linear line
 http://www.webmath.com/_answer.php
@@ -34,11 +35,40 @@ from PIL import EpsImagePlugin
 half_px = 3
 delay = 15
 
+import time
+TEST_MAMOS = True
+
+# TODO MAMOS
+if TEST_MAMOS:
+    try:
+        import ASUS.GPIO as GPIO
+
+        LED_OK = 161
+        LED_NG = 184
+        BTN_input = 167
+
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.ASUS)
+        GPIO.setup(LED_OK, GPIO.OUT)
+        GPIO.setup(LED_NG, GPIO.OUT)
+        GPIO.setup(BTN_input, GPIO.IN)
+    except:
+        pass
+
+
+def control(pin):
+    """Control GPIO output"""
+    GPIO.output(pin, GPIO.HIGH)
+    print("LED ON")
+    time.sleep(0.1)
+    GPIO.output(pin, GPIO.LOW)
+
 
 class App(tki.Frame):
     def __init__(self, window, *args, **kwargs):
         # Project variable
         self.log = logger.GetSystemLogger()
+        self.prev_input = False
 
         # Setting
         with open(r'setting.yaml') as file:
@@ -144,8 +174,18 @@ class App(tki.Frame):
 
     def update(self):
         if self.TEST_MAMOS:
-            if self.mm.output():
-                self.p1.snapshot("compare")
+            # if self.mm.output():
+            #     self.p1.snapshot("compare")
+            # TODO MAMOS: LED OUTPUT
+            try:
+                if not GPIO.input(BTN_input) and not self.prev_input:
+                    self.p1.snapshot("compare")
+                    print("click")
+                    self.prev_input = True
+                elif GPIO.input(BTN_input) and self.prev_input:
+                    self.prev_input = False
+            except KeyboardInterrupt:
+                GPIO.cleanup()  # Get a frame from the video source
 
         ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw)
         if ret:

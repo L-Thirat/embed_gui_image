@@ -139,6 +139,7 @@ class Page1(Page):
         self.app.undo_rgb(None)
 
         self.file_path_o = ""
+        self.load_img_o = None
         self.pathlabel.config(text="")
         self.lbl_result.config(text="        ", bg="yellow")
         self.count_draw_line = 0
@@ -176,48 +177,49 @@ class Page1(Page):
     #     self.drawmode = "ignore"
 
     def on_button_press(self, event):
-        x, y = event.x, event.y
-        if self.start_x and self.start_y:
-            if self.drawmode == "detect":
-                self.count_draw_line += 1
-                x1, y1, x2, y2 = lp.length2points((x, y), (self.start_x, self.start_y),
-                                                  self.app.original_threshold_dist[1])
-                self.prev_line.append(
-                    self.canvas2.create_line(x1, y1, x2, y2, width=self.app.original_threshold_dist[1],
-                                             fill='green'))
-                if self.start_x < x:
-                    green_line = [self.start_x, self.start_y, x, y]
-                else:
-                    green_line = [x, y, self.start_x, self.start_y]
-                self.raw_data_draw["draws"][str(self.count_draw_line)] = green_line
-                self.start_x, self.start_y = 0, 0
-            else:
-                if abs(x - self.start_x) < 20 and abs(y - self.start_y) < 20:
-                    for draw_line in self.prev_sub_pol:
-                        self.canvas2.delete(draw_line)
-                    self.prev_sub_pol = []
-                    self.count_draw_sub_pol = 0
-                    flat_polygon = [item for sublist in self.polygon_data for item in sublist]
-                    self.prev_pol = [self.canvas2.create_polygon(flat_polygon, outline='red', fill="", width=2)]
-
-                    self.raw_data_draw[self.drawmode] = self.polygon_data
-                    self.polygon_data = []
+        if self.load_img_o:
+            x, y = event.x, event.y
+            if self.start_x and self.start_y:
+                if self.drawmode == "detect":
+                    self.count_draw_line += 1
+                    x1, y1, x2, y2 = lp.length2points((x, y), (self.start_x, self.start_y),
+                                                      self.app.original_threshold_dist[1])
+                    self.prev_line.append(
+                        self.canvas2.create_line(x1, y1, x2, y2, width=self.app.original_threshold_dist[1],
+                                                 fill='green'))
+                    if self.start_x < x:
+                        green_line = [self.start_x, self.start_y, x, y]
+                    else:
+                        green_line = [x, y, self.start_x, self.start_y]
+                    self.raw_data_draw["draws"][str(self.count_draw_line)] = green_line
                     self.start_x, self.start_y = 0, 0
                 else:
-                    if self.drawmode == "area":
-                        self.count_draw_sub_pol += 1
-                        self.prev_sub_pol.append(
-                            self.canvas2.create_line(x, y, self.polygon_data[-1][0], self.polygon_data[-1][1], width=2,
-                                                     fill='red'))
-                    # else:
-                    #     # todo
-                    #     self.canvas2.create_line(x, y, self.polygon_data[-1][0], self.polygon_data[-1][1], width=2,
-                    #                              fill='blue')
+                    if abs(x - self.start_x) < 20 and abs(y - self.start_y) < 20:
+                        for draw_line in self.prev_sub_pol:
+                            self.canvas2.delete(draw_line)
+                        self.prev_sub_pol = []
+                        self.count_draw_sub_pol = 0
+                        flat_polygon = [item for sublist in self.polygon_data for item in sublist]
+                        self.prev_pol = [self.canvas2.create_polygon(flat_polygon, outline='red', fill="", width=2)]
+
+                        self.raw_data_draw[self.drawmode] = self.polygon_data
+                        self.polygon_data = []
+                        self.start_x, self.start_y = 0, 0
+                    else:
+                        if self.drawmode == "area":
+                            self.count_draw_sub_pol += 1
+                            self.prev_sub_pol.append(
+                                self.canvas2.create_line(x, y, self.polygon_data[-1][0], self.polygon_data[-1][1], width=2,
+                                                         fill='red'))
+                        # else:
+                        #     # todo
+                        #     self.canvas2.create_line(x, y, self.polygon_data[-1][0], self.polygon_data[-1][1], width=2,
+                        #                              fill='blue')
+                        self.polygon_data.append([x, y])
+            else:
+                self.start_x, self.start_y = x, y
+                if self.drawmode != "detect":
                     self.polygon_data.append([x, y])
-        else:
-            self.start_x, self.start_y = x, y
-            if self.drawmode != "detect":
-                self.polygon_data.append([x, y])
 
     def undo(self, event):
         """Event right click on the canvas"""
