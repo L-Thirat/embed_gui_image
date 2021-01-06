@@ -15,7 +15,7 @@ import time
 import atexit
 
 # Testing
-DEBUG = True  # Debug mode -> test from video source
+DEBUG = False  # Debug mode -> test from video source
 TEST_MAMOS = True  # TEST MAMOS mode -> use Mamos's button instead GUI
 sample_source = "sample1.mp4"
 
@@ -24,8 +24,8 @@ camera_h = 480
 camera_w = 640
 
 # fix
-out_path = "../output/temp_essembly/original/"
-cp_path = "../output/temp_essembly/compare/"
+out_path = "output/original/"
+cp_path = "output/compare/"
 
 # TODO MAMOS
 if TEST_MAMOS:
@@ -166,8 +166,8 @@ class App:
             latest_file = max(list_of_files, key=os.path.getctime)
         except:
             latest_file = ""
-        if latest_file:
-            self.read_raw_data(latest_file)
+        # if latest_file:
+        #     self.read_raw_data(latest_file)
 
         # # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
@@ -181,15 +181,15 @@ class App:
     def update(self):
         """To update interface"""
         # TODO MAMOS: LED OUTPUT
-        # try:
-        #     if not GPIO.input(BTN_input) and not self.prev_input:
-        #         self.snapshot("compare")
-        #         print("click")
-        #         self.prev_input = True
-        #     elif GPIO.input(BTN_input) and self.prev_input:
-        #         self.prev_input = False
-        # except KeyboardInterrupt:
-        #     GPIO.cleanup()  # Get a frame from the video source
+        try:
+            if GPIO.input(BTN_input) and not self.prev_input:
+                self.snapshot("compare")
+                print("click")
+                self.prev_input = True
+            elif GPIO.input(BTN_input) and self.prev_input:
+                self.prev_input = False
+        except KeyboardInterrupt:
+            GPIO.cleanup()  # Get a frame from the video source
         ret, frame = self.vid.get_frame()
 
         if ret:
