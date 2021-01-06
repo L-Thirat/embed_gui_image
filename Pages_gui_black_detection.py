@@ -36,32 +36,33 @@ half_px = 3
 delay = 15
 
 import time
-TEST_MAMOS = True
 
-# TODO MAMOS
-if TEST_MAMOS:
-    try:
-        import ASUS.GPIO as GPIO
-
-        LED_OK = 161
-        LED_NG = 184
-        BTN_input = 167
-
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.ASUS)
-        GPIO.setup(LED_OK, GPIO.OUT)
-        GPIO.setup(LED_NG, GPIO.OUT)
-        GPIO.setup(BTN_input, GPIO.IN)
-    except:
-        pass
-
-
-def control(pin):
-    """Control GPIO output"""
-    GPIO.output(pin, GPIO.HIGH)
-    print("LED ON")
-    time.sleep(0.1)
-    GPIO.output(pin, GPIO.LOW)
+# TEST_MAMOS = True
+#
+# # TODO MAMOS
+# if TEST_MAMOS:
+#     try:
+#         import ASUS.GPIO as GPIO
+#
+#         LED_OK = 161
+#         LED_NG = 184
+#         BTN_input = 167
+#
+#         GPIO.setwarnings(False)
+#         GPIO.setmode(GPIO.ASUS)
+#         GPIO.setup(LED_OK, GPIO.OUT)
+#         GPIO.setup(LED_NG, GPIO.OUT)
+#         GPIO.setup(BTN_input, GPIO.IN)
+#     except:
+#         pass
+#
+#
+# def control(pin):
+#     """Control GPIO output"""
+#     GPIO.output(pin, GPIO.HIGH)
+#     print("LED ON")
+#     time.sleep(0.1)
+#     GPIO.output(pin, GPIO.LOW)
 
 
 class App(tki.Frame):
@@ -174,17 +175,17 @@ class App(tki.Frame):
 
     def update(self):
         if self.TEST_MAMOS:
-            # if self.mm.output():
-            #     self.p1.snapshot("compare")
-            # TODO MAMOS: LED OUTPUT
-            try:
-                if not GPIO.input(BTN_input) and not self.prev_input:
-                    self.p1.snapshot("compare")
-                    print("click")
-                    self.prev_input = True
-                    self.prev_input = False
-            except KeyboardInterrupt:
-                GPIO.cleanup()  # Get a frame from the video source
+            if self.mm.output():
+                self.p1.snapshot("compare")
+            # # TODO MAMOS: LED OUTPUT
+            # try:
+            #     if not GPIO.input(BTN_input) and not self.prev_input:
+            #         self.p1.snapshot("compare")
+            #         print("click")
+            #         self.prev_input = True
+            #         self.prev_input = False
+            # except KeyboardInterrupt:
+            #     GPIO.cleanup()  # Get a frame from the video source
 
         ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw)
         if ret:

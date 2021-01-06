@@ -14,7 +14,7 @@ class Mamos:
             GPIO.setmode(GPIO.ASUS)
             GPIO.setup(LED_OK, GPIO.OUT)
             GPIO.setup(LED_NG, GPIO.OUT)
-            GPIO.setup(BTN_input, GPIO.IN)
+            GPIO.setup(BTN_input, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         except:
             pass
 
@@ -36,7 +36,7 @@ class Mamos:
                 print("click")
                 self.prev_input = True
                 return True
-            elif GPIO.input(self.BTN_input) and self.prev_input:
+            elif not GPIO.input(self.BTN_input) and self.prev_input:
                 self.prev_input = False
         except KeyboardInterrupt:
             GPIO.cleanup()  # Get a frame from the video source
