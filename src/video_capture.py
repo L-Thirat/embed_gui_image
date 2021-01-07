@@ -4,6 +4,7 @@ from src import extraction as et
 import imutils
 import numpy as np
 
+
 class MyVideoCapture:
     def __init__(self, DEBUG):
         self.DEBUG = DEBUG
@@ -34,6 +35,7 @@ class MyVideoCapture:
         t_light = config["t_light"]
         t_zoom = config["t_zoom"]
         t_blur = (2*(config["t_blur"]-1)) + 1
+        t_noise = config["t_noise"]
 
         if "sample_img" in self.DEBUG:
             selected_area = self.vid
@@ -49,7 +51,7 @@ class MyVideoCapture:
 
         # Remove Shadow
         # selected_area = pp.shadow_remove(selected_area)
-        selected_area = pp.color_shadow_demove(selected_area)
+        # selected_area = pp.color_shadow_demove(selected_area)
 
         if t_zoom > 1:
             selected_area = self.zoom(selected_area, t_zoom)
@@ -99,7 +101,7 @@ class MyVideoCapture:
 
         # contour extraction
         draw_cnt, contours = et.draw_contour(img, mask)
-        select_contour, mask = et.contour_selection(contours, img)
+        select_contour, mask = et.contour_selection(contours, img, t_noise)
 
         return True, selected_area, select_contour, mask
 

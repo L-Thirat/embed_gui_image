@@ -48,7 +48,6 @@ class Page1(Page):
         # Visualize output
         self.save_status = False
         self.contour = []
-        self.detect_line = {}
         self.error_box = {}
         self.error_line = {}
 
@@ -125,8 +124,7 @@ class Page1(Page):
 
     def reset(self):
         """Reset screen and parameters"""
-        self.btn_save = tki.Button(self.window, text="Save", bg=None, font=("Courier", 44), width=9, command=self.save_draw)
-        self.btn_save.place(relx=0.56, rely=0.05)
+        self.toggle_save_status()
         self.canvas2.delete("all")
         self.canvas3.delete("all")
         self.raw_data_draw = {
@@ -140,7 +138,6 @@ class Page1(Page):
             "max": [0, 0, 0]
         }]
         self.app.undo_rgb(None)
-        self.save_status = False
 
         self.file_path_o = ""
         self.load_img_o = None
@@ -181,6 +178,8 @@ class Page1(Page):
     #     self.drawmode = "ignore"
 
     def on_button_press(self, event):
+        if self.save_status:
+            self.toggle_save_status()
         if self.load_img_o:
             x, y = event.x, event.y
             if self.start_x and self.start_y:
@@ -201,6 +200,8 @@ class Page1(Page):
                     if abs(x - self.start_x) < 20 and abs(y - self.start_y) < 20:
                         for draw_line in self.prev_sub_pol:
                             self.canvas2.delete(draw_line)
+                        if self.prev_pol:
+                            self.canvas2.delete(self.prev_pol)
                         self.prev_sub_pol = []
                         self.count_draw_sub_pol = 0
                         flat_polygon = [item for sublist in self.polygon_data for item in sublist]
@@ -227,6 +228,9 @@ class Page1(Page):
 
     def undo(self, event):
         """Event right click on the canvas"""
+        if self.save_status:
+            self.toggle_save_status()
+
         if self.count_draw_line:
             if self.drawmode == "detect":
                 self.canvas2.delete(self.prev_line[-1])
@@ -262,109 +266,124 @@ class Page1(Page):
 
         if ret:
             if mode == "original":
-                self.file_path_o = self.app.out_path + "o_" + filename
-                cv2.imwrite(self.file_path_o, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-                self.load_img_o = Image.open(self.file_path_o)
-                size = [self.app.cam_width, self.app.cam_height, 0, 0]
-                self.load_img_o = self.load_img_o.resize((size[0], size[1]), Image.ANTIALIAS)
-                self.tk_photo_org = ImageTk.PhotoImage(image=self.load_img_o)
-                self.canvas2.create_image(size[2], size[3], image=self.tk_photo_org, anchor=tki.NW)
+                if self.save_status:
+                    msg_type = "Error"
+                    msg = "Need <reset> before <snapshot>"
+                    messagebox.showerror(msg_type, msg)
+                    raise Exception(msg_type + ": " + msg)
+                else:
+                    self.file_path_o = self.app.out_path + "o_" + filename
+                    cv2.imwrite(self.file_path_o, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+                    self.load_img_o = Image.open(self.file_path_o)
+                    size = [self.app.cam_width, self.app.cam_height, 0, 0]
+                    self.load_img_o = self.load_img_o.resize((size[0], size[1]), Image.ANTIALIAS)
+                    self.tk_photo_org = ImageTk.PhotoImage(image=self.load_img_o)
+                    self.canvas2.create_image(size[2], size[3], image=self.tk_photo_org, anchor=tki.NW)
 
             elif mode == "compare":
-                start = time.time()
-                self.file_path_c = self.app.cp_path + "c_" + "temp_filename.jpg"
-                cv2.imwrite(self.file_path_c, cv2.cvtColor(self.app.frame, cv2.COLOR_RGB2BGR))
-                self.load_img_cp = Image.open(self.file_path_c)
+                if self.save_status:
+                    start = time.time()
+                    self.file_path_c = self.app.cp_path + "c_" + "temp_filename.jpg"
+                    cv2.imwrite(self.file_path_c, cv2.cvtColor(self.app.frame, cv2.COLOR_RGB2BGR))
+                    self.load_img_cp = Image.open(self.file_path_c)
 
-                size = [self.app.cam_width, self.app.cam_height, 0, 0]
-                self.load_img_cp = self.load_img_cp.resize((size[0], size[1]), Image.ANTIALIAS)
+                    size = [self.app.cam_width, self.app.cam_height, 0, 0]
+                    self.load_img_cp = self.load_img_cp.resize((size[0], size[1]), Image.ANTIALIAS)
 
-                error_over, error_under = self.get_result(contours)
-                end = time.time()
-                print("Calculate time: %f" % (end - start))
-                self.tk_photo_cp = ImageTk.PhotoImage(image=self.load_img_cp)
-                self.canvas3.create_image(size[2], size[3], image=self.tk_photo_cp, anchor=tki.NW)
-                output_status = "        "
-                if error_over:
-                    output_status = "NG:OVER"
-                    for key in self.error_box:
-                        self.canvas3.delete(self.error_box[key])
-                    for i, cnt in enumerate(error_over):
-                        polygon = [(cnt[0][0], cnt[0][1]), (cnt[1][0], cnt[0][1]), (cnt[1][0], cnt[1][1]),
-                                   (cnt[0][0], cnt[1][1])]
-                        self.error_box[i] = self.canvas3.create_polygon(polygon, outline='red', fill="", width=2)
-                        self.canvas3.create_text((cnt[1][0] + 10, cnt[1][1]), text=i + 1, font=('Impact', -15),
-                                                 fill="red")
+                    error_over, error_under = self.get_result(contours)
+                    end = time.time()
+                    print("Calculate time: %f" % (end - start))
+                    self.tk_photo_cp = ImageTk.PhotoImage(image=self.load_img_cp)
+                    self.canvas3.create_image(size[2], size[3], image=self.tk_photo_cp, anchor=tki.NW)
+                    output_status = "        "
+                    if error_over:
+                        output_status = "NG:OVER"
+                        for key in self.error_box:
+                            self.canvas3.delete(self.error_box[key])
+                        for i, over_line in enumerate(error_over):
+                            # over_line = [(cnt[0][0], cnt[0][1]), (cnt[1][0], cnt[0][1]), (cnt[1][0], cnt[1][1]),
+                            #            (cnt[0][0], cnt[1][1])]
+                            self.error_box[i] = self.canvas3.create_line(over_line[0][0], over_line[0][1], over_line[1][0],
+                                                                         over_line[1][1], fill='red', width=2)
+                            self.canvas3.create_text((over_line[1][0] + 10, over_line[1][1]), text=i + 1,
+                                                     font=('Impact', -15), fill="red")
 
-                if error_under:
-                    if output_status == "NG:OVER":
-                        output_status = "NG:BOTH"
+                    if error_under:
+                        if output_status == "NG:OVER":
+                            output_status = "NG:BOTH"
+                        else:
+                            output_status = "NG:UNDER"
+                        width = self.app.original_threshold_dist[1]
+                        for key in self.error_line:
+                            self.canvas3.delete(self.error_line[key])
+                        for i, lack_line in enumerate(error_under):
+                            if len(lack_line) > 2:
+                                self.error_box[i] = self.canvas3.create_line(lack_line, fill='orange', width=width)
+                                self.canvas3.create_text((lack_line[2] + 10, lack_line[3]), text=i + 1,
+                                                         font=('Impact', -15),
+                                                         fill="orange")
+                            else:
+                                self.canvas3.create_text((lack_line[0] + 10, lack_line[1]), text=i + 1,
+                                                         font=('Impact', -15),
+                                                         fill="orange")
+
+                    if not error_under and not error_over:
+                        output_status = "OK"
+
+                    # Output Screen
+                    if output_status == "OK":
+                        self.lbl_result.config(text=output_status, bg="green")
                     else:
-                        output_status = "NG:UNDER"
-                    width = self.app.original_threshold_dist[1]
-                    for key in self.error_line:
-                        self.canvas3.delete(self.error_line[key])
-                    for i, lack_line in enumerate(error_under):
-                        if len(lack_line) > 2:
-                            self.error_box[i] = self.canvas3.create_line(lack_line, fill='orange', width=width)
-                            self.canvas3.create_text((lack_line[2] + 10, lack_line[3]), text=i + 1,
-                                                     font=('Impact', -15),
-                                                     fill="orange")
-                        elif len(lack_line) == 2:
-                            self.canvas3.create_text((lack_line[0] + 10, lack_line[1]), text=i + 1,
-                                                     font=('Impact', -15),
-                                                     fill="orange")
+                        self.lbl_result.config(text=output_status, bg="red")
 
-                if not error_under and not error_over:
-                    output_status = "OK"
+                    # Output log
+                    cur_time = datetime.datetime.now()
+                    file_time_form = cur_time.strftime("%Y%m%d_%H%M%S")
+                    log_time_form = cur_time.strftime("%Y:%m:%d %H:%M:%S")
+                    msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (
+                        len(error_over), len(error_under))
+                    self.app.log.info(msg)
 
-                # Output Screen
-                if output_status == "OK":
-                    self.lbl_result.config(text=output_status, bg="green")
+                    # use PIL to convert  PS to PNG
+                    self.canvas3.update()
+                    if output_status == "OK":
+                        filename = self.app.cp_path + file_time_form + "_" + "OK"
+                    else:
+                        filename = self.app.cp_path + file_time_form + "_" + "NG"
+                    filename_png = filename + ".png"
+                    ps = self.canvas3.postscript(colormode='color')
+                    img = Image.open(io.BytesIO(ps.encode('utf-8')))
+                    img.save(filename_png)
+
+                    end_task = time.time()
+                    print("Calculate event time: %f" % (end_task - start_task))
                 else:
-                    self.lbl_result.config(text=output_status, bg="red")
+                    msg_type = "Error"
+                    msg = "Need <save> before <compare>"
+                    messagebox.showerror(msg_type, msg)
+                    raise Exception(msg_type + ": " + msg)
 
-                # Output log
-                cur_time = datetime.datetime.now()
-                file_time_form = cur_time.strftime("%Y%m%d_%H%M%S")
-                log_time_form = cur_time.strftime("%Y:%m:%d %H:%M:%S")
-                msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (
-                    len(error_over), len(error_under))
-                self.app.log.info(msg)
-
-                # use PIL to convert  PS to PNG
-                self.canvas3.update()
-                if output_status == "OK":
-                    filename = self.app.cp_path + file_time_form + "_" + "OK"
-                else:
-                    filename = self.app.cp_path + file_time_form + "_" + "NG"
-                filename_png = filename + ".png"
-                ps = self.canvas3.postscript(colormode='color')
-                img = Image.open(io.BytesIO(ps.encode('utf-8')))
-                img.save(filename_png)
-
-                end_task = time.time()
-                print("Calculate event time: %f" % (end_task - start_task))
-
-    def load_rect(self, cvs):
+    def load_rect(self):
         """Load rectangle data from json"""
-        val = self.raw_data_draw["area"]
-        for i in range(1, len(val)):
-            cvs.create_line(val[i - 1][0], val[i - 1][1], val[i][0], val[i][1], width=2, fill='red')
-        cvs.create_line(val[0][0], val[0][1], val[-1][0], val[-1][1], width=2, fill='red')
+        # val = self.raw_data_draw["area"]
+        flat_polygon = [item for sublist in self.raw_data_draw["area"] for item in sublist]
+        self.prev_pol = [self.canvas2.create_polygon(flat_polygon, outline='red', fill="", width=2)]
+        # for i in range(1, len(val)):
+        #     self.canvas2.create_line(val[i - 1][0], val[i - 1][1], val[i][0], val[i][1], width=2, fill='red')
+        # self.canvas2.create_line(val[0][0], val[0][1], val[-1][0], val[-1][1], width=2, fill='red')
         # elif key == "ignore":
         #     for i in range(3, len(val) + 1, 2):
         #         cvs.create_line(val[i - 3], val[i - 2], val[i - 1], val[i], width=2, fill='blue')
 
-    def load_line(self, cvs):
+    def load_line(self):
         """Load line data from json"""
         width = self.app.original_threshold_dist[1]
+        self.count_draw_line = 0
         for key, val in self.raw_data_draw["draws"].items():
-            if key in self.detect_line:
-                cvs.delete(self.detect_line[key])
             x1, y1, x2, y2 = lp.length2points((val[0], val[1]), (val[2], val[3]), width)
-            self.detect_line[key] = cvs.create_line(x1, y1, x2, y2, width=width, fill='green')
-            cvs.create_text((val[2] + 10, val[3]), text=key, font=('Impact', -15), fill="red")
+            self.prev_line.append(
+                self.canvas2.create_line(x1, y1, x2, y2, width=self.app.config["t_width_max"], fill='green'))
+            self.count_draw_line += 1
 
     def snapshot_origin(self):
         """Call snapshot function with original image(LEFT)"""
@@ -412,7 +431,6 @@ class Page1(Page):
         }
         self.reset()
         self.read_raw_data(filename)
-        self.load_line(self.canvas2)
 
         # Save setting image
         self.canvas2.update()
@@ -447,9 +465,7 @@ class Page1(Page):
         """Read json data and update canvas"""
         if filename:
             with open(filename, 'r') as fp:
-                self.save_status = True
-                self.btn_save = tki.Button(self.window, text="Save", bg='green', font=("Courier", 44), width=9, command=self.save_draw)
-                self.btn_save.place(relx=0.56, rely=0.05)
+                self.toggle_save_status(True)
 
                 self.raw_data_draw = json.load(fp)
 
@@ -464,7 +480,9 @@ class Page1(Page):
                 self.canvas2.create_image(size[2], size[3], image=self.tk_photo_org, anchor=tki.NW)
 
                 # load draw
-                self.load_rect(self.canvas2)
+                self.load_rect()
+                if self.app.original_threshold_dist != [0, 0]:
+                    self.load_line()
 
     def browse(self):
         """Find json data from Local PC"""
@@ -472,4 +490,12 @@ class Page1(Page):
         self.pathlabel.config(text=self.load_filename)
         self.reset()
         self.read_raw_data(self.load_filename)
-        self.load_line(self.canvas2)
+
+    def toggle_save_status(self, status=False):
+        self.save_status = status
+        if status:
+            self.btn_save = tki.Button(self.window, text="Save", bg='green', font=("Courier", 44), width=9,
+                                       command=self.save_draw)
+        else:
+            self.btn_save = tki.Button(self.window, text="Save", font=("Courier", 44), width=9, command=self.save_draw)
+        self.btn_save.place(relx=0.56, rely=0.05)

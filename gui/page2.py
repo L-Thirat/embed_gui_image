@@ -99,18 +99,25 @@ class Page2(Page):
 
         lbl_space = tki.Label(self.buttonframe, text="Space", font=("Courier", 44))
         lbl_space.place(relx=0.47, rely=0.5)
-        scale_space = tki.Scale(self.buttonframe, from_=1, to=self.app.cam_width, tickinterval=self.app.cam_width / 10,
+        scale_space = tki.Scale(self.buttonframe, from_=1, to=self.app.cam_width, tickinterval=100,
                                 orient=tki.HORIZONTAL,
                                 length=(self.winfo_screenwidth() * 0.5) - pad_half_width, command=self.change_space)
         scale_space.set(self.app.config["t_space"])
         scale_space.place(relx=0.65, rely=0.5)
 
-        lbl_error = tki.Label(self.buttonframe, text="Error %", font=("Courier", 44))
-        lbl_error.place(relx=0.47, rely=0.6)
+        lbl_noise = tki.Label(self.buttonframe, text="Noise", font=("Courier", 44))
+        lbl_noise.place(relx=0.47, rely=0.6)
+        scale_noise = tki.Scale(self.buttonframe, from_=0, to=200, tickinterval=50, orient=tki.HORIZONTAL,
+                                length=(self.winfo_screenwidth() * 0.14), command=self.change_noise)
+        scale_noise.set(self.app.config["t_noise"])
+        scale_noise.place(relx=0.58, rely=0.6)
+
+        lbl_error = tki.Label(self.buttonframe, text="%", font=("Courier", 44))
+        lbl_error.place(relx=0.73, rely=0.6)
         scale_error = tki.Scale(self.buttonframe, from_=0, to=100, tickinterval=20, orient=tki.HORIZONTAL,
-                                length=(self.winfo_screenwidth() * 0.5) - pad_half_width, command=self.change_error)
+                                length=(self.winfo_screenwidth() * 0.14), command=self.change_error)
         scale_error.set(self.app.config["t_error"])
-        scale_error.place(relx=0.65, rely=0.6)
+        scale_error.place(relx=0.753, rely=0.6)
 
         lbl_min = tki.Label(self.buttonframe, text="Width", font=("Courier", 44))
         lbl_min.place(relx=0.47, rely=0.7)
@@ -121,7 +128,7 @@ class Page2(Page):
 
         lbl_max = tki.Label(self.buttonframe, text="~", font=("Courier", 44))
         lbl_max.place(relx=0.73, rely=0.7)
-        scale_max = tki.Scale(self.buttonframe, from_=0, to=50, tickinterval=10, orient=tki.HORIZONTAL,
+        scale_max = tki.Scale(self.buttonframe, from_=1, to=50, tickinterval=10, orient=tki.HORIZONTAL,
                               length=(self.winfo_screenwidth() * 0.14), command=self.change_max)
         scale_max.set(self.app.config["t_width_max"])
         scale_max.place(relx=0.753, rely=0.7)
@@ -166,6 +173,9 @@ class Page2(Page):
 
     def change_space(self, val):
         self.app.config["t_space"] = int(val)
+
+    def change_noise(self, val):
+        self.app.config["t_noise"] = int(val)
 
     def change_error(self, val):
         self.app.config["t_error"] = int(val)

@@ -2,7 +2,7 @@ import cv2
 from scipy import interpolate
 import numpy as np
 from src import linear_processing as lp
-from shapely.geometry import Point, Polygon
+from shapely.geometry import LineString, Point, Polygon
 import shapely.speedups
 shapely.speedups.enable()
 
@@ -24,13 +24,13 @@ def draw_contour(img, mask):
     return draw_cnt, contours
 
 
-def contour_selection(contours, img):
+def contour_selection(contours, img, noise_len):
     select_contour = []  # todo for check only
     for cnt in contours[1:]:
         len_cont = cv2.arcLength(cnt, True)
         approx = cv2.approxPolyDP(cnt, 0.02 * len_cont, True)
         x, y, w, h = cv2.boundingRect(approx)
-        if len_cont > 25:
+        if len_cont > noise_len:
             select_contour.append(cnt)
             cv2.putText(img, "" + str(int(len_cont)), (x, y), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255),
                         2)
@@ -39,25 +39,28 @@ def contour_selection(contours, img):
     return select_contour, img
 
 
-def error_line(match_cnt, over_cnt):
+def error_line(cnt, over_cnt, crop_area):
     error = []
-    for ps in match_cnt:
-        checkpoint = True
-        for over in over_cnt:
+    for ps in cnt:
+        # checkpoint = True
+        # for over in over_cnt:
+        #     if len(ps) > 1:
+        #         if (over[0][0] < ps[0][0]) and (over[0][1] < ps[0][1]) and (over[1][0] > ps[-1][0]) and (
+        #                 over[1][1] > ps[-1][1]):
+        #             checkpoint = False
+        #             break
+        #     elif len(ps) == 1:
+        #         if (over[0][0] < ps[0][0]) and (over[0][1] < ps[0][1]):
+        #             checkpoint = False
+        #             break
+        # if checkpoint:
+        if ps:
             if len(ps) > 1:
-                if (over[0][0] < ps[0][0]) and (over[0][1] < ps[0][1]) and (over[1][0] > ps[-1][0]) and (
-                        over[1][1] > ps[-1][1]):
-                    checkpoint = False
-                    break
-            elif len(ps) == 1:
-                if (over[0][0] < ps[0][0]) and (over[0][1] < ps[0][1]):
-                    checkpoint = False
-                    break
-        if checkpoint:
-            if len(ps) > 1:
-                error.append((ps[0][0], ps[0][1], ps[-1][0], ps[-1][1]))
-            elif len(ps) == 1:
-                error.append((ps[0][0], ps[0][1]))
+                if LineString([(ps[0][0], ps[0][1]), (ps[-1][0], ps[-1][1])]).intersects(Polygon(crop_area)):
+                    error.append((ps[0][0], ps[0][1], ps[-1][0], ps[-1][1]))
+            else:
+                if Point(ps[0][0], ps[0][1]).within(Polygon(crop_area)):
+                    error.append((ps[0][0], ps[0][1]))
     return error
 
 
@@ -113,10 +116,10 @@ def detect_error_cnt(contours, raw_data_draw, config):
                     break
             if not matching:
                 num_error += 1
-        if not num_error:
-            match_cnt.append(cnt)
         if (num_error * 100) / len(cnt) > t_error:
             error_over.append((start_point, end_point))
+        if num_error < len(cnt):
+            match_cnt.append(cnt)
 
     # find matching line
     not_match_cnt = [[]]
@@ -127,7 +130,7 @@ def detect_error_cnt(contours, raw_data_draw, config):
         for point in lines[line]:
             matching = False
             if prev_p:
-                sample_rect = lp.line2rect(prev_p, point, t_width_max)
+                sample_rect = lp.line2rect(prev_p, point, t_space)
                 for cnt in match_cnt:
                     poly_cnt = [(item[0][0], item[0][1]) for item in cnt]
                     if Polygon(poly_cnt).intersects(Polygon(sample_rect)):
@@ -143,7 +146,7 @@ def detect_error_cnt(contours, raw_data_draw, config):
             prev_p = point
         not_match_cnt.append([])
         if matching_count != len(lines[line]):
-            error_under = error_under + error_line(not_match_cnt, over_cnt=error_over)
+            error_under = error_under + error_line(not_match_cnt, error_over, raw_data_draw["area"])
 
     return error_over, error_under
 

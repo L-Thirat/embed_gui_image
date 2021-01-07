@@ -4,7 +4,6 @@
 # todo program slowed when a lot function update realtime ex hue -> Need RUN/STOP Button when start/STOP
 # todo auto set colour
 # todo **bug result when use browse-> can't call new save
-# todo ** bug input gpio mamos.py
 
 """
 check linear line
@@ -167,11 +166,12 @@ class App(tki.Frame):
                     x = rgb_data["point"][0]
                     y = rgb_data["point"][1]
                     self.canvas_rt.create_rectangle(x - half_px, y - half_px, x + half_px, y + half_px, fill='red')
-
             if self.p1.raw_data_draw:
                 if (self.config["t_width_min"], self.config["t_width_max"]) != self.original_threshold_dist:
                     self.original_threshold_dist = (self.config["t_width_min"], self.config["t_width_max"])
-                    self.p1.load_line(self.p1.canvas2)
+                    for item in self.p1.prev_line:
+                        self.p1.canvas2.delete(item)
+                    self.p1.load_line()
         self.window.after(delay, self.update)
 
     def exit_handler(self):
