@@ -22,7 +22,12 @@ class DailyLog(handlers.RotatingFileHandler):
         """
         @summary: Return logFile name string formatted to "today.log.alias"
         """
-        basename_ = "system_" + datetime.date.today().strftime("%Y-%m-%d") + ".log"
+        cur_date = datetime.date.today()
+        sub_dir = "%s/%s/%s/" % (str(cur_date.year), str(cur_date.month), str(cur_date.day))
+        # todo check changing date folder
+        if not os.path.exists(self.basedir_ + sub_dir):
+            os.makedirs(self.basedir_ + sub_dir)
+        basename_ = sub_dir + "system_" + cur_date.strftime("%Y-%m-%d") + ".log"
 
         # if settings.DEV_DEBUG:
         #     print("LOGDIR:" + self.basedir_)

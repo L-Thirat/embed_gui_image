@@ -17,6 +17,13 @@ import io
 from src import extraction as et
 from src import linear_processing as lp
 from gui.page_control import Page
+from src import logger
+
+
+def init_dir(basedir, sub_dir):
+    # init directory
+    if not os.path.exists(basedir + sub_dir):
+        os.makedirs(basedir + sub_dir)
 
 
 class Page1(Page):
@@ -263,6 +270,9 @@ class Page1(Page):
             messagebox.showerror(msg_type, msg)
             raise Exception(msg_type + ": " + msg)
 
+        cur_date = datetime.date.today()
+        sub_dir = "%s/%s/%s/" % (str(cur_date.year), str(cur_date.month), str(cur_date.day))
+
         start_task = time.time()
         ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw, self.save_status)
 
@@ -273,7 +283,8 @@ class Page1(Page):
 
         if ret:
             if mode == "original":
-                self.file_path_o = self.app.out_path + "o_" + filename
+                init_dir(self.app.out_path, sub_dir)
+                self.file_path_o = self.app.out_path + sub_dir + "o_" + filename
                 cv2.imwrite(self.file_path_o, cv2.cvtColor(mask, cv2.COLOR_RGB2BGR))
                 self.load_img_o = Image.open(self.file_path_o)
                 size = [self.app.cam_width, self.app.cam_height, 0, 0]
@@ -282,9 +293,13 @@ class Page1(Page):
                 self.canvas2.create_image(size[2], size[3], image=self.tk_photo_org, anchor=tki.NW)
 
             elif mode == "compare":
+                # todo Project variable
+                # log = logger.GetSystemLogger()
+
                 if self.save_status:
                     start = time.time()
-                    self.file_path_c = self.app.cp_path + "c_" + "temp_filename.jpg"
+                    init_dir(self.app.cp_path, sub_dir)
+                    self.file_path_c = self.app.cp_path + sub_dir + "c_" + "temp_filename.jpg"
                     cv2.imwrite(self.file_path_c, cv2.cvtColor(self.app.frame, cv2.COLOR_RGB2BGR))
                     self.load_img_cp = Image.open(self.file_path_c)
 
@@ -299,11 +314,8 @@ class Page1(Page):
                     self.canvas3.create_image(size[2], size[3], image=self.tk_photo_cp, anchor=tki.NW)
                     output_status = "        "
                     if error_under:
-                        # if output_status == "NG:OVER":
-                        #     output_status = "NG:BOTH"
-                        # else:
                         output_status = "NG:UNDER"
-                        width = self.app.original_threshold_dist[1]
+                        width = self.config["t_space"]
                         for key in self.error_line:
                             self.canvas3.delete(self.error_line[key])
                         for i, lack_line in enumerate(error_under):
@@ -312,19 +324,17 @@ class Page1(Page):
                                 self.canvas3.create_text((lack_line[2] + 10, lack_line[3]), text=i + 1,
                                                          font=('Impact', -15),
                                                          fill="orange")
-                            else:
-                                self.canvas3.create_text((lack_line[0] + 10, lack_line[1]), text=i + 1,
-                                                         font=('Impact', -15),
-                                                         fill="orange")
+                            # todo no case ? check in et code
+                            # else:
+                            #     self.canvas3.create_text((lack_line[0] + 10, lack_line[1]), text=i + 1,
+                            #                              font=('Impact', -15),
+                            #                              fill="orange")
 
                     if error_over:
                         if output_status == "NG:UNDER":
                             output_status = "NG:BOTH"
                         else:
                             output_status = "NG:OVER"
-                        # output_status = "NG:OVER"
-                        # for key in self.error_box:
-                        #     self.canvas3.delete(self.error_box[key])
                         for i, over_line in enumerate(error_over):
                             self.error_box[i] = self.canvas3.create_line(
                                 over_line[0][0], over_line[0][1], over_line[1][0], over_line[1][1],
@@ -347,14 +357,15 @@ class Page1(Page):
                     log_time_form = cur_time.strftime("%Y:%m:%d %H:%M:%S")
                     msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (
                         len(error_over), len(error_under))
+                    # todo log.info(msg)
                     self.app.log.info(msg)
 
                     # use PIL to convert  PS to PNG
                     self.canvas3.update()
                     if output_status == "OK":
-                        filename = self.app.cp_path + file_time_form + "_" + "OK"
+                        filename = self.app.cp_path + sub_dir + file_time_form + "_" + "OK"
                     else:
-                        filename = self.app.cp_path + file_time_form + "_" + "NG"
+                        filename = self.app.cp_path + sub_dir + file_time_form + "_" + "NG"
                     filename_png = filename + ".png"
                     ps = self.canvas3.postscript(colormode='color')
                     img = Image.open(io.BytesIO(ps.encode('utf-8')))
@@ -384,13 +395,14 @@ class Page1(Page):
         """Load line data from json"""
         width = self.app.original_threshold_dist[1]
         self.count_draw_line = 0
-        d = self.raw_data_draw["draws"]
-        for i in range(1, int(max(d, key=int))+1):
-            i = str(i)
-            x1, y1, x2, y2 = lp.length2points((d[i][0], d[i][1]), (d[i][2], d[i][3]), width)
-            self.prev_line.append(
-                self.canvas2.create_line(x1, y1, x2, y2, width=self.app.config["t_width_max"], fill='green'))
-            self.count_draw_line += 1
+        if self.raw_data_draw["draws"]:
+            d = self.raw_data_draw["draws"]
+            for i in range(1, int(max(d, key=int))+1):
+                i = str(i)
+                x1, y1, x2, y2 = lp.length2points((d[i][0], d[i][1]), (d[i][2], d[i][3]), width)
+                self.prev_line.append(
+                    self.canvas2.create_line(x1, y1, x2, y2, width=self.app.config["t_width_max"], fill='green'))
+                self.count_draw_line += 1
 
     def snapshot_origin(self):
         """Call snapshot function with original image(LEFT)"""
@@ -427,10 +439,10 @@ class Page1(Page):
 
         # Save setting data
         data = json.dumps(self.raw_data_draw)
-        filename = 'data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", "")
+        filename = 'data/data_%s.json' % self.file_path_o[:-4].split("/")[-1]
         with open(filename, 'w') as fp:
             fp.write(data)
-        print("SAVE !", 'data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", ""))
+        print("SAVE !", 'data/data_%s.json' % self.file_path_o[:-4].split("/")[-1])
         self.raw_data_draw = {
             "filename": filename,
             "area": [],
@@ -454,7 +466,7 @@ class Page1(Page):
                 self.load_filename = None
         else:
             try:
-                with open('data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", ""), 'r') as fp:
+                with open('data/data_%s.json' % self.file_path_o[:-4].split("/")[-1], 'r') as fp:
                     self.raw_data_draw = json.load(fp)
             except Exception:
                 msg_type = "Error"

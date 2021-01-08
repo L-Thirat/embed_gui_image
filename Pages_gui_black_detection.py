@@ -35,6 +35,7 @@ delay = 15
 class App(tki.Frame):
     def __init__(self, window, *args, **kwargs):
         # Project variable
+        # todo check
         self.log = logger.GetSystemLogger()
 
         # Setting
