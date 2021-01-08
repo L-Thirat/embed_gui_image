@@ -1,9 +1,6 @@
-# todo config camera bar gui/cv2 in tkinter
 # todo clear image in "/output/o_.jpg"
 # todo camera moved detection
 # todo program slowed when a lot function update realtime ex hue -> Need RUN/STOP Button when start/STOP
-# todo auto set colour
-# todo **bug result when use browse-> can't call new save
 
 """
 check linear line

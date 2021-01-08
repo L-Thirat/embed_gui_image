@@ -83,5 +83,5 @@ def color_shadow_demove(img):
     return final_image
 
 
-img = cv2.imread('output/original/o_2020-12-23_15-24-22.jpg')
+img = cv2.imread('shadow1.jpg')
 color_shadow_demove(img)

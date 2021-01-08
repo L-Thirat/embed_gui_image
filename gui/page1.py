@@ -141,6 +141,7 @@ class Page1(Page):
 
         self.file_path_o = ""
         self.load_img_o = None
+        self.tk_photo_org = None
         self.pathlabel.config(text="")
         self.lbl_result.config(text="        ", bg="yellow")
         self.count_draw_line = 0
@@ -256,8 +257,14 @@ class Page1(Page):
 
     def snapshot(self, mode):
         """Get a frame from the video source"""
+        if mode == "original" and self.tk_photo_org:
+            msg_type = "Error"
+            msg = "Need <reset> before <snapshot>"
+            messagebox.showerror(msg_type, msg)
+            raise Exception(msg_type + ": " + msg)
+
         start_task = time.time()
-        ret, frame, contours, _ = self.vid.get_frame(self.config, self.raw_data_draw, self.save_status)
+        ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw, self.save_status)
 
         end = time.time()
         print("Capture time: %f" % (end - start_task))
@@ -266,19 +273,13 @@ class Page1(Page):
 
         if ret:
             if mode == "original":
-                if self.save_status:
-                    msg_type = "Error"
-                    msg = "Need <reset> before <snapshot>"
-                    messagebox.showerror(msg_type, msg)
-                    raise Exception(msg_type + ": " + msg)
-                else:
-                    self.file_path_o = self.app.out_path + "o_" + filename
-                    cv2.imwrite(self.file_path_o, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-                    self.load_img_o = Image.open(self.file_path_o)
-                    size = [self.app.cam_width, self.app.cam_height, 0, 0]
-                    self.load_img_o = self.load_img_o.resize((size[0], size[1]), Image.ANTIALIAS)
-                    self.tk_photo_org = ImageTk.PhotoImage(image=self.load_img_o)
-                    self.canvas2.create_image(size[2], size[3], image=self.tk_photo_org, anchor=tki.NW)
+                self.file_path_o = self.app.out_path + "o_" + filename
+                cv2.imwrite(self.file_path_o, cv2.cvtColor(mask, cv2.COLOR_RGB2BGR))
+                self.load_img_o = Image.open(self.file_path_o)
+                size = [self.app.cam_width, self.app.cam_height, 0, 0]
+                self.load_img_o = self.load_img_o.resize((size[0], size[1]), Image.ANTIALIAS)
+                self.tk_photo_org = ImageTk.PhotoImage(image=self.load_img_o)
+                self.canvas2.create_image(size[2], size[3], image=self.tk_photo_org, anchor=tki.NW)
 
             elif mode == "compare":
                 if self.save_status:
@@ -294,17 +295,17 @@ class Page1(Page):
                     end = time.time()
                     print("Calculate time: %f" % (end - start))
                     self.tk_photo_cp = ImageTk.PhotoImage(image=self.load_img_cp)
+                    self.canvas3.delete("all")
                     self.canvas3.create_image(size[2], size[3], image=self.tk_photo_cp, anchor=tki.NW)
                     output_status = "        "
                     if error_over:
                         output_status = "NG:OVER"
-                        for key in self.error_box:
-                            self.canvas3.delete(self.error_box[key])
+                        # for key in self.error_box:
+                        #     self.canvas3.delete(self.error_box[key])
                         for i, over_line in enumerate(error_over):
-                            # over_line = [(cnt[0][0], cnt[0][1]), (cnt[1][0], cnt[0][1]), (cnt[1][0], cnt[1][1]),
-                            #            (cnt[0][0], cnt[1][1])]
-                            self.error_box[i] = self.canvas3.create_line(over_line[0][0], over_line[0][1], over_line[1][0],
-                                                                         over_line[1][1], fill='red', width=2)
+                            self.error_box[i] = self.canvas3.create_line(
+                                over_line[0][0], over_line[0][1], over_line[1][0], over_line[1][1],
+                                fill='red', width=2)
                             self.canvas3.create_text((over_line[1][0] + 10, over_line[1][1]), text=i + 1,
                                                      font=('Impact', -15), fill="red")
 
@@ -379,8 +380,10 @@ class Page1(Page):
         """Load line data from json"""
         width = self.app.original_threshold_dist[1]
         self.count_draw_line = 0
-        for key, val in self.raw_data_draw["draws"].items():
-            x1, y1, x2, y2 = lp.length2points((val[0], val[1]), (val[2], val[3]), width)
+        d = self.raw_data_draw["draws"]
+        for i in range(1, int(max(d, key=int))+1):
+            i = str(i)
+            x1, y1, x2, y2 = lp.length2points((d[i][0], d[i][1]), (d[i][2], d[i][3]), width)
             self.prev_line.append(
                 self.canvas2.create_line(x1, y1, x2, y2, width=self.app.config["t_width_max"], fill='green'))
             self.count_draw_line += 1
@@ -444,6 +447,7 @@ class Page1(Page):
         if self.load_filename:
             with open(self.load_filename, 'r') as fp:
                 self.raw_data_draw = json.load(fp)
+                self.load_filename = None
         else:
             try:
                 with open('data/data_%s.json' % self.file_path_o[:-4].replace("output/original/", ""), 'r') as fp:
@@ -453,6 +457,7 @@ class Page1(Page):
                 msg = "Click <Save button> before <compare>"
                 messagebox.showerror(msg_type, msg)
                 raise Exception(msg_type + ": " + msg)
+        print(self.raw_data_draw)
         error_cnt, error_lack = et.detect_error_cnt(contours, self.raw_data_draw, self.config)
         if self.app.TEST_MAMOS:
             if error_cnt or error_lack:
