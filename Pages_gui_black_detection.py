@@ -28,7 +28,7 @@ from gui import Page1, Page2
 from PIL import EpsImagePlugin
 
 # Global variable
-half_px = 3
+half_color_dot = 3
 delay = 15
 
 
@@ -120,7 +120,7 @@ class App(tki.Frame):
     def click_rgb(self, event):
         x, y = event.x, event.y
         open_cv_image = np.array(self.mask)
-        rgb_min, rgb_max = et.min_max_color(open_cv_image, x, y, self.range_rgb, half_px)
+        rgb_min, rgb_max = et.min_max_color(open_cv_image, x, y, self.range_rgb, half_color_dot)
         self.range_rgb.append({
             "point": (x, y),
             "min": rgb_min,
@@ -150,7 +150,7 @@ class App(tki.Frame):
                 self.p1.snapshot("compare")
 
         ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw, self.p1.save_status)
-        # test light calibrate >>, self.p1.save_status
+        # todo test light calibrate >>, self.p1.save_status
         if ret:
             self.mask = imutils.resize(self.mask, height=int(self.cam_height * 0.8), width=int(self.cam_width * 0.8))
             self.mask = Image.fromarray(self.mask)
@@ -162,7 +162,8 @@ class App(tki.Frame):
                 for rgb_data in self.range_rgb[1:]:
                     x = rgb_data["point"][0]
                     y = rgb_data["point"][1]
-                    self.canvas_rt.create_rectangle(x - half_px, y - half_px, x + half_px, y + half_px, fill='red')
+                    self.canvas_rt.create_rectangle(
+                        x - half_color_dot, y - half_color_dot, x + half_color_dot, y + half_color_dot, fill='red')
             if self.p1.raw_data_draw:
                 if (self.config["t_width_min"], self.config["t_width_max"]) != self.original_threshold_dist:
                     self.original_threshold_dist = (self.config["t_width_min"], self.config["t_width_max"])

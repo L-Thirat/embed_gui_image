@@ -298,22 +298,11 @@ class Page1(Page):
                     self.canvas3.delete("all")
                     self.canvas3.create_image(size[2], size[3], image=self.tk_photo_cp, anchor=tki.NW)
                     output_status = "        "
-                    if error_over:
-                        output_status = "NG:OVER"
-                        # for key in self.error_box:
-                        #     self.canvas3.delete(self.error_box[key])
-                        for i, over_line in enumerate(error_over):
-                            self.error_box[i] = self.canvas3.create_line(
-                                over_line[0][0], over_line[0][1], over_line[1][0], over_line[1][1],
-                                fill='red', width=2)
-                            self.canvas3.create_text((over_line[1][0] + 10, over_line[1][1]), text=i + 1,
-                                                     font=('Impact', -15), fill="red")
-
                     if error_under:
-                        if output_status == "NG:OVER":
-                            output_status = "NG:BOTH"
-                        else:
-                            output_status = "NG:UNDER"
+                        # if output_status == "NG:OVER":
+                        #     output_status = "NG:BOTH"
+                        # else:
+                        output_status = "NG:UNDER"
                         width = self.app.original_threshold_dist[1]
                         for key in self.error_line:
                             self.canvas3.delete(self.error_line[key])
@@ -327,6 +316,21 @@ class Page1(Page):
                                 self.canvas3.create_text((lack_line[0] + 10, lack_line[1]), text=i + 1,
                                                          font=('Impact', -15),
                                                          fill="orange")
+
+                    if error_over:
+                        if output_status == "NG:UNDER":
+                            output_status = "NG:BOTH"
+                        else:
+                            output_status = "NG:OVER"
+                        # output_status = "NG:OVER"
+                        # for key in self.error_box:
+                        #     self.canvas3.delete(self.error_box[key])
+                        for i, over_line in enumerate(error_over):
+                            self.error_box[i] = self.canvas3.create_line(
+                                over_line[0][0], over_line[0][1], over_line[1][0], over_line[1][1],
+                                fill='red', width=2)
+                            self.canvas3.create_text((over_line[1][0] + 10, over_line[1][1]), text=i + 1,
+                                                     font=('Impact', -15), fill="red")
 
                     if not error_under and not error_over:
                         output_status = "OK"
@@ -457,7 +461,6 @@ class Page1(Page):
                 msg = "Click <Save button> before <compare>"
                 messagebox.showerror(msg_type, msg)
                 raise Exception(msg_type + ": " + msg)
-        print(self.raw_data_draw)
         error_cnt, error_lack = et.detect_error_cnt(contours, self.raw_data_draw, self.config)
         if self.app.TEST_MAMOS:
             if error_cnt or error_lack:

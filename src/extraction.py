@@ -98,21 +98,26 @@ def detect_error_cnt(contours, raw_data_draw, config):
             for line in lines:
                 start_line = line[0]
                 end_line = line[1]
-                dist = lp.point2line_match((x, y), start_line, end_line)
-                if (dist >= t_width_min) and (dist <= t_width_max):
-                    matching = True
-                    if line not in match_cnt:
-                        match_cnt[line] = [cnt]
-                    else:
-                        if cnt not in match_cnt[line]:
-                            match_cnt[line].append(cnt)
-                    break
+                # dist = lp.point2line_match((x, y), start_line, end_line)
+                # if (dist >= t_width_min) and (dist <= t_width_max):
+                if t_width_min < t_width_max:
+                    sample_rect = lp.line2rect(start_line, end_line, t_width_max)
+                    point_inside = False
+                    if t_width_min:
+                        inside_sample_rect = lp.line2rect(start_line, end_line, t_width_min)
+                        point_inside = Point(x, y).within(Polygon(inside_sample_rect))
+                    if Point(x, y).within(Polygon(sample_rect)) and not point_inside:
+                        matching = True
+                        if line not in match_cnt:
+                            match_cnt[line] = [cnt]
+                        else:
+                            if cnt not in match_cnt[line]:
+                                match_cnt[line].append(cnt)
+                        break
             if not matching:
                 num_error += 1
         if (num_error * 100) / len(cnt) > t_error:
             error_over.append((start_point, end_point))
-        # if num_error < len(cnt):
-        #     match_cnt.append(cnt)
 
     # find matching line
     for line in lines:
