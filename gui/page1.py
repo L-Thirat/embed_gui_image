@@ -30,6 +30,15 @@ class Page1(Page):
     raw_data_draw = ...  # type: Dict["filename":str, "area":List[str, List[Any]], "draws":Dict[List[int]]]
 
     def __init__(self, app, *args, **kwargs):
+        """ Page 1 config
+
+        :param app: Tkinter (GUI builder) setup
+        :type app: class
+        :param args: Tkinter's arguments
+        :type args: Optional
+        :param kwargs: Tkinter's kwargs arguments
+        :type kwargs: Optional
+        """
         self.vid = app.vid
         self.config = app.config
         self.window = self
@@ -155,6 +164,7 @@ class Page1(Page):
         self.count_draw_sub_pol = 0
 
     def drawmode_default(self):
+        """ Change draw mode buttons to default """
         self.btn_drawmode_detect = tki.Button(self.window, text="Detect", font=("Courier", 44),
                                               command=self.drawmode_detect)
         self.btn_drawmode_detect.place(relx=0.74, rely=0.18)
@@ -165,6 +175,7 @@ class Page1(Page):
         # self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
 
     def drawmode_detect(self):
+        """ Draw mode: detect """
         self.drawmode_default()
         self.btn_drawmode_detect = tki.Button(self.window, text="Detect", font=("Courier", 44),
                                               command=self.drawmode_detect, bg='green')
@@ -172,6 +183,7 @@ class Page1(Page):
         self.drawmode = "detect"
 
     def drawmode_area(self):
+        """ Draw mode: area """
         self.drawmode_default()
         self.btn_drawmode_area = tki.Button(self.window, text="Area", font=("Courier", 44), command=self.drawmode_area,
                                             bg='red')
@@ -186,6 +198,7 @@ class Page1(Page):
     #     self.drawmode = "ignore"
 
     def on_button_press(self, event):
+        """ Left Click events in canvas"""
         if self.save_status:
             self.toggle_save_status()
         if self.load_img_o:
@@ -235,7 +248,7 @@ class Page1(Page):
                     self.polygon_data.append([x, y])
 
     def undo(self, event):
-        """Event right click on the canvas"""
+        """ Right click events in canvas"""
         if self.save_status:
             self.toggle_save_status()
 
@@ -263,7 +276,7 @@ class Page1(Page):
                     self.canvas2.delete(self.prev_pol)
 
     def snapshot(self, mode):
-        """Get a frame from the video source"""
+        """ Get a frame from the video source """
         if mode == "original" and self.tk_photo_org:
             msg_type = "Error"
             msg = "Need <reset> before <snapshot>"
@@ -380,7 +393,7 @@ class Page1(Page):
                     raise Exception(msg_type + ": " + msg)
 
     def load_rect(self):
-        """Load rectangle data from json"""
+        """Load rectangle data from saved json file"""
         # val = self.raw_data_draw["area"]
         flat_polygon = [item for sublist in self.raw_data_draw["area"] for item in sublist]
         self.prev_pol = [self.canvas2.create_polygon(flat_polygon, outline='red', fill="", width=2)]
@@ -392,7 +405,7 @@ class Page1(Page):
         #         cvs.create_line(val[i - 3], val[i - 2], val[i - 1], val[i], width=2, fill='blue')
 
     def load_line(self):
-        """Load line data from json"""
+        """ Load line data from saved json file"""
         width = self.app.original_threshold_dist[1]
         self.count_draw_line = 0
         if self.raw_data_draw["draws"]:
@@ -405,14 +418,15 @@ class Page1(Page):
                 self.count_draw_line += 1
 
     def snapshot_origin(self):
-        """Call snapshot function with original image(LEFT)"""
+        """ Call snapshot function with original image(LEFT)"""
         self.snapshot("original")
 
     def snapshot_compare(self):
-        """Call snapshot function with compare image(RIGHT)"""
+        """ Call snapshot function with compare image(RIGHT)"""
         self.snapshot("compare")
 
     def save_draw(self):
+        """ Save drawing data to json file"""
         if (not self.raw_data_draw["draws"]) or (not self.raw_data_draw["area"]):
             msg_type = "Error"
             msg = "Need <draw> and <area> before <save>"
@@ -459,7 +473,7 @@ class Page1(Page):
         img.save(filename_png)
 
     def get_result(self, contours):
-        """Load rectangle and filename data from json file"""
+        """Load rectangle and filename data from json file and return result"""
         if self.load_filename:
             with open(self.load_filename, 'r') as fp:
                 self.raw_data_draw = json.load(fp)
@@ -512,6 +526,7 @@ class Page1(Page):
         self.read_raw_data(self.load_filename)
 
     def toggle_save_status(self, status=False):
+        """Toggle snapshot status"""
         self.save_status = status
         if status:
             self.btn_save = tki.Button(self.window, text="Save", bg='green', font=("Courier", 44), width=9,

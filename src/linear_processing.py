@@ -4,10 +4,12 @@ from numpy.linalg import lstsq
 
 
 def find_distance(p1, p2):
+    """ Find distance between 2 points"""
     return math.sqrt(((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2))
 
 
 def find_start_end(cnt):
+    """ Find start-end point from contour data"""
     # todo start_point, start_dis = (), find_distance((camera_w, camera_h), (0, 0))
     start_point, start_dis = (), find_distance((640, 480), (0, 0))
     end_point, end_dis = (), 0
@@ -22,6 +24,7 @@ def find_start_end(cnt):
 
 
 def linear_formula(p1, p2):
+    """ Find linear formula from 2 points"""
     o_points = [p1, p2]
     x_coords, y_coords = zip(*o_points)
     A = vstack([x_coords, ones(len(x_coords))]).T
@@ -29,24 +32,20 @@ def linear_formula(p1, p2):
     return m, c
 
 
-# > find
-def dist2(start, end):
-    return (start[0] - end[0]) ** 2 + (start[1] - end[1]) ** 2
-
-
 def point2line_match(p, start, end):
+    """ Find minimum distance between line-point"""
     # https://stackoverfloend.com/questions/849211/shortest-distance-betendeen-a-point-and-a-line-segment
-    l2 = dist2(start, end)
+    l2 = find_distance(start, end)**2
     # distToSegmentSquared
     if l2 == 0:
-        return dist2(p, start)
+        return find_distance(start, end)
     t = ((p[0] - start[0]) * (end[0] - start[0]) + (p[1] - start[1]) * (end[1] - start[1])) / l2
     t = max(0, min(1, t))
-    dis2sag_squad = dist2(p, [start[0] + t * (end[0] - start[0]), start[1] + t * (end[1] - start[1])])
-    return math.sqrt(dis2sag_squad)
+    return find_distance(p, [start[0] + t * (end[0] - start[0]), start[1] + t * (end[1] - start[1])])
 
 
 def diff_xy(x1, y1, x2, y2, w):
+    """ Find difference distance when width change"""
     if x2 - x1 != 0:
         red = math.atan(abs(y2 - y1) / abs(x2 - x1))
         dx = math.cos(red) * w
@@ -58,6 +57,7 @@ def diff_xy(x1, y1, x2, y2, w):
 
 
 def length2points(p1, p2, w):
+    """ Find new points when width change"""
     x1 = p1[0]
     y1 = p1[1]
     x2 = p2[0]
@@ -86,6 +86,7 @@ INT_MAX = 10000
 
 
 def line2rect(p1, p2, w):
+    """ Convert points data to rectangle"""
     dx, dy = diff_xy(p1[0], p1[1], p2[0], p2[0], w)
     if p1[1] < p2[1]:
         new1_x = p1[0] - dx
@@ -112,6 +113,7 @@ def line2rect(p1, p2, w):
 
 
 def on_segment(p: tuple, q: tuple, r: tuple) -> bool:
+    """ Check segmentation"""
     if ((q[0] <= max(p[0], r[0])) &
             (q[0] >= min(p[0], r[0])) &
             (q[1] <= max(p[1], r[1])) &
@@ -121,12 +123,14 @@ def on_segment(p: tuple, q: tuple, r: tuple) -> bool:
     return False
 
 
-# To find orientation of ordered triplet (p, q, r).
-# The function returns following values
-# 0 --> p, q and r are colinear
-# 1 --> Clockwise
-# 2 --> Counterclockwise
 def orientation(p: tuple, q: tuple, r: tuple) -> int:
+    """
+
+    To find orientation of ordered triplet (p, q, r).
+    The function returns following values
+    0 --> p, q and r are colinear
+    1 --> Clockwise
+    2 --> Counterclockwise"""
     val = (((q[1] - p[1]) *
             (r[0] - q[0])) -
            ((q[0] - p[0]) *
@@ -141,8 +145,7 @@ def orientation(p: tuple, q: tuple, r: tuple) -> int:
 
 
 def do_intersect(p1, q1, p2, q2):
-    # Find the four orientations needed for
-    # general and special cases
+    """ Find the four orientations needed for general and special cases"""
     o1 = orientation(p1, q1, p2)
     o2 = orientation(p1, q1, q2)
     o3 = orientation(p2, q2, p1)
@@ -176,9 +179,11 @@ def do_intersect(p1, q1, p2, q2):
     return False
 
 
-# Returns true if the point p lies
-# inside the polygon[] with n vertices
 def is_inside_polygon(points: list, p: tuple) -> bool:
+    """
+
+    Returns true if the point p lies inside the polygon[] with n vertices
+    """
     n = len(points)
 
     # There must be at least 3 vertices

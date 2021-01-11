@@ -4,6 +4,7 @@ import time
 
 class Mamos:
     def __init__(self, LED_OK, LED_NG, BTN_input):
+        """ Mamos setup"""
         self.LED_OK = LED_OK
         self.LED_NG = LED_NG
         self.BTN_input = BTN_input
@@ -28,9 +29,11 @@ class Mamos:
 
     @staticmethod
     def clean():
+        """Clean GPIO"""
         GPIO.cleanup()
 
     def output(self):
+        """Input button event"""
         try:
             if not GPIO.input(self.BTN_input) and not self.prev_input:
                 print("click")

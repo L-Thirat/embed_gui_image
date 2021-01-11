@@ -7,9 +7,10 @@ import numpy as np
 
 class MyVideoCapture:
     def __init__(self, DEBUG):
+        """ Video config"""
         self.DEBUG = DEBUG
         self.start_rgb = (0, 0, 0)
-        # Open the video source
+        #  open video source (by default this will try to open the computer webcam)
         if "sample_img" in DEBUG:
             sample_source = DEBUG["sample_img"]
             self.cam_width = DEBUG["cam_width"]
@@ -26,6 +27,7 @@ class MyVideoCapture:
             self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
     def get_frame(self, config, raw_data_draw=None, auto_calibrate=False):
+        """ Get frame from video source"""
         if raw_data_draw is None:
             raw_data_draw = {}
         t_red_min, t_red_max = config["t_red"]["min"], config["t_red"]["max"]
@@ -107,8 +109,7 @@ class MyVideoCapture:
 
     @staticmethod
     def zoom(cv2Object, zoomSize):
-        # Resizes the image/video frame to the specified amount of "zoomSize".
-        # A zoomSize of "2", for example, will double the canvas size
+        """ Resizes the image/video frame to the specified amount of "zoomSize"""
         cv2Object = imutils.resize(cv2Object, width=(zoomSize * cv2Object.shape[1]))
         # center is simply half of the height & width (y/2,x/2)
         center = (int(cv2Object.shape[0] / 2), int(cv2Object.shape[1] / 2))
@@ -120,7 +121,7 @@ class MyVideoCapture:
         cv2Object = cv2Object[cropScale[0]:center[0] + cropScale[0], cropScale[1]:center[1] + cropScale[1]]
         return cv2Object
 
-    # Release the video source when the object is destroyed
     def __del__(self):
+        """ Release the video source when the object is destroyed"""
         if self.vid.isOpened():
             self.vid.release()

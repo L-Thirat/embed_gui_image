@@ -24,8 +24,8 @@ camera_h = 480
 camera_w = 640
 
 # fix
-out_path = "output/original/"
-cp_path = "output/compare/"
+out_path = "../output/original/"
+cp_path = "../output/compare/"
 
 # TODO MAMOS
 if TEST_MAMOS:

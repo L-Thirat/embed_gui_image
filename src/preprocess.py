@@ -3,6 +3,7 @@ import numpy as np
 
 
 def apply_brightness_contrast(input_img, brightness=0, contrast=0):
+    """ Light and contrast config"""
     if brightness != 0:
         if brightness > 0:
             shadow = brightness
@@ -28,11 +29,13 @@ def apply_brightness_contrast(input_img, brightness=0, contrast=0):
 
 
 def brightness(img, t_light, t_contrast):
+    """ Apply light config"""
     img = apply_brightness_contrast(img, -t_light, t_contrast)
     return img
 
 
 def hue(img, lower_hue, upper_hue):
+    """ Select image by range of hue value"""
     mask = cv2.inRange(img, lower_hue, upper_hue)
 
     (T, mask) = cv2.threshold(mask, 100, 255, cv2.THRESH_BINARY_INV)
@@ -41,6 +44,8 @@ def hue(img, lower_hue, upper_hue):
 
 
 def shadow_remove(img):
+    """ Remove shadow from image (Normalize color)"""
+    # todo developing
     rgb_planes = cv2.split(img)
     result_norm_planes = []
     for plane in rgb_planes:
@@ -54,6 +59,8 @@ def shadow_remove(img):
 
 
 def color_shadow_demove(img):
+    """ Remove shadow from image (YCbCr image)"""
+    # todo developing
     # covert the BGR image to an YCbCr image
     y_cb_cr_img = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
 
@@ -131,6 +138,7 @@ def color_shadow_demove(img):
 
 
 def crop_img(img, area):
+    """ Crop image area"""
     # contours = [np.array([[333, 147], [320, 329], [361, 464], [411, 425], [382, 164]])]
     contours = [np.array(area)]
     fill_color = [255, 255, 255]  # any BGR color value to fill with

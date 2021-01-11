@@ -8,7 +8,6 @@ import os
 class DailyLog(handlers.RotatingFileHandler):
     def __init__(self, basedir, mode='a', maxBytes=0, backupCount=0, encoding=None, delay=0):
         """
-        @summary:
         Set self.baseFilename to date string of today.
         The handler create logFile named self.baseFilename
         """
@@ -19,9 +18,7 @@ class DailyLog(handlers.RotatingFileHandler):
         handlers.RotatingFileHandler.__init__(self, self.baseFilename, mode, maxBytes, backupCount, encoding, delay)
 
     def getBaseFilename(self):
-        """
-        @summary: Return logFile name string formatted to "today.log.alias"
-        """
+        """Return logFile name string formatted to today.log.alias"""
         cur_date = datetime.date.today()
         sub_dir = "%s/%s/%s/" % (str(cur_date.year), str(cur_date.month), str(cur_date.day))
         # todo check changing date folder
@@ -36,18 +33,15 @@ class DailyLog(handlers.RotatingFileHandler):
         return os.path.join(self.basedir_, basename_)
 
     def shouldRollover(self, record):
-        """
-        @summary:
-        Rollover happen
+        """ Rollover happen
         1. When the logFile size is get over maxBytes.
         2. When date is changed.
-
-        @see: BaseRotatingHandler.emit
         """
         return 0
 
 
 def GetSystemLogger():
+    """ Logger config"""
     log_handler = DailyLog("log/")
 
     formatter = logging.Formatter('%(levelname)s %(message)s')

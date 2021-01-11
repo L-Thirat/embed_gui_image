@@ -34,8 +34,16 @@ delay = 15
 
 class App(tki.Frame):
     def __init__(self, window, *args, **kwargs):
+        """ This is application to detect line in image using image processing technique on CV2
+
+        :param window: Tkinter (GUI builder) setup
+        :type window: class
+        :param args: Tkinter's arguments
+        :type args: Optional
+        :param kwargs: Tkinter's kwargs arguments
+        :type kwargs: Optional
+        """
         # Project variable
-        # todo check
         self.log = logger.GetSystemLogger()
 
         # Setting
@@ -52,7 +60,7 @@ class App(tki.Frame):
             self.LED_NG = self.setting_data["LED_NG"]
             self.BTN_input = self.setting_data["BTN_INPUT"]
 
-            # Testing
+            # # Testing
             self.DEBUG = self.setting_data["DEBUG"]
             if "sample_img" in self.DEBUG:
                 self.DEBUG["cam_width"] = self.cam_width
@@ -67,29 +75,28 @@ class App(tki.Frame):
                 EpsImagePlugin.gs_windows_binary = self.setting_data["gs"]
 
             self.mini_sampling = 4
-        # <<<
 
         # config canvas
         with open(r'config.yaml') as file:
+            """
             # The FullLoader parameter handles the conversion from YAML
             # scalar values to Python the dictionary format
+            """
             self.config = yaml.load(file, Loader=yaml.FullLoader)
-        # [self.config["t_red"], self.config["t_green"], self.config["t_blue"]]
         self.range_rgb = [{
             "point": None,
             "min": [255, 255, 255],
             "max": [0, 0, 0]
         }]
         self.original_threshold_dist = [0, 0]
-        # <<<
 
+        # index page
         self.window = window
         self.vid = Vdo(self.DEBUG)
         self.frame = None
         self.mask = None
 
         tki.Frame.__init__(self, *args, **kwargs)
-        # open video source (by default this will try to open the computer webcam)
         buttonframe = tki.Frame(self)
         container = tki.Frame(self)
         buttonframe.pack(side="top", fill="x", expand=False)
@@ -114,11 +121,16 @@ class App(tki.Frame):
         self.canvas_rt.place(relx=0.05, rely=0.01)
         self.canvas_rt.config(width=int(self.cam_width * 0.8), height=int(self.cam_height * 0.8))
 
-        # # After it is called once, the update method will be automatically called every delay milliseconds
+        # After it is called once, the update method will be automatically called every delay milliseconds
         self.update()
         self.p1.show()
 
     def click_rgb(self, event):
+        """ Click on video source to check RGB values
+
+        :param event: click event
+        :type event: class
+        """
         x, y = event.x, event.y
         open_cv_image = np.array(self.mask)
         rgb_min, rgb_max = et.min_max_color(open_cv_image, x, y, self.range_rgb, half_color_dot)
@@ -131,7 +143,11 @@ class App(tki.Frame):
         self.p2.lbl_rgb.config(text=txt_range, font=("Courier", 22))
 
     def undo_rgb(self, event):
-        # x, y = event.x, event.y
+        """ Right click to undo RGB values
+
+        :param event: click event
+        :type event: class
+        """
         if self.range_rgb[-1]["point"] is not None:
             del self.range_rgb[-1]
         txt_range = "Range: " + str(self.range_rgb[-1]["min"]) + " ~ " + str(self.range_rgb[-1]["max"])
@@ -146,6 +162,7 @@ class App(tki.Frame):
             }]
 
     def update(self):
+        """ Real-time update image in canvas """
         if self.TEST_MAMOS:
             if self.mm.output():
                 self.p1.snapshot("compare")
@@ -174,12 +191,14 @@ class App(tki.Frame):
         self.window.after(delay, self.update)
 
     def exit_handler(self):
+        """ To run some function when this application was closed"""
         print("Ending ..")
         if self.TEST_MAMOS:
             self.mm.clean()
 
 
 def toggle_geom(self, event):
+    """ Geometry of GUI """
     geom = self.master.winfo_geometry()
     print(geom, self._geom)
     self.master.geometry(self._geom)

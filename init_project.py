@@ -2,6 +2,7 @@ import os
 
 
 def create_folders():
+    """ Generate folders for this project """
     if not os.path.exists('output/original'):
         os.makedirs('output/original')
     if not os.path.exists('output/compare'):

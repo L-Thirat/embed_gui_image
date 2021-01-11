@@ -14,6 +14,7 @@ else:
 
 
 def draw_contour(img, mask):
+    """ Draw contour"""
     if cv2ver == 3:
         # https://qiita.com/anyamaru/items/fd3d894966a98098376c
         mask, contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -25,6 +26,7 @@ def draw_contour(img, mask):
 
 
 def contour_selection(contours, img, noise_len):
+    """ Contour selection"""
     select_contour = []  # todo for check only
     for cnt in contours[1:]:
         len_cont = cv2.arcLength(cnt, True)
@@ -40,6 +42,7 @@ def contour_selection(contours, img, noise_len):
 
 
 def error_line(cnt, crop_area):
+    """ Check overlap between over-under area"""
     error = []
     for ps in cnt:
         if ps:
@@ -152,6 +155,7 @@ def detect_error_cnt(contours, raw_data_draw, config):
 
 
 def min_max_color(frame, x, y, range_rgb, half_px):
+    """ Extract min-max RGB values"""
     base_min_rgb = range_rgb[-1]["min"]
     base_max_rgb = range_rgb[-1]["max"]
     for h in frame[y - half_px:y + half_px]:

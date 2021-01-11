@@ -5,6 +5,15 @@ import yaml
 
 class Page2(Page):
     def __init__(self, app, *args, **kwargs):
+        """ Page 2 config
+
+        :param app: Tkinter (GUI builder) setup
+        :type app: class
+        :param args: Tkinter's arguments
+        :type args: Optional
+        :param kwargs: Tkinter's kwargs arguments
+        :type kwargs: Optional
+        """
         self.app = app
         Page.__init__(self, *args, **kwargs)
         self.buttonframe = tki.Frame(self)
@@ -137,51 +146,67 @@ class Page2(Page):
         btn_save.place(relx=0.45, rely=0.8)
 
     def save_config(self):
+        """ Save config data to yaml file"""
         print("SAVE: config.yaml")
         with open('config.yaml', 'w') as outfile:
             yaml.dump(self.app.config, outfile, default_flow_style=False)
 
     def change_red(self, val):
+        """ Change minimum value of red color detection"""
         self.app.config["t_red"]["min"] = int(val)
 
     def change_red_max(self, val):
+        """ Change maximum value of red color detection"""
         self.app.config["t_red"]["max"] = int(val)
 
     def change_green(self, val):
+        """ Change minimum value of green color detection"""
         self.app.config["t_green"]["min"] = int(val)
 
     def change_green_max(self, val):
+        """ Change maximum value of green color detection"""
         self.app.config["t_green"]["max"] = int(val)
 
     def change_blue(self, val):
+        """ Change minimum value of blue color detection"""
         self.app.config["t_blue"]["min"] = int(val)
 
     def change_blue_max(self, val):
+        """ Change maximum value of blue color detection"""
         self.app.config["t_blue"]["max"] = int(val)
 
     def change_light(self, val):
+        """ Change light config"""
         self.app.config["t_light"] = int(val)
 
     def change_contrast(self, val):
+        """ Change contrast config"""
         self.app.config["t_contrast"] = int(val)
 
     def change_zoom(self, val):
+        """ Change zoom config"""
         self.app.config["t_zoom"] = int(val)
 
     def change_blur(self, val):
+        """ Change blur config"""
         self.app.config["t_blur"] = int(val)
 
     def change_space(self, val):
+        """ Change space detection value"""
         self.app.config["t_space"] = int(val)
 
     def change_noise(self, val):
+        """ Change minimum length of noise detection value"""
         self.app.config["t_noise"] = int(val)
 
     def change_error(self, val):
+        """ Change maximum error config"""
         self.app.config["t_error"] = int(val)
 
     def change_min(self, val):
+        """ Change minimum width of detect line"""
         self.app.config["t_width_min"] = int(val)
 
     def change_max(self, val):
+        """ Change maximum width of detect line"""
         self.app.config["t_width_max"] = int(val)
