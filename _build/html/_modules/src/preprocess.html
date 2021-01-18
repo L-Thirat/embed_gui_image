@@ -1,0 +1,352 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="NO" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>src.preprocess &mdash; LineDetection 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> LineDetection
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../docs/modules.html">TinkerBoard_line_detection35</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">LineDetection</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>src.preprocess</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for src.preprocess</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="apply_brightness_contrast"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.apply_brightness_contrast">[docs]</a><span class="k">def</span> <span class="nf">apply_brightness_contrast</span><span class="p">(</span><span class="n">input_img</span><span class="p">,</span> <span class="n">brightness</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">contrast</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Light and contrast config&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">brightness</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">brightness</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">shadow</span> <span class="o">=</span> <span class="n">brightness</span>
+            <span class="n">highlight</span> <span class="o">=</span> <span class="mi">255</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">shadow</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">highlight</span> <span class="o">=</span> <span class="mi">255</span> <span class="o">+</span> <span class="n">brightness</span>
+        <span class="n">alpha_b</span> <span class="o">=</span> <span class="p">(</span><span class="n">highlight</span> <span class="o">-</span> <span class="n">shadow</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
+        <span class="n">gamma_b</span> <span class="o">=</span> <span class="n">shadow</span>
+
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">addWeighted</span><span class="p">(</span><span class="n">input_img</span><span class="p">,</span> <span class="n">alpha_b</span><span class="p">,</span> <span class="n">input_img</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">gamma_b</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">input_img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">contrast</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">127</span> <span class="o">*</span> <span class="p">(</span><span class="mi">131</span> <span class="o">-</span> <span class="n">contrast</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="mi">131</span> <span class="o">*</span> <span class="p">(</span><span class="n">contrast</span> <span class="o">+</span> <span class="mi">127</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">127</span> <span class="o">*</span> <span class="p">(</span><span class="mi">131</span> <span class="o">-</span> <span class="n">contrast</span><span class="p">))</span>
+        <span class="n">alpha_c</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="n">gamma_c</span> <span class="o">=</span> <span class="mi">127</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span>
+
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">addWeighted</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">alpha_c</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">gamma_c</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">buf</span></div>
+
+
+<div class="viewcode-block" id="brightness"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.brightness">[docs]</a><span class="k">def</span> <span class="nf">brightness</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">t_light</span><span class="p">,</span> <span class="n">t_contrast</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Apply light config&quot;&quot;&quot;</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">apply_brightness_contrast</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="o">-</span><span class="n">t_light</span><span class="p">,</span> <span class="n">t_contrast</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">img</span></div>
+
+
+<div class="viewcode-block" id="hue"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.hue">[docs]</a><span class="k">def</span> <span class="nf">hue</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">lower_hue</span><span class="p">,</span> <span class="n">upper_hue</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Select image by range of hue value&quot;&quot;&quot;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">inRange</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">lower_hue</span><span class="p">,</span> <span class="n">upper_hue</span><span class="p">)</span>
+
+    <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">threshold</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">THRESH_BINARY_INV</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mask</span></div>
+
+
+<div class="viewcode-block" id="shadow_remove"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.shadow_remove">[docs]</a><span class="k">def</span> <span class="nf">shadow_remove</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Remove shadow from image (Normalize color)&quot;&quot;&quot;</span>
+    <span class="c1"># todo developing</span>
+    <span class="n">rgb_planes</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">result_norm_planes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">plane</span> <span class="ow">in</span> <span class="n">rgb_planes</span><span class="p">:</span>
+        <span class="n">dilated_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">dilate</span><span class="p">(</span><span class="n">plane</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">))</span>
+        <span class="n">bg_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">medianBlur</span><span class="p">(</span><span class="n">dilated_img</span><span class="p">,</span> <span class="mi">21</span><span class="p">)</span>
+        <span class="n">diff_img</span> <span class="o">=</span> <span class="mi">255</span> <span class="o">-</span> <span class="n">cv2</span><span class="o">.</span><span class="n">absdiff</span><span class="p">(</span><span class="n">plane</span><span class="p">,</span> <span class="n">bg_img</span><span class="p">)</span>
+        <span class="n">norm_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">diff_img</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">norm_type</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">NORM_MINMAX</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">CV_8UC1</span><span class="p">)</span>
+        <span class="n">result_norm_planes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">norm_img</span><span class="p">)</span>
+    <span class="n">shadowremov</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">result_norm_planes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">shadowremov</span></div>
+
+
+<div class="viewcode-block" id="color_shadow_demove"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.color_shadow_demove">[docs]</a><span class="k">def</span> <span class="nf">color_shadow_demove</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Remove shadow from image (YCbCr image)&quot;&quot;&quot;</span>
+    <span class="c1"># todo developing</span>
+    <span class="c1"># covert the BGR image to an YCbCr image</span>
+    <span class="n">y_cb_cr_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2YCrCb</span><span class="p">)</span>
+
+    <span class="c1"># copy the image to create a binary mask later</span>
+    <span class="n">binary_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">y_cb_cr_img</span><span class="p">)</span>
+
+    <span class="c1"># get mean value of the pixels in Y plane</span>
+    <span class="n">y_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">y_cb_cr_img</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># get standard deviation of channel in Y plane</span>
+    <span class="n">y_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">y_cb_cr_img</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># classify pixels as shadow and non-shadow pixels</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_cb_cr_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_cb_cr_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+
+            <span class="k">if</span> <span class="n">y_cb_cr_img</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y_mean</span> <span class="o">-</span> <span class="p">(</span><span class="n">y_std</span> <span class="o">/</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="c1"># paint it white (shadow)</span>
+                <span class="n">binary_mask</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># paint it black (non-shadow)</span>
+                <span class="n">binary_mask</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Using morphological operation</span>
+    <span class="c1"># The misclassified pixels are</span>
+    <span class="c1"># removed using dilation followed by erosion.</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="n">erosion</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">erode</span><span class="p">(</span><span class="n">binary_mask</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># sum of pixel intensities in the lit areas</span>
+    <span class="n">spi_la</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># sum of pixel intensities in the shadow</span>
+    <span class="n">spi_s</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># number of pixels in the lit areas</span>
+    <span class="n">n_la</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># number of pixels in the shadow</span>
+    <span class="n">n_s</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># get sum of pixel intensities in the lit areas</span>
+    <span class="c1"># and sum of pixel intensities in the shadow</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_cb_cr_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_cb_cr_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">erosion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">erosion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">erosion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">spi_la</span> <span class="o">=</span> <span class="n">spi_la</span> <span class="o">+</span> <span class="n">y_cb_cr_img</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">n_la</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">spi_s</span> <span class="o">=</span> <span class="n">spi_s</span> <span class="o">+</span> <span class="n">y_cb_cr_img</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">n_s</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># get the average pixel intensities in the lit areas</span>
+    <span class="n">average_ld</span> <span class="o">=</span> <span class="n">spi_la</span> <span class="o">/</span> <span class="n">n_la</span>
+
+    <span class="c1"># get the average pixel intensities in the shadow</span>
+    <span class="n">average_le</span> <span class="o">=</span> <span class="n">spi_s</span> <span class="o">/</span> <span class="n">n_s</span>
+
+    <span class="c1"># difference of the pixel intensities in the shadow and lit areas</span>
+    <span class="n">i_diff</span> <span class="o">=</span> <span class="n">average_ld</span> <span class="o">-</span> <span class="n">average_le</span>
+
+    <span class="c1"># get the ratio between average shadow pixels and average lit pixels</span>
+    <span class="n">ratio_as_al</span> <span class="o">=</span> <span class="n">average_ld</span> <span class="o">/</span> <span class="n">average_le</span>
+
+    <span class="c1"># added these difference</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_cb_cr_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y_cb_cr_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">erosion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">255</span> <span class="ow">and</span> <span class="n">erosion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">255</span> <span class="ow">and</span> <span class="n">erosion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">255</span><span class="p">:</span>
+                <span class="n">y_cb_cr_img</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">y_cb_cr_img</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">i_diff</span><span class="p">,</span> <span class="n">y_cb_cr_img</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ratio_as_al</span><span class="p">,</span>
+                                     <span class="n">y_cb_cr_img</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">ratio_as_al</span><span class="p">]</span>
+
+    <span class="c1"># covert the YCbCr image to the BGR image</span>
+    <span class="n">final_image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">y_cb_cr_img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_YCR_CB2BGR</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">final_image</span></div>
+
+
+<div class="viewcode-block" id="crop_img"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.crop_img">[docs]</a><span class="k">def</span> <span class="nf">crop_img</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">area</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Crop image area&quot;&quot;&quot;</span>
+    <span class="c1"># contours = [np.array([[333, 147], [320, 329], [361, 464], [411, 425], [382, 164]])]</span>
+    <span class="n">contours</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">area</span><span class="p">)]</span>
+    <span class="n">fill_color</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span>  <span class="c1"># any BGR color value to fill with</span>
+    <span class="n">mask_value</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># 1 channel white (can be any non-zero uint8 value)</span>
+
+    <span class="n">stencil</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="n">cv2</span><span class="o">.</span><span class="n">fillPoly</span><span class="p">(</span><span class="n">stencil</span><span class="p">,</span> <span class="n">contours</span><span class="p">,</span> <span class="n">mask_value</span><span class="p">)</span>
+
+    <span class="n">sel</span> <span class="o">=</span> <span class="n">stencil</span> <span class="o">!=</span> <span class="n">mask_value</span>
+    <span class="n">img</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span> <span class="o">=</span> <span class="n">fill_color</span>
+
+    <span class="k">return</span> <span class="n">img</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Thirat.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

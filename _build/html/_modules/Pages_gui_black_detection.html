@@ -1,0 +1,422 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="NO" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Pages_gui_black_detection &mdash; LineDetection 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> LineDetection
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../docs/modules.html">TinkerBoard_line_detection35</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">LineDetection</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>Pages_gui_black_detection</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for Pages_gui_black_detection</h1><div class="highlight"><pre>
+<span></span><span class="c1"># todo clear image in &quot;/output/o_.jpg&quot;</span>
+<span class="c1"># todo camera moved detection</span>
+<span class="c1"># todo program slowed when a lot function update realtime ex hue -&gt; Need RUN/STOP Button when start/STOP</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">check linear line</span>
+<span class="sd">http://www.webmath.com/_answer.php</span>
+<span class="sd">Iterporation</span>
+<span class="sd">https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tki</span>
+<span class="kn">import</span> <span class="nn">PIL.Image</span> <span class="k">as</span> <span class="nn">Image</span>
+<span class="kn">import</span> <span class="nn">PIL.ImageTk</span> <span class="k">as</span> <span class="nn">ImageTk</span>
+<span class="kn">import</span> <span class="nn">imutils</span>
+<span class="kn">import</span> <span class="nn">atexit</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">init_project</span>
+
+<span class="n">init_project</span><span class="o">.</span><span class="n">create_folders</span><span class="p">()</span>
+
+<span class="kn">from</span> <span class="nn">src</span> <span class="kn">import</span> <span class="n">extraction</span> <span class="k">as</span> <span class="n">et</span>
+<span class="kn">from</span> <span class="nn">src.video_capture</span> <span class="kn">import</span> <span class="n">MyVideoCapture</span> <span class="k">as</span> <span class="n">Vdo</span>
+<span class="kn">from</span> <span class="nn">src</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">gui</span> <span class="kn">import</span> <span class="n">Page1</span><span class="p">,</span> <span class="n">Page2</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">EpsImagePlugin</span>
+
+<span class="c1"># Global variable</span>
+<span class="n">half_color_dot</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">delay</span> <span class="o">=</span> <span class="mi">15</span>
+
+
+<div class="viewcode-block" id="App"><a class="viewcode-back" href="../docs/Pages_gui_black_detection.html#Pages_gui_black_detection.App">[docs]</a><span class="k">class</span> <span class="nc">App</span><span class="p">(</span><span class="n">tki</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This is application to detect line in image using image processing technique on CV2</span>
+
+<span class="sd">        :param window: Tkinter (GUI builder) setup</span>
+<span class="sd">        :type window: class</span>
+<span class="sd">        :param args: Tkinter&#39;s arguments</span>
+<span class="sd">        :type args: Optional</span>
+<span class="sd">        :param kwargs: Tkinter&#39;s kwargs arguments</span>
+<span class="sd">        :type kwargs: Optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Project variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">GetSystemLogger</span><span class="p">()</span>
+
+        <span class="c1"># Setting</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;setting.yaml&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="c1"># The FullLoader parameter handles the conversion from YAML</span>
+            <span class="c1"># scalar values to Python the dictionary format</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">cam_height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;cam_height&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cam_width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;cam_width&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">out_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cp_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;cp_path&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">LED_OK</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;LED_OK&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">LED_NG</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;LED_NG&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">BTN_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;BTN_INPUT&quot;</span><span class="p">]</span>
+
+            <span class="c1"># # Testing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;sample_img&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">[</span><span class="s2">&quot;cam_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cam_width</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">[</span><span class="s2">&quot;cam_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cam_height</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TEST_MAMOS</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;TEST_MAMOS&quot;</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEST_MAMOS</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">src.mamos</span> <span class="kn">import</span> <span class="n">Mamos</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">mm</span> <span class="o">=</span> <span class="n">Mamos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LED_OK</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">LED_NG</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">BTN_input</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">EpsImagePlugin</span><span class="o">.</span><span class="n">gs_windows_binary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;gs&quot;</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">mini_sampling</span> <span class="o">=</span> <span class="mi">4</span>
+
+        <span class="c1"># config canvas</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;config.yaml&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            # The FullLoader parameter handles the conversion from YAML</span>
+<span class="sd">            # scalar values to Python the dictionary format</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span> <span class="o">=</span> <span class="p">[{</span>
+            <span class="s2">&quot;point&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span>
+            <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="p">}]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_threshold_dist</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># index page</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="o">=</span> <span class="n">window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vid</span> <span class="o">=</span> <span class="n">Vdo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">tki</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">buttonframe</span> <span class="o">=</span> <span class="n">tki</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">container</span> <span class="o">=</span> <span class="n">tki</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">buttonframe</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">container</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">p1</span> <span class="o">=</span> <span class="n">Page1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p2</span> <span class="o">=</span> <span class="n">Page2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">in_</span><span class="o">=</span><span class="n">container</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">relwidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">relheight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p2</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">in_</span><span class="o">=</span><span class="n">container</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">relwidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">relheight</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">b1</span> <span class="o">=</span> <span class="n">tki</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">buttonframe</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Home&quot;</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Courier&quot;</span><span class="p">,</span> <span class="mi">44</span><span class="p">),</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">lift</span><span class="p">)</span>
+        <span class="n">b2</span> <span class="o">=</span> <span class="n">tki</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">buttonframe</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Setting&quot;</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Courier&quot;</span><span class="p">,</span> <span class="mi">44</span><span class="p">),</span> <span class="n">command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p2</span><span class="o">.</span><span class="n">lift</span><span class="p">)</span>
+
+        <span class="n">b1</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+        <span class="n">b2</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create a canvas that can fit the above video source size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas_rt</span> <span class="o">=</span> <span class="n">tki</span><span class="o">.</span><span class="n">Canvas</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="s2">&quot;cross&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas_rt</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;ButtonPress-1&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">click_rgb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas_rt</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;&lt;Button-3&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">undo_rgb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas_rt</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">relx</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">rely</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canvas_rt</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cam_width</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">),</span> <span class="n">height</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cam_height</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">))</span>
+
+        <span class="c1"># After it is called once, the update method will be automatically called every delay milliseconds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<div class="viewcode-block" id="App.click_rgb"><a class="viewcode-back" href="../docs/Pages_gui_black_detection.html#Pages_gui_black_detection.App.click_rgb">[docs]</a>    <span class="k">def</span> <span class="nf">click_rgb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Click on video source to check RGB values</span>
+
+<span class="sd">        :param event: click event</span>
+<span class="sd">        :type event: class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">open_cv_image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+        <span class="n">rgb_min</span><span class="p">,</span> <span class="n">rgb_max</span> <span class="o">=</span> <span class="n">et</span><span class="o">.</span><span class="n">min_max_color</span><span class="p">(</span><span class="n">open_cv_image</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span><span class="p">,</span> <span class="n">half_color_dot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;point&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span>
+            <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="n">rgb_min</span><span class="p">,</span>
+            <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="n">rgb_max</span>
+        <span class="p">})</span>
+        <span class="n">txt_range</span> <span class="o">=</span> <span class="s2">&quot;Range: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;min&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; ~ &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;max&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p2</span><span class="o">.</span><span class="n">lbl_rgb</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">txt_range</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Courier&quot;</span><span class="p">,</span> <span class="mi">22</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="App.undo_rgb"><a class="viewcode-back" href="../docs/Pages_gui_black_detection.html#Pages_gui_black_detection.App.undo_rgb">[docs]</a>    <span class="k">def</span> <span class="nf">undo_rgb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Right click to undo RGB values</span>
+
+<span class="sd">        :param event: click event</span>
+<span class="sd">        :type event: class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;point&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">txt_range</span> <span class="o">=</span> <span class="s2">&quot;Range: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;min&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; ~ &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;max&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;point&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">p2</span><span class="o">.</span><span class="n">lbl_rgb</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">txt_range</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Courier&quot;</span><span class="p">,</span> <span class="mi">22</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">p2</span><span class="o">.</span><span class="n">lbl_rgb</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Courier&quot;</span><span class="p">,</span> <span class="mi">22</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span> <span class="o">=</span> <span class="p">[{</span>
+                <span class="s2">&quot;point&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span>
+                <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="p">}]</span></div>
+
+<div class="viewcode-block" id="App.update"><a class="viewcode-back" href="../docs/Pages_gui_black_detection.html#Pages_gui_black_detection.App.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Real-time update image in canvas &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEST_MAMOS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">output</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(</span><span class="s2">&quot;compare&quot;</span><span class="p">)</span>
+
+        <span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">get_frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">raw_data_draw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">save_status</span><span class="p">)</span>
+        <span class="c1"># todo test light calibrate &gt;&gt;, self.p1.save_status</span>
+        <span class="k">if</span> <span class="n">ret</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">imutils</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cam_height</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cam_width</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">tk_photo_line</span> <span class="o">=</span> <span class="n">ImageTk</span><span class="o">.</span><span class="n">PhotoImage</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas_rt</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">canvas_rt</span><span class="o">.</span><span class="n">create_image</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">tk_photo_line</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="n">tki</span><span class="o">.</span><span class="n">NW</span><span class="p">)</span>
+            <span class="c1"># todo run on RUN mode</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;point&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">rgb_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">range_rgb</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="n">rgb_data</span><span class="p">[</span><span class="s2">&quot;point&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">rgb_data</span><span class="p">[</span><span class="s2">&quot;point&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">canvas_rt</span><span class="o">.</span><span class="n">create_rectangle</span><span class="p">(</span>
+                        <span class="n">x</span> <span class="o">-</span> <span class="n">half_color_dot</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">half_color_dot</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="n">half_color_dot</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">half_color_dot</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">raw_data_draw</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_width_min&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_width_max&quot;</span><span class="p">])</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_threshold_dist</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">original_threshold_dist</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_width_min&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_width_max&quot;</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">prev_line</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">canvas2</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">load_line</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="n">delay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="App.exit_handler"><a class="viewcode-back" href="../docs/Pages_gui_black_detection.html#Pages_gui_black_detection.App.exit_handler">[docs]</a>    <span class="k">def</span> <span class="nf">exit_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; To run some function when this application was closed&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ending ..&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEST_MAMOS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="toggle_geom"><a class="viewcode-back" href="../docs/Pages_gui_black_detection.html#Pages_gui_black_detection.toggle_geom">[docs]</a><span class="k">def</span> <span class="nf">toggle_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Geometry of GUI &quot;&quot;&quot;</span>
+    <span class="n">geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">winfo_geometry</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geom</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_geom</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_geom</span> <span class="o">=</span> <span class="n">geom</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">tki</span><span class="o">.</span><span class="n">Tk</span><span class="p">()</span>
+    <span class="n">main</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="n">atexit</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">main</span><span class="o">.</span><span class="n">exit_handler</span><span class="p">)</span>
+    <span class="n">main</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">side</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Tkinter setting</span>
+    <span class="n">pad</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">tki</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">_geom</span> <span class="o">=</span> <span class="s1">&#39;200x200+0+0&#39;</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">x</span><span class="si">{1}</span><span class="s2">+0+0&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">winfo_screenwidth</span><span class="p">()</span> <span class="o">-</span> <span class="n">pad</span><span class="p">,</span> <span class="n">root</span><span class="o">.</span><span class="n">winfo_screenheight</span><span class="p">()</span> <span class="o">-</span> <span class="n">pad</span><span class="p">))</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s1">&#39;&lt;Escape&gt;&#39;</span><span class="p">,</span> <span class="n">toggle_geom</span><span class="p">)</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Tkinter and OpenCV&quot;</span><span class="p">)</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">resizable</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">background</span><span class="o">=</span><span class="s2">&quot;#d9d9d9&quot;</span><span class="p">)</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">mainloop</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Thirat.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

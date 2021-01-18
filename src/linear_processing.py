@@ -8,6 +8,11 @@ def find_distance(p1, p2):
     return math.sqrt(((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2))
 
 
+def dist2(start, end):
+    """distance square"""
+    return (start[0] - end[0]) ** 2 + (start[1] - end[1]) ** 2
+
+
 def find_start_end(cnt):
     """ Find start-end point from contour data"""
     # todo start_point, start_dis = (), find_distance((camera_w, camera_h), (0, 0))
@@ -33,15 +38,15 @@ def linear_formula(p1, p2):
 
 
 def point2line_match(p, start, end):
-    """ Find minimum distance between line-point"""
     # https://stackoverfloend.com/questions/849211/shortest-distance-betendeen-a-point-and-a-line-segment
-    l2 = find_distance(start, end)**2
+    l2 = dist2(start, end)
     # distToSegmentSquared
     if l2 == 0:
-        return find_distance(start, end)
+        return dist2(p, start)
     t = ((p[0] - start[0]) * (end[0] - start[0]) + (p[1] - start[1]) * (end[1] - start[1])) / l2
     t = max(0, min(1, t))
-    return find_distance(p, [start[0] + t * (end[0] - start[0]), start[1] + t * (end[1] - start[1])])
+    dis2sag_squad = dist2(p, [start[0] + t * (end[0] - start[0]), start[1] + t * (end[1] - start[1])])
+    return math.sqrt(dis2sag_squad)
 
 
 def diff_xy(x1, y1, x2, y2, w):
