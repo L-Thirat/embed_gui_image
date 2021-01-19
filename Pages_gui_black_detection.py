@@ -26,6 +26,7 @@ from src.video_capture import MyVideoCapture as Vdo
 from src import logger
 from gui import Page1, Page2
 from PIL import EpsImagePlugin
+from time import time
 
 # Global variable
 half_color_dot = 3
@@ -43,6 +44,8 @@ class App(tki.Frame):
         :param kwargs: Tkinter's kwargs arguments
         :type kwargs: Optional
         """
+        # todo testing
+        self.timing = time()
         # Project variable
         self.log = logger.GetSystemLogger()
 
@@ -163,9 +166,11 @@ class App(tki.Frame):
 
     def update(self):
         """ Real-time update image in canvas """
-        if self.TEST_MAMOS:
-            if self.mm.output():
-                self.p1.snapshot("compare")
+        # todo if self.TEST_MAMOS:
+        if int(time() - self.timing) > 30:
+        # todo if self.mm.output():
+            self.p1.snapshot("compare")
+            self.timing = time()
 
         ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw, self.p1.save_status)
         # todo test light calibrate >>, self.p1.save_status
