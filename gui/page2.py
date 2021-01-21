@@ -128,19 +128,19 @@ class Page2(Page):
         scale_error.set(self.app.config["t_error"])
         scale_error.place(relx=0.753, rely=0.6)
 
-        lbl_min = tki.Label(self.buttonframe, text="Width", font=("Courier", 44))
-        lbl_min.place(relx=0.47, rely=0.7)
-        scale_min = tki.Scale(self.buttonframe, from_=0, to=50, tickinterval=10, orient=tki.HORIZONTAL,
-                              length=(self.winfo_screenwidth() * 0.14), command=self.change_min)
-        scale_min.set(self.app.config["t_width_min"])
-        scale_min.place(relx=0.58, rely=0.7)
-
-        lbl_max = tki.Label(self.buttonframe, text="~", font=("Courier", 44))
-        lbl_max.place(relx=0.73, rely=0.7)
-        scale_max = tki.Scale(self.buttonframe, from_=1, to=50, tickinterval=10, orient=tki.HORIZONTAL,
-                              length=(self.winfo_screenwidth() * 0.14), command=self.change_max)
-        scale_max.set(self.app.config["t_width_max"])
-        scale_max.place(relx=0.753, rely=0.7)
+        # lbl_min = tki.Label(self.buttonframe, text="Width", font=("Courier", 44))
+        # lbl_min.place(relx=0.47, rely=0.7)
+        # scale_min = tki.Scale(self.buttonframe, from_=0, to=50, tickinterval=10, orient=tki.HORIZONTAL,
+        #                       length=(self.winfo_screenwidth() * 0.14), command=self.change_min)
+        # scale_min.set(self.app.config["t_width_min"])
+        # scale_min.place(relx=0.58, rely=0.7)
+        #
+        # lbl_max = tki.Label(self.buttonframe, text="~", font=("Courier", 44))
+        # lbl_max.place(relx=0.73, rely=0.7)
+        # scale_max = tki.Scale(self.buttonframe, from_=1, to=50, tickinterval=10, orient=tki.HORIZONTAL,
+        #                       length=(self.winfo_screenwidth() * 0.14), command=self.change_max)
+        # scale_max.set(self.app.config["t_width_max"])
+        # scale_max.place(relx=0.753, rely=0.7)
 
         btn_save = tki.Button(self.buttonframe, font=("Courier", 44), text="Save", command=self.save_config)
         btn_save.place(relx=0.45, rely=0.8)
@@ -203,10 +203,10 @@ class Page2(Page):
         """ Change maximum error config"""
         self.app.config["t_error"] = int(val)
 
-    def change_min(self, val):
-        """ Change minimum width of detect line"""
-        self.app.config["t_width_min"] = int(val)
-
-    def change_max(self, val):
-        """ Change maximum width of detect line"""
-        self.app.config["t_width_max"] = int(val)
+    # def change_min(self, val):
+    #     """ Change minimum width of detect line"""
+    #     self.app.config["t_width_min"] = int(val)
+    #
+    # def change_max(self, val):
+    #     """ Change maximum width of detect line"""
+    #     self.app.config["t_width_max"] = int(val)

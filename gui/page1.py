@@ -15,9 +15,11 @@ import time
 import io
 
 from src import extraction as et
-from src import linear_processing as lp
 from gui.page_control import Page
-from src import logger
+import init_project
+
+# Load init params
+init_param = init_project.init_param()
 
 
 def init_dir(basedir, sub_dir):
@@ -27,7 +29,8 @@ def init_dir(basedir, sub_dir):
 
 
 class Page1(Page):
-    raw_data_draw = ...  # type: Dict["filename":str, "area":List[str, List[Any]], "draws":Dict[List[int]]]
+    raw_data_draw = ...  # type: Dict["filename":str, "detect":List[str, List[Any]], "inside":List[str, List[Any]], "area":List[str, List[Any]]]
+    drawing_data = ...  # type: Dict[str, Dict["color": str, "prev": Dict, "polygon": Dict]]
 
     def __init__(self, app, *args, **kwargs):
         """ Page 1 config
@@ -55,17 +58,24 @@ class Page1(Page):
         self.load_img_o = None
         self.load_img_cp = None
         self.load_filename = None
-        self.raw_data_draw = {
-            "filename": "",
-            "area": [],
-            "draws": {},
-        }
+        self.raw_data_draw = init_param["load_data"]["raw_data_draw"]
 
-        # Visualize output
-        self.save_status = False
+        # Output display
         self.contour = []
         self.error_box = {}
         self.error_line = {}
+
+        # Drawing
+        self.drawing_data = init_param["drawing"]["drawing_data"]
+        self.prev_sub_pol = []
+        # self.count_draw_line = 0
+        self.count_draw_sub_pol = 0
+        self.start_x = 0
+        self.start_y = 0
+
+        # Status
+        self.save_status = False
+        self.mode = "detect"
 
         buttonframe = tki.Frame(self)
         buttonframe.pack(side="top", fill="both", expand=True)
@@ -78,8 +88,7 @@ class Page1(Page):
         self.btn_save = tki.Button(buttonframe, text="Save", font=("Courier", 44), width=9, command=self.save_draw)
         self.btn_save.place(relx=0.56, rely=0.05)
 
-        self.browsebutton = tki.Button(buttonframe, text="Browse", font=("Courier", 44), width=9,
-                                       command=self.browse)
+        self.browsebutton = tki.Button(buttonframe, text="Browse", font=("Courier", 44), width=9, command=self.browse)
         self.browsebutton.place(relx=0.74, rely=0.05)
 
         self.btn_compare = tki.Button(buttonframe, text="Compare", font=("Courier", 44), width=9,
@@ -89,16 +98,13 @@ class Page1(Page):
         self.btn_reset = tki.Button(buttonframe, text="Reset", font=("Courier", 44), width=9, command=self.reset)
         self.btn_reset.place(relx=0.56, rely=0.18)
 
-        self.btn_drawmode_detect = tki.Button(buttonframe, text="Detect", font=("Courier", 44),
-                                              command=self.drawmode_detect,
-                                              bg='green')
-        self.btn_drawmode_detect.place(relx=0.74, rely=0.18)
-        self.btn_drawmode_area = tki.Button(buttonframe, text="Area", font=("Courier", 44), command=self.drawmode_area)
-        self.btn_drawmode_area.place(relx=0.88, rely=0.18)
-        # todo ignore modes for draw
-        # self.btn_drawmode_ignore = tki.Button(buttonframe, text="Ignore", font=("Courier", 44), width=3, height=3,
-        #                                       command=self.drawmode_ignore)
-        # self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
+        self.btn_mode_detect = tki.Button(buttonframe, text="DO", font=("Courier", 44),
+                                          command=self.mode_detect, bg=self.drawing_data["detect"]["color"])
+        self.btn_mode_detect.place(relx=0.74, rely=0.18)
+        self.btn_mode_inside = tki.Button(buttonframe, text="DI", font=("Courier", 44), command=self.mode_inside)
+        self.btn_mode_inside.place(relx=0.81, rely=0.18)
+        self.btn_mode_area = tki.Button(buttonframe, text="Area", font=("Courier", 44), command=self.mode_area)
+        self.btn_mode_area.place(relx=0.88, rely=0.18)
 
         # todo remove or use ?
         self.pathlabel = tki.Label(buttonframe)
@@ -118,15 +124,22 @@ class Page1(Page):
         # self.canvas2.bind("<ButtonRelease-1>", self.on_button_release)
         self.canvas2.bind("<Button-3>", self.undo)
         self.canvas2.config(width=app.cam_width, height=app.cam_height)
-        self.start_x = None
-        self.start_y = None
-        self.prev_line = []
-        self.prev_sub_pol = []
-        self.prev_pol = []
-        self.count_draw_line = 0
-        self.count_draw_sub_pol = 0
-        self.drawmode = "detect"
-        self.polygon_data = []
+
+        # Drawing
+        # self.prev_line = []
+
+        # self.polygon_line_data = []
+        # self.polygon_inside_data = []
+        # self.polygon_area_data = []
+        # self.prev_line_pol = []
+        # self.prev_inside_pol = []
+        # self.prev_area_pol = []
+
+        # self.prev_sub_pol = []
+        # # self.count_draw_line = 0
+        # self.count_draw_sub_pol = 0
+        # self.start_x = None
+        # self.start_y = None
 
         # Check latest data
         list_of_files = glob.glob('data/*')  # * means all if need specific format then *.csv
@@ -143,137 +156,200 @@ class Page1(Page):
         self.toggle_save_status()
         self.canvas2.delete("all")
         self.canvas3.delete("all")
-        self.raw_data_draw = {
-            "filename": "",
-            "area": [],
-            "draws": {}
-        }
-        self.app.range_rgb = [{
-            "point": None,
-            "min": [255, 255, 255],
-            "max": [0, 0, 0]
-        }]
+        self.app.range_rgb = init_param["drawing"]["range_rgb"]
         self.app.undo_rgb(None)
 
         self.file_path_o = ""
-        self.load_img_o = None
-        self.tk_photo_org = None
+        self.load_img_o = ""
+        self.tk_photo_org = ""
         self.pathlabel.config(text="")
         self.lbl_result.config(text="        ", bg="yellow")
-        self.count_draw_line = 0
+        # self.count_draw_line = 0
+        self.raw_data_draw = init_param["load_data"]["raw_data_draw"]
+        self.drawing_data = init_param["drawing"]["drawing_data"]
         self.count_draw_sub_pol = 0
 
-    def drawmode_default(self):
+    def mode_default(self):
         """ Change draw mode buttons to default """
-        self.btn_drawmode_detect = tki.Button(self.window, text="Detect", font=("Courier", 44),
-                                              command=self.drawmode_detect)
-        self.btn_drawmode_detect.place(relx=0.74, rely=0.18)
-        self.btn_drawmode_area = tki.Button(self.window, text="Area", font=("Courier", 44), command=self.drawmode_area)
-        self.btn_drawmode_area.place(relx=0.88, rely=0.18)
-        # self.btn_drawmode_ignore = tki.Button(self.window, text="Ignore", width=10, height=3,
-        #                                       command=self.drawmode_ignore)
-        # self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
+        self.btn_mode_detect = tki.Button(self.window, text="DO", font=("Courier", 44), command=self.mode_detect)
+        self.btn_mode_detect.place(relx=0.74, rely=0.18)
+        self.btn_mode_inside = tki.Button(self.window, text="DI", font=("Courier", 44), command=self.mode_inside)
+        self.btn_mode_inside.place(relx=0.81, rely=0.18)
+        self.btn_mode_area = tki.Button(self.window, text="Area", font=("Courier", 44), command=self.mode_area)
+        self.btn_mode_area.place(relx=0.88, rely=0.18)
 
-    def drawmode_detect(self):
+        # Remove drawing
+        for draw_line in self.prev_sub_pol:
+            self.canvas2.delete(draw_line)
+        self.drawing_data[self.mode]["temp_pol"] = []
+        self.prev_sub_pol = []
+        self.count_draw_sub_pol = 0
+        self.start_x, self.start_y = 0, 0
+
+    def mode_detect(self):
         """ Draw mode: detect """
-        self.drawmode_default()
-        self.btn_drawmode_detect = tki.Button(self.window, text="Detect", font=("Courier", 44),
-                                              command=self.drawmode_detect, bg='green')
-        self.btn_drawmode_detect.place(relx=0.74, rely=0.18)
-        self.drawmode = "detect"
+        self.mode_default()
+        self.btn_mode_detect = tki.Button(self.window, text="DO", font=("Courier", 44),
+                                          command=self.mode_detect, bg=self.drawing_data["detect"]["color"])
+        self.btn_mode_detect.place(relx=0.74, rely=0.18)
+        self.mode = "detect"
 
-    def drawmode_area(self):
+    def mode_inside(self):
+        self.mode_default()
+        self.btn_mode_inside = tki.Button(self.window, text="DI", font=("Courier", 44),
+                                          command=self.mode_inside, bg=self.drawing_data["inside"]["color"])
+        self.btn_mode_inside.place(relx=0.81, rely=0.18)
+        self.mode = "inside"
+
+    def mode_area(self):
         """ Draw mode: area """
-        self.drawmode_default()
-        self.btn_drawmode_area = tki.Button(self.window, text="Area", font=("Courier", 44), command=self.drawmode_area,
-                                            bg='red')
-        self.btn_drawmode_area.place(relx=0.88, rely=0.18)
-        self.drawmode = "area"
+        self.mode_default()
+        self.btn_mode_area = tki.Button(self.window, text="Area", font=("Courier", 44), command=self.mode_area,
+                                        bg=self.drawing_data["area"]["color"])
+        self.btn_mode_area.place(relx=0.88, rely=0.18)
+        self.mode = "area"
 
-    # def drawmode_ignore(self):
-    #     self.drawmode_default()
-    #     self.btn_drawmode_ignore = tki.Button(self.window, text="Ignore", width=10, height=3,
-    #                                           command=self.drawmode_ignore, bg='blue')
-    #     self.btn_drawmode_ignore.place(relx=0.91, rely=0.15)
-    #     self.drawmode = "ignore"
+    # def polygon_draw(self, event, polygon_data, prev_pol):
+    #     if self.load_img_o:
+    #         x, y = event.x, event.y
+    #         print("start>>", self.start_x, self.start_y)
+    #         if self.start_x and self.start_y:
+    #             if abs(x - self.start_x) < 20 and abs(y - self.start_y) < 20:
+    #                 for draw_line in self.prev_sub_pol:
+    #                     self.canvas2.delete(draw_line)
+    #                 self.prev_sub_pol = []
+    #                 self.count_draw_sub_pol = 0
+    #
+    #                 flat_polygon = [item for sublist in self.drawing_data[self.mode]["polygon"] for item in sublist]
+    #                 if self.mode == "area":
+    #                     if prev_pol:
+    #                         self.canvas2.delete(prev_pol)
+    #                 prev_pol = [self.canvas2.create_polygon(
+    #                     flat_polygon, outline=self.drawing_data[self.mode]["color"], fill="", width=2)]
+    #                 self.raw_data_draw[self.mode] = self.drawing_data[self.mode]["polygon"]
+    #                 self.drawing_data[self.mode]["polygon"] = []
+    #                 self.start_x, self.start_y = 0, 0
+    #             else:
+    #                 self.canvas2.create_line(x, y, self.drawing_data[self.mode]["polygon"][-1][0],
+    #                                          self.drawing_data[self.mode]["polygon"][-1][1], width=2,
+    #                                          fill=self.drawing_data[self.mode]["color"])
+    #                 self.count_draw_sub_pol += 1
+    #                 self.drawing_data[self.mode]["polygon"].append([x, y])
+    #         else:
+    #             self.start_x, self.start_y = x, y
+    #             self.drawing_data[self.mode]["polygon"].append([x, y])
 
     def on_button_press(self, event):
         """ Left Click events in canvas"""
         if self.save_status:
             self.toggle_save_status()
+
         if self.load_img_o:
             x, y = event.x, event.y
             if self.start_x and self.start_y:
-                if self.drawmode == "detect":
-                    self.count_draw_line += 1
-                    x1, y1, x2, y2 = lp.length2points((x, y), (self.start_x, self.start_y),
-                                                      self.app.original_threshold_dist[1])
-                    self.prev_line.append(
-                        self.canvas2.create_line(x1, y1, x2, y2, width=self.app.original_threshold_dist[1],
-                                                 fill='green'))
+                if self.mode == "inside":
+                    self.drawing_data[self.mode]["prev"].append(
+                        self.canvas2.create_line(
+                            x, y, self.start_x, self.start_y, width=2, fill=self.drawing_data[self.mode]["color"]))
                     if self.start_x < x:
-                        green_line = [self.start_x, self.start_y, x, y]
+                        blue_line = [self.start_x, self.start_y, x, y]
                     else:
-                        green_line = [x, y, self.start_x, self.start_y]
-                    self.raw_data_draw["draws"][str(self.count_draw_line)] = green_line
+                        blue_line = [x, y, self.start_x, self.start_y]
+                    self.raw_data_draw[self.mode].append(blue_line)
                     self.start_x, self.start_y = 0, 0
                 else:
                     if abs(x - self.start_x) < 20 and abs(y - self.start_y) < 20:
                         for draw_line in self.prev_sub_pol:
                             self.canvas2.delete(draw_line)
-                        if self.prev_pol:
-                            self.canvas2.delete(self.prev_pol)
                         self.prev_sub_pol = []
                         self.count_draw_sub_pol = 0
-                        flat_polygon = [item for sublist in self.polygon_data for item in sublist]
-                        self.prev_pol = [self.canvas2.create_polygon(flat_polygon, outline='red', fill="", width=2)]
 
-                        self.raw_data_draw[self.drawmode] = self.polygon_data
-                        self.polygon_data = []
+                        flat_polygon = [item for sublist in self.drawing_data[self.mode]["temp_pol"] for item in sublist]
+                        if self.mode == "area":
+                            # todo area more than 1
+                            if self.drawing_data[self.mode]["prev"]:
+                                self.canvas2.delete(self.drawing_data[self.mode]["prev"])
+                                self.drawing_data[self.mode]["prev"] = []
+                                self.drawing_data[self.mode]["polygon"] = []
+                        self.drawing_data[self.mode]["prev"].append([self.canvas2.create_polygon(
+                            flat_polygon, outline=self.drawing_data[self.mode]["color"], fill="", width=2)])
+                        self.drawing_data[self.mode]["polygon"].append(self.drawing_data[self.mode]["temp_pol"])
+                        self.raw_data_draw[self.mode] = self.drawing_data[self.mode]["polygon"]
+                        self.drawing_data[self.mode]["temp_pol"] = []
                         self.start_x, self.start_y = 0, 0
                     else:
-                        if self.drawmode == "area":
-                            self.count_draw_sub_pol += 1
-                            self.prev_sub_pol.append(
-                                self.canvas2.create_line(x, y, self.polygon_data[-1][0], self.polygon_data[-1][1], width=2,
-                                                         fill='red'))
-                        # else:
-                        #     # todo
-                        #     self.canvas2.create_line(x, y, self.polygon_data[-1][0], self.polygon_data[-1][1], width=2,
-                        #                              fill='blue')
-                        self.polygon_data.append([x, y])
+                        self.prev_sub_pol.append(
+                            self.canvas2.create_line(x, y, self.drawing_data[self.mode]["temp_pol"][-1][0],
+                                                     self.drawing_data[self.mode]["temp_pol"][-1][1], width=2,
+                                                     fill=self.drawing_data[self.mode]["color"]))
+                        self.count_draw_sub_pol += 1
+                        self.drawing_data[self.mode]["temp_pol"].append([x, y])
             else:
                 self.start_x, self.start_y = x, y
-                if self.drawmode != "detect":
-                    self.polygon_data.append([x, y])
+                self.drawing_data[self.mode]["temp_pol"].append([x, y])
+
+        # if self.mode == "detect":
+        #     self.polygon_line_data, self.prev_line_pol = self.polygon_draw(
+        #         event, self.polygon_line_data, self.prev_line_pol)
+        # elif self.mode == "inside":
+        #     self.polygon_inside_data, self.prev_inside_pol = self.polygon_draw(
+        #         event, self.polygon_inside_data, self.prev_inside_pol)
+        # else:
+        #     self.polygon_area_data, self.prev_area_pol = self.polygon_draw(
+        #         event, self.polygon_area_data, self.prev_area_pol)
+
+    # def undo_polygon(self, polygon_data, prev_pol):
+    #     if polygon_data:
+    #         del polygon_data[-1]
+    #     # if len(polygon_data) == 0:
+    #     #     self.start_x, self.start_y = 0, 0
+    #     #     self.polygon_area_data = []
+    #
+    #     if self.mode in self.raw_data_draw:
+    #         self.raw_data_draw[self.mode] = polygon_data
+    #         # self.canvas2.delete(self.prev_sub_pol)
+    #         self.canvas2.delete(prev_pol)
+    #     return polygon_data, prev_pol
 
     def undo(self, event):
         """ Right click events in canvas"""
         if self.save_status:
             self.toggle_save_status()
 
-        if self.count_draw_line:
-            if self.drawmode == "detect":
-                self.canvas2.delete(self.prev_line[-1])
-                del self.prev_line[-1]
-                del self.raw_data_draw["draws"][str(self.count_draw_line)]
-                self.count_draw_line -= 1
-
-        if self.drawmode == "area":
+        # if self.count_draw_line:
+        if self.mode == "inside":
+            self.canvas2.delete(self.drawing_data[self.mode]["prev"][-1])
+            del self.drawing_data[self.mode]["prev"][-1]
+            del self.drawing_data[self.mode]["polygon"][-1]
+            del self.raw_data_draw["inside"][-1]
+        else:
             if self.prev_sub_pol:
+                # remove sub-polygon
                 self.canvas2.delete(self.prev_sub_pol[-1])
                 del self.prev_sub_pol[-1]
                 self.count_draw_sub_pol -= 1
-                if self.polygon_data:
-                    del self.polygon_data[-1]
-                if len(self.polygon_data) == 1:
+                if not self.count_draw_sub_pol:
                     self.start_x, self.start_y = 0, 0
-                    self.polygon_data = []
+                del self.drawing_data[self.mode]["temp_pol"][-1]
             else:
-                if "area" in self.raw_data_draw:
-                    self.raw_data_draw["area"] = []
-                    self.canvas2.delete(self.prev_sub_pol)
-                    self.canvas2.delete(self.prev_pol)
+                # remove last polygon
+                if self.drawing_data[self.mode]["polygon"]:
+                    del self.drawing_data[self.mode]["polygon"][-1]
+                    self.raw_data_draw[self.mode] = self.drawing_data[self.mode]["polygon"]
+                    self.canvas2.delete(self.drawing_data[self.mode]["prev"][-1])
+                    del self.drawing_data[self.mode]["prev"][-1]
+            # if len(polygon_data) == 0:
+            #     self.start_x, self.start_y = 0, 0
+            #     self.polygon_area_data = []
+
+            # if self.mode in self.raw_data_draw:
+            # self.canvas2.delete(self.prev_sub_pol)
+            # if self.mode == "detect":
+            #     self.undo_polygon(self.polygon_line_data, self.prev_line_pol)
+            # elif self.mode == "inside":
+            #     self.undo_polygon(self.polygon_inside_data, self.prev_inside_pol)
+            # else:
+            #     self.undo_polygon(self.polygon_area_data, self.prev_area_pol)
 
     def snapshot(self, mode):
         """ Get a frame from the video source """
@@ -392,30 +468,46 @@ class Page1(Page):
                     messagebox.showerror(msg_type, msg)
                     raise Exception(msg_type + ": " + msg)
 
-    def load_rect(self):
-        """Load rectangle data from saved json file"""
-        # val = self.raw_data_draw["area"]
-        flat_polygon = [item for sublist in self.raw_data_draw["area"] for item in sublist]
-        self.prev_pol = [self.canvas2.create_polygon(flat_polygon, outline='red', fill="", width=2)]
-        # for i in range(1, len(val)):
-        #     self.canvas2.create_line(val[i - 1][0], val[i - 1][1], val[i][0], val[i][1], width=2, fill='red')
-        # self.canvas2.create_line(val[0][0], val[0][1], val[-1][0], val[-1][1], width=2, fill='red')
-        # elif key == "ignore":
-        #     for i in range(3, len(val) + 1, 2):
-        #         cvs.create_line(val[i - 3], val[i - 2], val[i - 1], val[i], width=2, fill='blue')
+    def load_draw(self):
+        for mode in self.drawing_data:
+            if self.raw_data_draw[mode]:
+                if mode == "inside":
+                    lines = self.raw_data_draw["inside"]
+                    if lines:
+                        for line in lines:
+                            self.drawing_data[mode]["prev"].append(
+                                self.canvas2.create_line(line[0], line[1], line[2], line[3], width=2, fill='blue'))
+                else:
+                    for polygon in self.raw_data_draw[mode]:
+                        flat_polygon = [item for sublist in polygon for item in sublist]
+                        self.drawing_data[mode]["prev"].append(self.canvas2.create_polygon(
+                            flat_polygon, outline=self.drawing_data[mode]["color"], fill="", width=2))
+                self.drawing_data[mode]["polygon"] = self.raw_data_draw[mode]
 
-    def load_line(self):
-        """ Load line data from saved json file"""
-        width = self.app.original_threshold_dist[1]
-        self.count_draw_line = 0
-        if self.raw_data_draw["draws"]:
-            d = self.raw_data_draw["draws"]
-            for i in range(1, int(max(d, key=int))+1):
-                i = str(i)
-                x1, y1, x2, y2 = lp.length2points((d[i][0], d[i][1]), (d[i][2], d[i][3]), width)
-                self.prev_line.append(
-                    self.canvas2.create_line(x1, y1, x2, y2, width=self.app.config["t_width_max"], fill='green'))
-                self.count_draw_line += 1
+    # def load_area(self):
+    #     """Load area data from saved json file"""
+    #     # val = self.raw_data_draw["area"]
+    #     flat_polygon = [item for sublist in self.raw_data_draw["area"] for item in sublist]
+    #     self.prev_area_pol = [self.canvas2.create_polygon(flat_polygon, outline='red', fill="", width=2)]
+    #     # for i in range(1, len(val)):
+    #     #     self.canvas2.create_line(val[i - 1][0], val[i - 1][1], val[i][0], val[i][1], width=2, fill='red')
+    #     # self.canvas2.create_line(val[0][0], val[0][1], val[-1][0], val[-1][1], width=2, fill='red')
+    #     # elif key == "ignore":
+    #     #     for i in range(3, len(val) + 1, 2):
+    #     #         cvs.create_line(val[i - 3], val[i - 2], val[i - 1], val[i], width=2, fill='blue')
+    #
+    # def load_line(self):
+    #     """ Load line data from saved json file"""
+    #     # width = self.app.original_threshold_dist[1]
+    #     # self.count_draw_line = 0
+    #     d = self.raw_data_draw["detect"]
+    #     if d:
+    #         for i in range(1, int(max(d, key=int)) + 1):
+    #             i = str(i)
+    #             # x1, y1, x2, y2 = lp.length2points((d[i][0], d[i][1]), (d[i][2], d[i][3]), width)
+    #             # self.prev_line.append(
+    #             #     self.canvas2.create_line(x1, y1, x2, y2, width=self.app.config["t_width_max"], fill='yellow'))
+    #             self.count_draw_line += 1
 
     def snapshot_origin(self):
         """ Call snapshot function with original image(LEFT)"""
@@ -427,29 +519,29 @@ class Page1(Page):
 
     def save_draw(self):
         """ Save drawing data to json file"""
-        if (not self.raw_data_draw["draws"]) or (not self.raw_data_draw["area"]):
+        if (not self.raw_data_draw["detect"]) or (not self.raw_data_draw["area"]):
             msg_type = "Error"
             msg = "Need <draw> and <area> before <save>"
             messagebox.showerror(msg_type, msg)
             raise Exception(msg_type + ": " + msg)
 
-        self.count_draw_line = 0
-        copy_image = self.load_img_o.copy()
+        # self.count_draw_line = 0
+        # copy_image = self.load_img_o.copy()
 
         self.raw_data_draw["filename"] = self.file_path_o
-        for n in self.raw_data_draw["draws"]:
-            # todo *start point = from left + (top) passed?
-            [x1, y1, x2, y2] = self.raw_data_draw["draws"][n]
-            if x2 < x1:
-                x1, x2 = x2, x1
-                y1, y2 = y2, y1
-            elif x2 == x1:
-                if y2 > y1:
-                    x1, x2 = x2, x1
-                    y1, y2 = y2, y1
-            image_area = copy_image.crop((x1, y1, x2, y2))
-            if (image_area.size[0] != 0) and (image_area.size[1] != 0):
-                self.raw_data_draw["draws"][n] = [x1, y1, x2, y2]
+        # for n in self.raw_data_draw["detect"]:
+        #     # todo *start point = from left + (top) passed?
+        #     [x1, y1, x2, y2] = self.raw_data_draw["detect"][n]
+        #     if x2 < x1:
+        #         x1, x2 = x2, x1
+        #         y1, y2 = y2, y1
+        #     elif x2 == x1:
+        #         if y2 > y1:
+        #             x1, x2 = x2, x1
+        #             y1, y2 = y2, y1
+        #     image_area = copy_image.crop((x1, y1, x2, y2))
+        #     if (image_area.size[0] != 0) and (image_area.size[1] != 0):
+        #         self.raw_data_draw["detect"][n] = [x1, y1, x2, y2]
 
         # Save setting data
         data = json.dumps(self.raw_data_draw)
@@ -457,11 +549,7 @@ class Page1(Page):
         with open(filename, 'w') as fp:
             fp.write(data)
         print("SAVE !", 'data/data_%s.json' % self.file_path_o[:-4].split("/")[-1])
-        self.raw_data_draw = {
-            "filename": filename,
-            "area": [],
-            "draws": {}
-        }
+        # self.raw_data_draw = init_param["load_data"]["raw_data_draw"]
         self.reset()
         self.read_raw_data(filename)
 
@@ -514,9 +602,9 @@ class Page1(Page):
                 self.canvas2.create_image(size[2], size[3], image=self.tk_photo_org, anchor=tki.NW)
 
                 # load draw
-                self.load_rect()
-                if self.app.original_threshold_dist != [0, 0]:
-                    self.load_line()
+                self.load_draw()
+                # if self.app.original_threshold_dist != [0, 0]:
+                #     self.load_line()
 
     def browse(self):
         """Find json data from Local PC"""

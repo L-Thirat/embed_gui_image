@@ -58,19 +58,19 @@ def error_line(cnt, crop_area):
 def detect_error_cnt(contours, raw_data_draw, config):
     """Get result from comparing image"""
     t_error = config["t_error"]
-    t_width_min = config["t_width_min"]
-    t_width_max = config["t_width_max"]
+    # t_width_min = config["t_width_min"]
+    # t_width_max = config["t_width_max"]
     t_space = config["t_space"]
 
     error_over = []
     error_under = []
     lines = {}
 
-    for val in raw_data_draw["draws"].values():
+    for line in raw_data_draw["inside"]:
         # https://www.geeksforgeeks.org/solving-linear-regression-in-python/
-        x1, y1, x2, y2 = lp.length2points((val[0], val[1]), (val[2], val[3]), t_width_max)
-        start_line = (x1, y1)
-        end_line = (x2, y2)
+        # x1, y1, x2, y2 = lp.length2points((val[0], val[1]), (val[2], val[3]), t_width_max)
+        start_line = (line[0], line[1])
+        end_line = (line[2], line[3])
         m, c = lp.linear_formula(start_line, end_line)
 
         dx, dy = lp.diff_xy(start_line[0], start_line[1], end_line[0], end_line[1], t_space)
@@ -89,7 +89,7 @@ def detect_error_cnt(contours, raw_data_draw, config):
         lines[(start_line, end_line)] = sampling_point
 
     # find over contour
-    match_cnt = {}
+    match_cnt = []
     for cnt in contours:
         start_point, end_point = lp.find_start_end(cnt)
         num_error = 0
@@ -98,25 +98,26 @@ def detect_error_cnt(contours, raw_data_draw, config):
             x, y = p[0][0], p[0][1]
 
             # find matching line
-            for line in lines:
-                start_line = line[0]
-                end_line = line[1]
-                if t_width_min < t_width_max:
-                    sample_rect = lp.line2rect(start_line, end_line, t_width_max)
-                    point_inside = False
-                    if t_width_min:
-                        inside_sample_rect = lp.line2rect(start_line, end_line, t_width_min)
-                        point_inside = Point(x, y).within(Polygon(inside_sample_rect))
-                    if Point(x, y).within(Polygon(sample_rect)) and not point_inside:
-                        matching = True
-                        poly_cnt = [(item[0][0], item[0][1]) for item in cnt]
+            for pol_idx, pol in enumerate(raw_data_draw["detect"]):
+                # start_line = line[0]
+                # end_line = line[1]
+                # if t_width_min < t_width_max:
+                #     sample_rect = lp.line2rect(start_line, end_line, t_width_max)
+                # point_inside = False
+                # if t_width_min:
 
-                        if line not in match_cnt:
-                            match_cnt[line] = [poly_cnt]
-                        else:
-                            if poly_cnt not in match_cnt[line]:
-                                match_cnt[line].append(poly_cnt)
-                        break
+                # inside_sample_rect = lp.line2rect(start_line, end_line, t_width_min)
+                # point_inside = Point(x, y).within(Polygon(inside_sample_rect))
+
+                if Point(x, y).within(Polygon(pol)):
+                    matching = True
+                    poly_cnt = [(item[0][0], item[0][1]) for item in cnt]
+                    if poly_cnt not in match_cnt:
+                        match_cnt.append(poly_cnt)
+                    # else:
+                    #     if poly_cnt not in match_cnt[pol_idx]:
+                    #         match_cnt[pol_idx].append(poly_cnt)
+                    break
             if not matching:
                 num_error += 1
         if (num_error * 100) / len(cnt) > t_error:
@@ -127,19 +128,20 @@ def detect_error_cnt(contours, raw_data_draw, config):
         not_match_cnt = [[]]
         matching_count = 0
         prev_p = None
-
+        print("lines>>", line)
         for point in lines[line]:
             matching = False
             if prev_p:
-                if line in match_cnt:
-                    sample_rect = lp.line2rect(prev_p, point, t_space)
-                    for poly_cnt in match_cnt[line]:
-                        if Polygon(poly_cnt).intersects(Polygon(sample_rect)):
-                            matching_count += 1
-                            if not_match_cnt[-1]:
-                                not_match_cnt.append([])
-                            matching = True
-                            break
+                # if line in match_cnt:
+                    # sample_rect = lp.line2rect(prev_p, point, t_space)
+                for cnt in match_cnt:
+                    if Point(point).within(Polygon(cnt)):
+                        # if Polygon(poly_cnt).intersects(Polygon(sample_rect)):
+                        matching_count += 1
+                        if not_match_cnt[-1]:
+                            not_match_cnt.append([])
+                        matching = True
+                        break
 
                 if not matching:
                     if not not_match_cnt[-1]:
@@ -149,7 +151,7 @@ def detect_error_cnt(contours, raw_data_draw, config):
         # not_match_cnt.append([])
 
         if matching_count < len(lines[line]):
-            error_under = error_under + error_line(not_match_cnt, raw_data_draw["area"])
+            error_under = error_under + error_line(not_match_cnt, raw_data_draw["area"][0])
 
     return error_over, error_under
 

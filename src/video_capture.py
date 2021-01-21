@@ -59,7 +59,7 @@ class MyVideoCapture:
             selected_area = self.zoom(selected_area, t_zoom)
 
         if raw_data_draw["area"]:
-            selected_area = pp.crop_img(selected_area, raw_data_draw["area"])
+            selected_area = pp.crop_img(selected_area, raw_data_draw["area"][0])
 
         # Remove noise
         # ## (2) Morph-op to remove noise

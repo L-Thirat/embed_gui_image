@@ -1,6 +1,7 @@
 # todo clear image in "/output/o_.jpg"
 # todo camera moved detection
 # todo program slowed when a lot function update realtime ex hue -> Need RUN/STOP Button when start/STOP
+# todo multiple camera
 
 """
 check linear line
@@ -91,7 +92,7 @@ class App(tki.Frame):
             "min": [255, 255, 255],
             "max": [0, 0, 0]
         }]
-        self.original_threshold_dist = [0, 0]
+        # self.original_threshold_dist = [0, 0]
 
         # index page
         self.window = window
@@ -166,11 +167,11 @@ class App(tki.Frame):
 
     def update(self):
         """ Real-time update image in canvas """
-        # todo if self.TEST_MAMOS:
-        if int(time() - self.timing) > 30:
-        # todo if self.mm.output():
-            self.p1.snapshot("compare")
-            self.timing = time()
+        if self.TEST_MAMOS:
+            # if int(time() - self.timing) > 30:
+            if self.mm.output():
+                self.p1.snapshot("compare")
+                self.timing = time()
 
         ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw, self.p1.save_status)
         # todo test light calibrate >>, self.p1.save_status
@@ -187,12 +188,12 @@ class App(tki.Frame):
                     y = rgb_data["point"][1]
                     self.canvas_rt.create_rectangle(
                         x - half_color_dot, y - half_color_dot, x + half_color_dot, y + half_color_dot, fill='red')
-            if self.p1.raw_data_draw:
-                if (self.config["t_width_min"], self.config["t_width_max"]) != self.original_threshold_dist:
-                    self.original_threshold_dist = (self.config["t_width_min"], self.config["t_width_max"])
-                    for item in self.p1.prev_line:
-                        self.p1.canvas2.delete(item)
-                    self.p1.load_line()
+            # if self.p1.raw_data_draw:
+            #     if (self.config["t_width_min"], self.config["t_width_max"]) != self.original_threshold_dist:
+            #         self.original_threshold_dist = (self.config["t_width_min"], self.config["t_width_max"])
+            #         for item in self.p1.prev_line_pol:
+            #             self.p1.canvas2.delete(item)
+            #         self.p1.load_line()
         self.window.after(delay, self.update)
 
     def exit_handler(self):
