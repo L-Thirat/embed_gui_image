@@ -29,7 +29,7 @@ init_param = init_project.init_param()
 from src import extraction as et
 from src.video_capture import MyVideoCapture as Vdo
 from src import logger
-from gui import Page1, Page2
+from gui import Page1, Page2, Page3
 from PIL import EpsImagePlugin
 from time import time
 
@@ -96,6 +96,8 @@ class App(tki.Frame):
         self.vid = Vdo(self.DEBUG)
         self.frame = None
         self.mask = None
+        self.cur_page = 1
+        self.prev_page = 1
 
         tki.Frame.__init__(self, *args, **kwargs)
         buttonframe = tki.Frame(self)
@@ -105,26 +107,54 @@ class App(tki.Frame):
 
         self.p1 = Page1(self, self)
         self.p2 = Page2(self, self)
+        self.p3 = Page3(self, self)
 
         self.p1.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
         self.p2.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
+        self.p3.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
 
-        b1 = tki.Button(buttonframe, text="Home", font=("Courier", 44), command=self.p1.lift)
-        b2 = tki.Button(buttonframe, text="Setting", font=("Courier", 44), command=self.p2.lift)
+        b1 = tki.Button(buttonframe, text="Home", font=("Courier", 44), command=self.move_p1)
+        b2 = tki.Button(buttonframe, text="Setting", font=("Courier", 44), command=self.move_p2)
+        b3 = tki.Button(buttonframe, text="Drawing", font=("Courier", 44), command=self.move_p3)
 
         b1.pack(side="right")
         b2.pack(side="right")
+        b3.pack(side="right")
 
+        self.canvas_rt = tki.Canvas(self.window, cursor="cross")
+        self.create_monitor_canvas()
+
+        # After it is called once, the update method will be automatically called every delay milliseconds
+        self.update()
+        self.p1.show()
+
+    def create_monitor_canvas(self):
         # Create a canvas that can fit the above video source size
-        self.canvas_rt = tki.Canvas(window, cursor="cross")
+        self.canvas_rt = tki.Canvas(self.window, cursor="cross")
         self.canvas_rt.bind("<ButtonPress-1>", self.click_rgb)
         self.canvas_rt.bind("<Button-3>", self.undo_rgb)
         self.canvas_rt.place(relx=0.05, rely=0.01)
         self.canvas_rt.config(width=int(self.cam_width * 0.8), height=int(self.cam_height * 0.8))
 
-        # After it is called once, the update method will be automatically called every delay milliseconds
-        self.update()
+    def move_p1(self):
+        self.prev_page = self.cur_page
+        self.cur_page = 1
+        if self.prev_page == 3:
+            self.create_monitor_canvas()
         self.p1.show()
+
+    def move_p2(self):
+        self.prev_page = self.cur_page
+        self.cur_page = 2
+        if self.prev_page == 3:
+            self.create_monitor_canvas()
+        self.p2.show()
+
+    def move_p3(self):
+        self.prev_page = self.cur_page
+        self.cur_page = 3
+        self.canvas_rt.destroy()
+        self.p3.show()
 
     def click_rgb(self, event):
         """ Click on video source to check RGB values
@@ -159,28 +189,29 @@ class App(tki.Frame):
             self.range_rgb = copy.deepcopy(init_param["drawing"]["range_rgb"])
 
     def update(self):
-        """ Real-time update image in canvas """
-        if self.TEST_MAMOS:
-            # todo for auto testing if int(time() - self.timing) > 30:
-            if self.mm.output():
-                self.p1.snapshot("compare")
-                self.timing = time()
+        if self.cur_page != 3:
+            """ Real-time update image in canvas """
+            if self.TEST_MAMOS:
+                # todo for auto testing if int(time() - self.timing) > 30:
+                if self.mm.output():
+                    self.p1.snapshot("compare")
+                    self.timing = time()
 
-        ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw, self.p1.save_status)
-        # todo test light calibrate >>, self.p1.save_status
-        if ret:
-            self.mask = imutils.resize(self.mask, height=int(self.cam_height * 0.8), width=int(self.cam_width * 0.8))
-            self.mask = Image.fromarray(self.mask)
-            self.p1.tk_photo_line = ImageTk.PhotoImage(image=self.mask)
-            self.canvas_rt.delete("all")
-            self.canvas_rt.create_image(0, 0, image=self.p1.tk_photo_line, anchor=tki.NW)
-            # todo run on RUN mode
-            if self.range_rgb[-1]["point"] is not None:
-                for rgb_data in self.range_rgb[1:]:
-                    x = rgb_data["point"][0]
-                    y = rgb_data["point"][1]
-                    self.canvas_rt.create_rectangle(
-                        x - half_color_dot, y - half_color_dot, x + half_color_dot, y + half_color_dot, fill='red')
+            ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw, self.p1.save_status)
+            # todo test light calibrate >>, self.p1.save_status
+            if ret:
+                self.mask = imutils.resize(self.mask, height=int(self.cam_height * 0.8), width=int(self.cam_width * 0.8))
+                self.mask = Image.fromarray(self.mask)
+                self.p1.tk_photo_line = ImageTk.PhotoImage(image=self.mask)
+                self.canvas_rt.delete("all")
+                self.canvas_rt.create_image(0, 0, image=self.p1.tk_photo_line, anchor=tki.NW)
+                # todo run on RUN mode
+                if self.range_rgb[-1]["point"] is not None:
+                    for rgb_data in self.range_rgb[1:]:
+                        x = rgb_data["point"][0]
+                        y = rgb_data["point"][1]
+                        self.canvas_rt.create_rectangle(
+                            x - half_color_dot, y - half_color_dot, x + half_color_dot, y + half_color_dot, fill='red')
         self.window.after(delay, self.update)
 
     def exit_handler(self):

@@ -16,7 +16,6 @@ import time
 import io
 
 from src import extraction as et
-from gui.page_control import Page
 import init_project
 from init_project import init_dir
 
@@ -24,26 +23,14 @@ from init_project import init_dir
 init_param = init_project.init_param()
 
 
-class Page1(Page):
-    raw_data_draw = ...  # type: Dict["filename":str, "detect":List[str, List[Any]], "inside":List[str, List[Any]], "area":List[str, List[Any]]]
-    drawing_data = ...  # type: Dict[str, Dict["color": str, "prev": Dict, "polygon": Dict]]
-
+class Page(tki.Frame):
     def __init__(self, app, *args, **kwargs):
-        """ Page 1 config
-
-        :param app: Tkinter (GUI builder) setup
-        :type app: class
-        :param args: Tkinter's arguments
-        :type args: Optional
-        :param kwargs: Tkinter's kwargs arguments
-        :type kwargs: Optional
-        """
         self.vid = app.vid
         self.config = app.config
         self.window = self
         self.app = app
 
-        Page.__init__(self, *args, **kwargs)
+        tki.Frame.__init__(self, *args, **kwargs)
 
         # Load data
         self.file_path_o = ""
@@ -76,47 +63,34 @@ class Page1(Page):
         # Button that lets the user take a snapshot
         self.btn_snapshot = tki.Button(buttonframe, text="Snapshot", font=("Courier", 44), width=9,
                                        command=self.snapshot_origin)
-        self.btn_snapshot.place(relx=0.38, rely=0.05)
 
         self.btn_save = tki.Button(buttonframe, text="Save", font=("Courier", 44), width=9, command=self.save_draw)
-        self.btn_save.place(relx=0.56, rely=0.05)
 
         self.browsebutton = tki.Button(buttonframe, text="Browse", font=("Courier", 44), width=9, command=self.browse)
-        self.browsebutton.place(relx=0.74, rely=0.05)
 
         self.btn_compare = tki.Button(buttonframe, text="Compare", font=("Courier", 44), width=9,
                                       command=self.snapshot_compare)
-        self.btn_compare.place(relx=0.38, rely=0.18)
 
         self.btn_reset = tki.Button(buttonframe, text="Reset", font=("Courier", 44), width=9, command=self.reset)
-        self.btn_reset.place(relx=0.56, rely=0.18)
 
         self.btn_mode_detect = tki.Button(buttonframe, text="DO", font=("Courier", 44),
                                           command=self.mode_detect, bg=self.drawing_data["detect"]["color"])
-        self.btn_mode_detect.place(relx=0.74, rely=0.18)
         self.btn_mode_inside = tki.Button(buttonframe, text="DI", font=("Courier", 44), command=self.mode_inside)
-        self.btn_mode_inside.place(relx=0.81, rely=0.18)
         self.btn_mode_area = tki.Button(buttonframe, text="Area", font=("Courier", 44), command=self.mode_area)
-        self.btn_mode_area.place(relx=0.88, rely=0.18)
 
         # todo remove or use ?
         self.pathlabel = tki.Label(buttonframe)
-        self.pathlabel.place(relx=0.41, rely=0.25)
 
         # Result
         lbl_result = tki.Label(buttonframe, text="Result", font=("Courier", 44))
-        lbl_result.place(relx=0.83, rely=0.35)
         self.lbl_result = tki.Label(buttonframe, text="        ", bg="yellow", font=("Courier", 44))
-        self.lbl_result.place(relx=0.83, rely=0.44)
 
         # Drawing cv
         self.canvas2 = tki.Canvas(buttonframe, cursor="cross")
-        self.canvas2.place(relx=0.05, rely=0.35)
         self.canvas2.bind("<ButtonPress-1>", self.on_button_press)
         # self.canvas2.bind("<B1-Motion>", self.on_move_press)
         # self.canvas2.bind("<ButtonRelease-1>", self.on_button_release)
         self.canvas2.bind("<Button-3>", self.undo)
-        self.canvas2.config(width=app.cam_width, height=app.cam_height)
 
         # Check latest data
         list_of_files = glob.glob('data/*')  # * means all if need specific format then *.csv
@@ -125,8 +99,9 @@ class Page1(Page):
             self.read_raw_data(latest_file)
 
         self.canvas3 = tki.Canvas(buttonframe)
-        self.canvas3.place(relx=0.45, rely=0.35)
-        self.canvas3.config(width=app.cam_width, height=app.cam_height)
+
+    def show(self):
+        self.lift()
 
     def reset(self):
         """Reset screen and parameters"""
@@ -175,6 +150,7 @@ class Page1(Page):
         self.mode = "detect"
 
     def mode_inside(self):
+        """ Draw mode: inside """
         self.mode_default()
         self.btn_mode_inside = tki.Button(self.window, text="DI", font=("Courier", 44),
                                           command=self.mode_inside, bg=self.drawing_data["inside"]["color"])
