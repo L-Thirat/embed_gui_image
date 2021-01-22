@@ -41,25 +41,9 @@ def contour_selection(contours, img, noise_len):
     return select_contour, img
 
 
-def error_line(cnt, crop_area):
-    """ Check overlap between over-under area"""
-    error = []
-    for ps in cnt:
-        if ps:
-            if len(ps) > 1:
-                if LineString([(ps[0][0], ps[0][1]), (ps[-1][0], ps[-1][1])]).intersects(Polygon(crop_area)):
-                    error.append((ps[0][0], ps[0][1], ps[-1][0], ps[-1][1]))
-            else:
-                if Point(ps[0][0], ps[0][1]).within(Polygon(crop_area)):
-                    error.append((ps[0][0], ps[0][1]))
-    return error
-
-
 def detect_error_cnt(contours, raw_data_draw, config):
     """Get result from comparing image"""
     t_error = config["t_error"]
-    # t_width_min = config["t_width_min"]
-    # t_width_max = config["t_width_max"]
     t_space = config["t_space"]
 
     error_over = []
@@ -68,24 +52,30 @@ def detect_error_cnt(contours, raw_data_draw, config):
 
     for line in raw_data_draw["inside"]:
         # https://www.geeksforgeeks.org/solving-linear-regression-in-python/
-        # x1, y1, x2, y2 = lp.length2points((val[0], val[1]), (val[2], val[3]), t_width_max)
         start_line = (line[0], line[1])
         end_line = (line[2], line[3])
         m, c = lp.linear_formula(start_line, end_line)
 
-        dx, dy = lp.diff_xy(start_line[0], start_line[1], end_line[0], end_line[1], t_space)
+        dx, dy = lp.diff_xy(start_line[0], start_line[1], end_line[0], end_line[1], w=2)
         if end_line[0] - start_line[0] != 0:
             x = np.arange(start_line[0], end_line[0], dx)
             y = m * x + c
         else:
             y = np.arange(start_line[1], end_line[1], dy)
-            x = (y - c) / m
+            if m != 0:
+                x = (y - c) / m
+            else:
+                x = 0
         f = interpolate.interp1d(x, y)
         xnew = np.arange(start_line[0], end_line[0], dx)
         ynew = f(xnew)  # use interpolation function returned by `interp1d`
         # plt.plot(x, y, 'o', xnew, ynew, '-')
         # plt.show()
-        sampling_point = [(x, y) for x, y in zip(xnew, ynew)]
+
+        sampling_point = []
+        for x, y in zip(xnew, ynew):
+            if Point(x, y).within(Polygon(raw_data_draw["area"][0])):
+                sampling_point.append((x, y))
         lines[(start_line, end_line)] = sampling_point
 
     # find over contour
@@ -99,24 +89,12 @@ def detect_error_cnt(contours, raw_data_draw, config):
 
             # find matching line
             for pol_idx, pol in enumerate(raw_data_draw["detect"]):
-                # start_line = line[0]
-                # end_line = line[1]
-                # if t_width_min < t_width_max:
-                #     sample_rect = lp.line2rect(start_line, end_line, t_width_max)
-                # point_inside = False
-                # if t_width_min:
-
-                # inside_sample_rect = lp.line2rect(start_line, end_line, t_width_min)
-                # point_inside = Point(x, y).within(Polygon(inside_sample_rect))
-
                 if Point(x, y).within(Polygon(pol)):
                     matching = True
                     poly_cnt = [(item[0][0], item[0][1]) for item in cnt]
+                    poly_cnt = Polygon(poly_cnt)
                     if poly_cnt not in match_cnt:
                         match_cnt.append(poly_cnt)
-                    # else:
-                    #     if poly_cnt not in match_cnt[pol_idx]:
-                    #         match_cnt[pol_idx].append(poly_cnt)
                     break
             if not matching:
                 num_error += 1
@@ -125,33 +103,35 @@ def detect_error_cnt(contours, raw_data_draw, config):
 
     # find matching line
     for line in lines:
-        not_match_cnt = [[]]
-        matching_count = 0
-        prev_p = None
-        print("lines>>", line)
-        for point in lines[line]:
-            matching = False
-            if prev_p:
-                # if line in match_cnt:
-                    # sample_rect = lp.line2rect(prev_p, point, t_space)
-                for cnt in match_cnt:
-                    if Point(point).within(Polygon(cnt)):
-                        # if Polygon(poly_cnt).intersects(Polygon(sample_rect)):
-                        matching_count += 1
-                        if not_match_cnt[-1]:
-                            not_match_cnt.append([])
+        # case line length < space = always success
+        if lp.find_distance(lines[line][0], lines[line][-1]) > t_space:
+            start_not_match = None
+            last_not_match = None
+            prev_matching_cnt = None
+
+            for point in lines[line]:
+                matching = False
+                if prev_matching_cnt:
+                    if Point(point).within(prev_matching_cnt):
                         matching = True
-                        break
-
-                if not matching:
-                    if not not_match_cnt[-1]:
-                        not_match_cnt[-1].append(prev_p)
-                    not_match_cnt[-1].append(point)
-            prev_p = point
-        # not_match_cnt.append([])
-
-        if matching_count < len(lines[line]):
-            error_under = error_under + error_line(not_match_cnt, raw_data_draw["area"][0])
+                else:
+                    for poly_cnt in match_cnt:
+                        if poly_cnt != prev_matching_cnt:
+                            if Point(point).within(poly_cnt):
+                                matching = True
+                                prev_matching_cnt = poly_cnt
+                                break
+                if not matching and point != lines[line][-1]:
+                    if not start_not_match:
+                        start_not_match = point
+                    else:
+                        last_not_match = point
+                else:
+                    if start_not_match and last_not_match:
+                        if lp.find_distance(start_not_match, last_not_match) > t_space:
+                            error_under.append((start_not_match[0], start_not_match[1], last_not_match[0], last_not_match[1]))
+                    start_not_match = None
+                    last_not_match = None
 
     return error_over, error_under
 

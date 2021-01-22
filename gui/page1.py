@@ -4,6 +4,7 @@ import tkinter as tki
 from tkinter import filedialog
 from tkinter import messagebox
 
+import copy
 import cv2
 import PIL.Image as Image
 import PIL.ImageTk as ImageTk
@@ -17,15 +18,10 @@ import io
 from src import extraction as et
 from gui.page_control import Page
 import init_project
+from init_project import init_dir
 
 # Load init params
 init_param = init_project.init_param()
-
-
-def init_dir(basedir, sub_dir):
-    # init directory
-    if not os.path.exists(basedir + sub_dir):
-        os.makedirs(basedir + sub_dir)
 
 
 class Page1(Page):
@@ -58,20 +54,18 @@ class Page1(Page):
         self.load_img_o = None
         self.load_img_cp = None
         self.load_filename = None
-        self.raw_data_draw = init_param["load_data"]["raw_data_draw"]
+        self.raw_data_draw = copy.deepcopy(init_param["load_data"]["raw_data_draw"])
 
         # Output display
-        self.contour = []
         self.error_box = {}
         self.error_line = {}
 
         # Drawing
-        self.drawing_data = init_param["drawing"]["drawing_data"]
+        self.drawing_data = copy.deepcopy(init_param["drawing"]["drawing_data"])
         self.prev_sub_pol = []
         # self.count_draw_line = 0
         self.count_draw_sub_pol = 0
-        self.start_x = 0
-        self.start_y = 0
+        self.start_x, self.start_y = 0, 0
 
         # Status
         self.save_status = False
@@ -125,22 +119,6 @@ class Page1(Page):
         self.canvas2.bind("<Button-3>", self.undo)
         self.canvas2.config(width=app.cam_width, height=app.cam_height)
 
-        # Drawing
-        # self.prev_line = []
-
-        # self.polygon_line_data = []
-        # self.polygon_inside_data = []
-        # self.polygon_area_data = []
-        # self.prev_line_pol = []
-        # self.prev_inside_pol = []
-        # self.prev_area_pol = []
-
-        # self.prev_sub_pol = []
-        # # self.count_draw_line = 0
-        # self.count_draw_sub_pol = 0
-        # self.start_x = None
-        # self.start_y = None
-
         # Check latest data
         list_of_files = glob.glob('data/*')  # * means all if need specific format then *.csv
         if list_of_files:
@@ -156,7 +134,7 @@ class Page1(Page):
         self.toggle_save_status()
         self.canvas2.delete("all")
         self.canvas3.delete("all")
-        self.app.range_rgb = init_param["drawing"]["range_rgb"]
+        self.app.range_rgb = copy.deepcopy(init_param["drawing"]["range_rgb"])
         self.app.undo_rgb(None)
 
         self.file_path_o = ""
@@ -164,10 +142,13 @@ class Page1(Page):
         self.tk_photo_org = ""
         self.pathlabel.config(text="")
         self.lbl_result.config(text="        ", bg="yellow")
-        # self.count_draw_line = 0
-        self.raw_data_draw = init_param["load_data"]["raw_data_draw"]
-        self.drawing_data = init_param["drawing"]["drawing_data"]
+        for mode in self.drawing_data:
+            for draw_line in self.drawing_data[mode]["prev"]:
+                self.canvas2.delete(draw_line)
+        self.raw_data_draw = copy.deepcopy(init_param["load_data"]["raw_data_draw"])
+        self.drawing_data = copy.deepcopy(init_param["drawing"]["drawing_data"])
         self.count_draw_sub_pol = 0
+        self.start_x, self.start_y = 0, 0
 
     def mode_default(self):
         """ Change draw mode buttons to default """
@@ -208,36 +189,6 @@ class Page1(Page):
                                         bg=self.drawing_data["area"]["color"])
         self.btn_mode_area.place(relx=0.88, rely=0.18)
         self.mode = "area"
-
-    # def polygon_draw(self, event, polygon_data, prev_pol):
-    #     if self.load_img_o:
-    #         x, y = event.x, event.y
-    #         print("start>>", self.start_x, self.start_y)
-    #         if self.start_x and self.start_y:
-    #             if abs(x - self.start_x) < 20 and abs(y - self.start_y) < 20:
-    #                 for draw_line in self.prev_sub_pol:
-    #                     self.canvas2.delete(draw_line)
-    #                 self.prev_sub_pol = []
-    #                 self.count_draw_sub_pol = 0
-    #
-    #                 flat_polygon = [item for sublist in self.drawing_data[self.mode]["polygon"] for item in sublist]
-    #                 if self.mode == "area":
-    #                     if prev_pol:
-    #                         self.canvas2.delete(prev_pol)
-    #                 prev_pol = [self.canvas2.create_polygon(
-    #                     flat_polygon, outline=self.drawing_data[self.mode]["color"], fill="", width=2)]
-    #                 self.raw_data_draw[self.mode] = self.drawing_data[self.mode]["polygon"]
-    #                 self.drawing_data[self.mode]["polygon"] = []
-    #                 self.start_x, self.start_y = 0, 0
-    #             else:
-    #                 self.canvas2.create_line(x, y, self.drawing_data[self.mode]["polygon"][-1][0],
-    #                                          self.drawing_data[self.mode]["polygon"][-1][1], width=2,
-    #                                          fill=self.drawing_data[self.mode]["color"])
-    #                 self.count_draw_sub_pol += 1
-    #                 self.drawing_data[self.mode]["polygon"].append([x, y])
-    #         else:
-    #             self.start_x, self.start_y = x, y
-    #             self.drawing_data[self.mode]["polygon"].append([x, y])
 
     def on_button_press(self, event):
         """ Left Click events in canvas"""
@@ -288,49 +239,27 @@ class Page1(Page):
                 self.start_x, self.start_y = x, y
                 self.drawing_data[self.mode]["temp_pol"].append([x, y])
 
-        # if self.mode == "detect":
-        #     self.polygon_line_data, self.prev_line_pol = self.polygon_draw(
-        #         event, self.polygon_line_data, self.prev_line_pol)
-        # elif self.mode == "inside":
-        #     self.polygon_inside_data, self.prev_inside_pol = self.polygon_draw(
-        #         event, self.polygon_inside_data, self.prev_inside_pol)
-        # else:
-        #     self.polygon_area_data, self.prev_area_pol = self.polygon_draw(
-        #         event, self.polygon_area_data, self.prev_area_pol)
-
-    # def undo_polygon(self, polygon_data, prev_pol):
-    #     if polygon_data:
-    #         del polygon_data[-1]
-    #     # if len(polygon_data) == 0:
-    #     #     self.start_x, self.start_y = 0, 0
-    #     #     self.polygon_area_data = []
-    #
-    #     if self.mode in self.raw_data_draw:
-    #         self.raw_data_draw[self.mode] = polygon_data
-    #         # self.canvas2.delete(self.prev_sub_pol)
-    #         self.canvas2.delete(prev_pol)
-    #     return polygon_data, prev_pol
-
     def undo(self, event):
         """ Right click events in canvas"""
         if self.save_status:
             self.toggle_save_status()
 
-        # if self.count_draw_line:
         if self.mode == "inside":
-            self.canvas2.delete(self.drawing_data[self.mode]["prev"][-1])
-            del self.drawing_data[self.mode]["prev"][-1]
-            del self.drawing_data[self.mode]["polygon"][-1]
-            del self.raw_data_draw["inside"][-1]
+            if self.drawing_data[self.mode]["prev"]:
+                self.canvas2.delete(self.drawing_data[self.mode]["prev"][-1])
+                del self.drawing_data[self.mode]["prev"][-1]
+                del self.drawing_data[self.mode]["polygon"][-1]
+                self.raw_data_draw[self.mode] = self.drawing_data[self.mode]["polygon"]
         else:
-            if self.prev_sub_pol:
+            if self.count_draw_sub_pol:
                 # remove sub-polygon
                 self.canvas2.delete(self.prev_sub_pol[-1])
                 del self.prev_sub_pol[-1]
+                del self.drawing_data[self.mode]["temp_pol"][-1]
                 self.count_draw_sub_pol -= 1
                 if not self.count_draw_sub_pol:
                     self.start_x, self.start_y = 0, 0
-                del self.drawing_data[self.mode]["temp_pol"][-1]
+                    del self.drawing_data[self.mode]["temp_pol"][-1]
             else:
                 # remove last polygon
                 if self.drawing_data[self.mode]["polygon"]:
@@ -338,18 +267,6 @@ class Page1(Page):
                     self.raw_data_draw[self.mode] = self.drawing_data[self.mode]["polygon"]
                     self.canvas2.delete(self.drawing_data[self.mode]["prev"][-1])
                     del self.drawing_data[self.mode]["prev"][-1]
-            # if len(polygon_data) == 0:
-            #     self.start_x, self.start_y = 0, 0
-            #     self.polygon_area_data = []
-
-            # if self.mode in self.raw_data_draw:
-            # self.canvas2.delete(self.prev_sub_pol)
-            # if self.mode == "detect":
-            #     self.undo_polygon(self.polygon_line_data, self.prev_line_pol)
-            # elif self.mode == "inside":
-            #     self.undo_polygon(self.polygon_inside_data, self.prev_inside_pol)
-            # else:
-            #     self.undo_polygon(self.polygon_area_data, self.prev_area_pol)
 
     def snapshot(self, mode):
         """ Get a frame from the video source """
@@ -382,9 +299,6 @@ class Page1(Page):
                 self.canvas2.create_image(size[2], size[3], image=self.tk_photo_org, anchor=tki.NW)
 
             elif mode == "compare":
-                # todo Project variable
-                # log = logger.GetSystemLogger()
-
                 if self.save_status:
                     start = time.time()
                     init_dir(self.app.cp_path, sub_dir)
@@ -404,20 +318,14 @@ class Page1(Page):
                     output_status = "        "
                     if error_under:
                         output_status = "NG:UNDER"
-                        width = self.config["t_space"]
                         for key in self.error_line:
                             self.canvas3.delete(self.error_line[key])
                         for i, lack_line in enumerate(error_under):
                             if len(lack_line) > 2:
-                                self.error_box[i] = self.canvas3.create_line(lack_line, fill='orange', width=width)
+                                self.error_box[i] = self.canvas3.create_line(lack_line, fill='blue', width=2)
                                 self.canvas3.create_text((lack_line[2] + 10, lack_line[3]), text=i + 1,
                                                          font=('Impact', -15),
-                                                         fill="orange")
-                            # todo no case ? check in et code
-                            # else:
-                            #     self.canvas3.create_text((lack_line[0] + 10, lack_line[1]), text=i + 1,
-                            #                              font=('Impact', -15),
-                            #                              fill="orange")
+                                                         fill="blue")
 
                     if error_over:
                         if output_status == "NG:UNDER":
@@ -484,31 +392,6 @@ class Page1(Page):
                             flat_polygon, outline=self.drawing_data[mode]["color"], fill="", width=2))
                 self.drawing_data[mode]["polygon"] = self.raw_data_draw[mode]
 
-    # def load_area(self):
-    #     """Load area data from saved json file"""
-    #     # val = self.raw_data_draw["area"]
-    #     flat_polygon = [item for sublist in self.raw_data_draw["area"] for item in sublist]
-    #     self.prev_area_pol = [self.canvas2.create_polygon(flat_polygon, outline='red', fill="", width=2)]
-    #     # for i in range(1, len(val)):
-    #     #     self.canvas2.create_line(val[i - 1][0], val[i - 1][1], val[i][0], val[i][1], width=2, fill='red')
-    #     # self.canvas2.create_line(val[0][0], val[0][1], val[-1][0], val[-1][1], width=2, fill='red')
-    #     # elif key == "ignore":
-    #     #     for i in range(3, len(val) + 1, 2):
-    #     #         cvs.create_line(val[i - 3], val[i - 2], val[i - 1], val[i], width=2, fill='blue')
-    #
-    # def load_line(self):
-    #     """ Load line data from saved json file"""
-    #     # width = self.app.original_threshold_dist[1]
-    #     # self.count_draw_line = 0
-    #     d = self.raw_data_draw["detect"]
-    #     if d:
-    #         for i in range(1, int(max(d, key=int)) + 1):
-    #             i = str(i)
-    #             # x1, y1, x2, y2 = lp.length2points((d[i][0], d[i][1]), (d[i][2], d[i][3]), width)
-    #             # self.prev_line.append(
-    #             #     self.canvas2.create_line(x1, y1, x2, y2, width=self.app.config["t_width_max"], fill='yellow'))
-    #             self.count_draw_line += 1
-
     def snapshot_origin(self):
         """ Call snapshot function with original image(LEFT)"""
         self.snapshot("original")
@@ -525,25 +408,8 @@ class Page1(Page):
             messagebox.showerror(msg_type, msg)
             raise Exception(msg_type + ": " + msg)
 
-        # self.count_draw_line = 0
-        # copy_image = self.load_img_o.copy()
-
-        self.raw_data_draw["filename"] = self.file_path_o
-        # for n in self.raw_data_draw["detect"]:
-        #     # todo *start point = from left + (top) passed?
-        #     [x1, y1, x2, y2] = self.raw_data_draw["detect"][n]
-        #     if x2 < x1:
-        #         x1, x2 = x2, x1
-        #         y1, y2 = y2, y1
-        #     elif x2 == x1:
-        #         if y2 > y1:
-        #             x1, x2 = x2, x1
-        #             y1, y2 = y2, y1
-        #     image_area = copy_image.crop((x1, y1, x2, y2))
-        #     if (image_area.size[0] != 0) and (image_area.size[1] != 0):
-        #         self.raw_data_draw["detect"][n] = [x1, y1, x2, y2]
-
         # Save setting data
+        self.raw_data_draw["filename"] = self.file_path_o
         data = json.dumps(self.raw_data_draw)
         filename = 'data/data_%s.json' % self.file_path_o[:-4].split("/")[-1]
         with open(filename, 'w') as fp:
@@ -603,8 +469,6 @@ class Page1(Page):
 
                 # load draw
                 self.load_draw()
-                # if self.app.original_threshold_dist != [0, 0]:
-                #     self.load_line()
 
     def browse(self):
         """Find json data from Local PC"""

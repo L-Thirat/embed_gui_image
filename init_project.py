@@ -13,6 +13,12 @@ def create_folders():
         os.makedirs('log')
 
 
+def init_dir(basedir, sub_dir):
+    # init directory
+    if not os.path.exists(basedir + sub_dir):
+        os.makedirs(basedir + sub_dir)
+
+
 def init_param():
     params = {
         "load_data": {
@@ -32,7 +38,6 @@ def init_param():
             },
         },
         "output_display": {
-            "contour": [],
             "error_box": {},
             "error_line": {}
         },

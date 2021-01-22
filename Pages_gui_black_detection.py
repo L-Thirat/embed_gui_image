@@ -2,7 +2,9 @@
 # todo camera moved detection
 # todo program slowed when a lot function update realtime ex hue -> Need RUN/STOP Button when start/STOP
 # todo multiple camera
-
+# todo zoom when drawing
+# todo show all area on output
+# todo show line realtime (capture: Origin image)
 """
 check linear line
 http://www.webmath.com/_answer.php
@@ -17,10 +19,12 @@ import imutils
 import atexit
 import yaml
 import numpy as np
+import copy
 
 import init_project
 
 init_project.create_folders()
+init_param = init_project.init_param()
 
 from src import extraction as et
 from src.video_capture import MyVideoCapture as Vdo
@@ -78,8 +82,6 @@ class App(tki.Frame):
             else:
                 EpsImagePlugin.gs_windows_binary = self.setting_data["gs"]
 
-            self.mini_sampling = 4
-
         # config canvas
         with open(r'config.yaml') as file:
             """
@@ -87,12 +89,7 @@ class App(tki.Frame):
             # scalar values to Python the dictionary format
             """
             self.config = yaml.load(file, Loader=yaml.FullLoader)
-        self.range_rgb = [{
-            "point": None,
-            "min": [255, 255, 255],
-            "max": [0, 0, 0]
-        }]
-        # self.original_threshold_dist = [0, 0]
+        self.range_rgb = copy.deepcopy(init_param["drawing"]["range_rgb"])
 
         # index page
         self.window = window
@@ -159,16 +156,12 @@ class App(tki.Frame):
             self.p2.lbl_rgb.config(text=txt_range, font=("Courier", 22))
         else:
             self.p2.lbl_rgb.config(text="", font=("Courier", 22))
-            self.range_rgb = [{
-                "point": None,
-                "min": [255, 255, 255],
-                "max": [0, 0, 0]
-            }]
+            self.range_rgb = copy.deepcopy(init_param["drawing"]["range_rgb"])
 
     def update(self):
         """ Real-time update image in canvas """
         if self.TEST_MAMOS:
-            # if int(time() - self.timing) > 30:
+            # todo for auto testing if int(time() - self.timing) > 30:
             if self.mm.output():
                 self.p1.snapshot("compare")
                 self.timing = time()
@@ -188,12 +181,6 @@ class App(tki.Frame):
                     y = rgb_data["point"][1]
                     self.canvas_rt.create_rectangle(
                         x - half_color_dot, y - half_color_dot, x + half_color_dot, y + half_color_dot, fill='red')
-            # if self.p1.raw_data_draw:
-            #     if (self.config["t_width_min"], self.config["t_width_max"]) != self.original_threshold_dist:
-            #         self.original_threshold_dist = (self.config["t_width_min"], self.config["t_width_max"])
-            #         for item in self.p1.prev_line_pol:
-            #             self.p1.canvas2.delete(item)
-            #         self.p1.load_line()
         self.window.after(delay, self.update)
 
     def exit_handler(self):
