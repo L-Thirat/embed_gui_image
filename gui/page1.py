@@ -17,6 +17,7 @@ import os
 import time
 import io
 
+from src.video_capture import MyVideoCapture as Vdo
 from src import extraction as et
 from gui.page_control import Page
 from gui.drawing_control import DrawingPage
@@ -87,7 +88,10 @@ class Page1(DrawingPage):
 
     def reset(self):
         """Reset screen and parameters"""
-        self.toggle_save_status()
+        if self.save_status:
+            self.save_status = False
+            self.toggle_save_status()
+
         self.canvas2.delete("all")
         self.canvas3.delete("all")
         self.app.range_rgb = copy.deepcopy(init_param["drawing"]["range_rgb"])
@@ -118,15 +122,12 @@ class Page1(DrawingPage):
         sub_dir = "%s/%s/%s/" % (str(cur_date.year), str(cur_date.month), str(cur_date.day))
 
         start_task = time.time()
-        ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw, self.save_status)
-
-        end = time.time()
-        print("Capture time: %f" % (end - start_task))
         ts = datetime.datetime.now()
         filename = "{}.jpg".format(ts.strftime("%Y-%m-%d_%H-%M-%S"))
 
-        if ret:
-            if mode == "original":
+        if mode == "original":
+            ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw)
+            if ret:
                 init_dir(self.app.out_path, sub_dir)
                 self.file_path_o = self.app.out_path + sub_dir + "o_" + filename
                 cv2.imwrite(self.file_path_o, cv2.cvtColor(mask, cv2.COLOR_RGB2BGR))
@@ -135,12 +136,15 @@ class Page1(DrawingPage):
                 self.tk_photo_org = ImageTk.PhotoImage(image=self.load_img_o)
                 self.canvas2.create_image(self.size[2], self.size[3], image=self.tk_photo_org, anchor=tki.NW)
 
-            elif mode == "compare":
-                if self.save_status:
+        elif mode == "compare":
+            if self.save_status:
+                ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw, auto_calibrate=True)
+                if ret:
                     start = time.time()
                     init_dir(self.app.cp_path, sub_dir)
                     self.file_path_c = self.app.cp_path + sub_dir + "c_" + "temp_filename.jpg"
-                    cv2.imwrite(self.file_path_c, cv2.cvtColor(self.app.frame, cv2.COLOR_RGB2BGR))
+                    origin_image = self.vid.get_original_frame()
+                    cv2.imwrite(self.file_path_c, cv2.cvtColor(origin_image, cv2.COLOR_RGB2BGR))
                     self.load_img_cp = Image.open(self.file_path_c)
 
                     self.load_img_cp = self.load_img_cp.resize((self.size[0], self.size[1]), Image.ANTIALIAS)

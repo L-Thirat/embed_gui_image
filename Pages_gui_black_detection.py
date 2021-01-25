@@ -222,7 +222,7 @@ class App(tki.Frame):
                     self.p1.snapshot("compare")
                     self.timing = time()
 
-            ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw, self.p1.save_status)
+            ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw)
             # todo test light calibrate >>, self.p1.save_status
             if ret:
                 self.mask = imutils.resize(self.mask, height=int(self.cam_height * 0.8), width=int(self.cam_width * 0.8))

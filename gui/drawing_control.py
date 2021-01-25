@@ -146,7 +146,8 @@ class DrawingPage(tki.Frame):
     def show(self, p1=None, p3=None):
         if p1:
             # To page 3
-            self.save_status = True
+            self.save_status = p1.save_status
+
             self.file_path_o = p1.file_path_o
             self.load_img_o = Image.open(self.file_path_o)
             self.load_img_o = self.load_img_o.resize((self.size[0], self.size[1]), Image.ANTIALIAS)
@@ -160,9 +161,7 @@ class DrawingPage(tki.Frame):
             self.load_draw()
         elif p3:
             # To page 1
-            self.save_status = True
-            self.toggle_save_status(self.save_status)
-            # self.file_path_o = p3.file_path_o
+            self.save_status = p3.save_status
 
             self.drawing_data = p3.drawing_data
             self.raw_data_draw = p3.raw_data_draw
@@ -217,6 +216,7 @@ class DrawingPage(tki.Frame):
     def on_button_press(self, event):
         """ Left Click events in canvas"""
         if self.save_status:
+            self.save_status = False
             self.toggle_save_status()
 
         if self.load_img_o:
@@ -267,6 +267,7 @@ class DrawingPage(tki.Frame):
     def undo(self, event):
         """ Right click events in canvas"""
         if self.save_status:
+            self.save_status = False
             self.toggle_save_status()
 
         if self.mode == "inside":
@@ -293,11 +294,10 @@ class DrawingPage(tki.Frame):
                     self.canvas2.delete(self.drawing_data[self.mode]["prev"][-1])
                     del self.drawing_data[self.mode]["prev"][-1]
 
-    def toggle_save_status(self, status=False):
+    def toggle_save_status(self):
         """Toggle snapshot status"""
         if self.page == "p1":
-            self.save_status = status
-            if status:
+            if self.save_status:
                 self.btn_save = tki.Button(self.window, text="Save", bg='green', font=("Courier", 44), width=9,
                                            command=self.save_draw)
             else:
@@ -324,9 +324,12 @@ class DrawingPage(tki.Frame):
         """Read json data and update canvas"""
         if filename:
             with open(filename, 'r') as fp:
-                self.toggle_save_status(True)
-
                 self.raw_data_draw = json.load(fp)
+                if (not self.raw_data_draw["detect"]) or (not self.raw_data_draw["area"]):
+                    self.save_status = False
+                else:
+                    self.save_status = True
+                self.toggle_save_status()
 
                 # load img
                 print("Loading data: ")
@@ -345,19 +348,12 @@ class DrawingPage(tki.Frame):
 
     def save_draw(self):
         """ Save drawing data to json file"""
-        if (not self.raw_data_draw["detect"]) or (not self.raw_data_draw["area"]):
-            msg_type = "Error"
-            msg = "Need <draw> and <area> before <save>"
-            messagebox.showerror(msg_type, msg)
-            raise Exception(msg_type + ": " + msg)
-
         self.raw_data_draw["filename"] = self.file_path_o
         data = json.dumps(self.raw_data_draw)
         filename = 'data/data_%s.json' % self.file_path_o[:-4].split("/")[-1]
         with open(filename, 'w') as fp:
             fp.write(data)
         print("SAVE !", 'data/data_%s.json' % self.file_path_o[:-4].split("/")[-1])
-        # self.raw_data_draw = init_param["load_data"]["raw_data_draw"]
         self.reset()
         self.read_raw_data(filename)
 

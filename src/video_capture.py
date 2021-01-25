@@ -26,6 +26,20 @@ class MyVideoCapture:
             self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
             self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
+    def get_original_frame(self):
+        if "sample_img" in self.DEBUG:
+            origin_image = self.vid
+            origin_image = cv2.resize(origin_image, (self.cam_width, self.cam_height),
+                                       interpolation=cv2.INTER_AREA)
+        else:
+            if self.vid.isOpened():
+                ret, origin_image = self.vid.read()
+                if not ret:
+                    return ret, None, None, None
+            else:
+                raise Exception("Camera not opening")
+        return origin_image
+
     def get_frame(self, config, raw_data_draw=None, auto_calibrate=False):
         """ Get frame from video source"""
         if raw_data_draw is None:
@@ -39,17 +53,7 @@ class MyVideoCapture:
         t_blur = (2*(config["t_blur"]-1)) + 1
         t_noise = config["t_noise"]
 
-        if "sample_img" in self.DEBUG:
-            selected_area = self.vid
-            selected_area = cv2.resize(selected_area, (self.cam_width, self.cam_height),
-                                       interpolation=cv2.INTER_AREA)
-        else:
-            if self.vid.isOpened():
-                ret, selected_area = self.vid.read()
-                if not ret:
-                    return ret, None, None, None
-            else:
-                raise Exception("Camera not opening")
+        selected_area = self.get_original_frame()
 
         # Remove Shadow
         # selected_area = pp.shadow_remove(selected_area)
@@ -72,33 +76,32 @@ class MyVideoCapture:
 
         # todo run on RUN mode
         # todo rgb control -> gui slow**
-        lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
-        upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
-        if False:
-            if not auto_calibrate:
-                # define range of a color in HSV
-                lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
-                upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
+        # lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
+        # upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
+        if not auto_calibrate:
+            # define range of a color in HSV
+            lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
+            upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
+        else:
+            b, g, r = cv2.split(img)
+            cur_red = int(sum(r.ravel()/len(r.ravel())))
+            cur_green = int(sum(g.ravel()/len(g.ravel())))
+            cur_blue = int(sum(b.ravel()/len(b.ravel())))
+            if self.start_rgb == (0, 0, 0):
+                diff_rgb = (0, 0, 0)
+                self.start_rgb = (cur_red, cur_green, cur_blue)
             else:
-                b, g, r = cv2.split(img)
-                cur_red = int(sum(r.ravel()/len(r.ravel())))
-                cur_green = int(sum(g.ravel()/len(g.ravel())))
-                cur_blue = int(sum(b.ravel()/len(b.ravel())))
-                if self.start_rgb == (0, 0, 0):
-                    diff_rgb = (0, 0, 0)
-                    self.start_rgb = (cur_red, cur_green, cur_blue)
-                else:
-                    diff_rgb = (self.start_rgb[0] - cur_red, self.start_rgb[1] - cur_green, self.start_rgb[2] - cur_blue)
-                # print(diff_rgb)
-                lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
-                upper_hue = np.array([(t_red_max - (diff_rgb[0]*1)), (t_green_max - (diff_rgb[1]*1)), (t_blue_max - (diff_rgb[2]*1))])
+                diff_rgb = (self.start_rgb[0] - cur_red, self.start_rgb[1] - cur_green, self.start_rgb[2] - cur_blue)
+            print("diff_rgb: ", diff_rgb)
+            lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
+            upper_hue = np.array([(t_red_max - (diff_rgb[0]*1)), (t_green_max - (diff_rgb[1]*1)), (t_blue_max - (diff_rgb[2]*1))])
 
-                # todo lightness control
-                # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-                # diff_rgb = 255 - int(hsv[-1][-1][-1])
-                # print(diff_rgb)
-                # lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
-                # upper_hue = np.array([t_red_max-diff_rgb, t_green_max-diff_rgb, t_blue_max-diff_rgb])
+            # todo lightness control
+            # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            # diff_rgb = 255 - int(hsv[-1][-1][-1])
+            # print(diff_rgb)
+            # lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
+            # upper_hue = np.array([t_red_max-diff_rgb, t_green_max-diff_rgb, t_blue_max-diff_rgb])
         mask = pp.hue(img, lower_hue, upper_hue)
 
         # contour extraction
