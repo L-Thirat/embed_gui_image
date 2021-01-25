@@ -22,6 +22,7 @@ import numpy as np
 import copy
 
 import init_project
+from tkinter import messagebox
 
 init_project.create_folders()
 init_param = init_project.init_param()
@@ -137,24 +138,48 @@ class App(tki.Frame):
         self.canvas_rt.config(width=int(self.cam_width * 0.8), height=int(self.cam_height * 0.8))
 
     def move_p1(self):
-        self.prev_page = self.cur_page
-        self.cur_page = 1
-        if self.prev_page == 3:
-            self.create_monitor_canvas()
-        self.p1.show()
+        if self.cur_page != 1:
+            if self.cur_page == 3:
+                self.p1.show(p3=self.p3)
+                self.prev_page = self.cur_page
+                self.cur_page = 1
+                self.create_monitor_canvas()
+            else:
+                self.p1.show()
+                self.prev_page = self.cur_page
+                self.cur_page = 1
 
     def move_p2(self):
-        self.prev_page = self.cur_page
-        self.cur_page = 2
-        if self.prev_page == 3:
-            self.create_monitor_canvas()
-        self.p2.show()
+        if self.cur_page != 2:
+            if self.cur_page == 3:
+                self.p1.show(p3=self.p3)
+                self.p2.show()
+                self.prev_page = self.cur_page
+                self.cur_page = 2
+                self.create_monitor_canvas()
+            else:
+                self.p2.show()
+                self.prev_page = self.cur_page
+                self.cur_page = 2
 
     def move_p3(self):
-        self.prev_page = self.cur_page
-        self.cur_page = 3
-        self.canvas_rt.destroy()
-        self.p3.show()
+        if self.cur_page != 3:
+            msg_type = ""
+            for mode in self.p1.drawing_data:
+                if self.p1.drawing_data[mode]["temp_pol"]:
+                    msg_type = "Error"
+                    msg = "Need to finish drawing"
+                    messagebox.showerror(msg_type, msg)
+            if not self.p1.file_path_o:
+                msg_type = "Error"
+                msg = "No Image"
+                messagebox.showerror(msg_type, msg)
+
+            if msg_type != "Error" and self.cur_page != 3:
+                self.canvas_rt.destroy()
+                self.p3.show(p1=self.p1)
+                self.prev_page = self.cur_page
+                self.cur_page = 3
 
     def click_rgb(self, event):
         """ Click on video source to check RGB values

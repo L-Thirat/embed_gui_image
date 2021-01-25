@@ -19,6 +19,7 @@ import io
 
 from src import extraction as et
 from gui.page_control import Page
+from gui.drawing_control import DrawingPage
 import init_project
 from init_project import init_dir
 
@@ -27,10 +28,8 @@ from gui import Page1
 # Load init params
 init_param = init_project.init_param()
 
-FULL_SIZE = (960, 720)
 
-
-class Page3(Page):
+class Page3(DrawingPage):
     def __init__(self, app, *args, **kwargs):
         """ Page 3 config
 
@@ -41,19 +40,12 @@ class Page3(Page):
         :param kwargs: Tkinter's kwargs arguments
         :type kwargs: Optional
         """
-        self.vid = app.vid
-        self.config = app.config
-        self.window = self
-        self.app = app
+        size = (960, 720, 0, 0)
+        DrawingPage.__init__(self, app, size, "p3", *args, **kwargs)
 
-        self.p1 = self.app.p1
-
-        Page.__init__(self, *args, **kwargs)
-        self.buttonframe = tki.Frame(self)
-        self.buttonframe.pack(side="top", fill="both", expand=True)
-
-        # Drawing cv
-        self.canvas2 = tki.Canvas(self.buttonframe, cursor="cross")
         self.canvas2.place(relx=0.05, rely=0.1)
-        self.canvas2.config(width=FULL_SIZE[0], height=FULL_SIZE[1])
-        print("p3")
+        self.canvas2.config(width=size[0], height=size[1])
+
+        self.btn_mode_detect.place(relx=0.74, rely=0.18)
+        self.btn_mode_inside.place(relx=0.81, rely=0.18)
+        self.btn_mode_area.place(relx=0.88, rely=0.18)
