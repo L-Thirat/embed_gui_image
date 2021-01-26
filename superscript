@@ -1,0 +1,6 @@
+#!/bin/sh
+cd /home/linaro/Desktop/embed_gui_image
+bash run.sh
+if [[ $? -ne 0 ]] ; then
+    exit 1
+fi

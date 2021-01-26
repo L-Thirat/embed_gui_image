@@ -53,6 +53,12 @@ shapely
 
 > pip3 install opencv-python==3.4.10.37
 
+* Scipy
+
+> sudo apt-get install liblapack-def
+> pip3 install scipy
+
+* Python libary etc.
 > pip3 install -r requirements.txt
 
 * Install ghostscript: 
@@ -64,3 +70,7 @@ shapely
  ```yaml
 TEST_MAMOS: True
  ```
+* auto start
+> sudo vi /home/.config/lxsession/LXDE/autostart
+> add>> @./superscript
+> cp superscript ./superscript

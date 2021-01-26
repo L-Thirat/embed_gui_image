@@ -1,11 +1,10 @@
+#!/usr/bin/env python3
+
 # todo clear image in "/output/o_.jpg"
 # todo camera moved detection
 # todo program slowed when a lot function update realtime ex hue -> Need RUN/STOP Button when start/STOP
 # todo multiple camera
-# todo zoom when drawing
-# todo show all area on output
 # todo show line realtime (capture: Origin image)
-# todo base color = first time <COMPARE>
 """
 check linear line
 http://www.webmath.com/_answer.php
@@ -51,7 +50,6 @@ class App(tki.Frame):
         :param kwargs: Tkinter's kwargs arguments
         :type kwargs: Optional
         """
-        # todo testing
         self.timing = time()
         # Project variable
         self.log = logger.GetSystemLogger()
