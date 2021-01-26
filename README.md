@@ -74,3 +74,4 @@ TEST_MAMOS: True
 > sudo vi /home/.config/lxsession/LXDE/autostart
 > add>> @./superscript
 > cp superscript ./superscript
+> sudo chmod +x Pages_gui_black_detection.py
