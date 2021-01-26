@@ -5,6 +5,7 @@
 # todo zoom when drawing
 # todo show all area on output
 # todo show line realtime (capture: Origin image)
+# todo base color = first time <COMPARE>
 """
 check linear line
 http://www.webmath.com/_answer.php

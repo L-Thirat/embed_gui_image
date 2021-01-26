@@ -138,7 +138,8 @@ class Page1(DrawingPage):
 
         elif mode == "compare":
             if self.save_status:
-                ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw, auto_calibrate=True)
+                ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw, auto_calibrate=True, reset=self.reset_calibrate)
+                self.reset_calibrate = False
                 if ret:
                     start = time.time()
                     init_dir(self.app.cp_path, sub_dir)

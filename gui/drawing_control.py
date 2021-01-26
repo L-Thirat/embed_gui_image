@@ -69,6 +69,7 @@ class DrawingPage(tki.Frame):
 
         # Status
         self.save_status = False
+        self.reset_calibrate = True
         self.mode = "detect"
 
         buttonframe = tki.Frame(self)
@@ -302,6 +303,7 @@ class DrawingPage(tki.Frame):
                                            command=self.save_draw)
             else:
                 self.btn_save = tki.Button(self.window, text="Save", font=("Courier", 44), width=9, command=self.save_draw)
+                self.reset_calibrate = True
             self.btn_save.place(relx=0.56, rely=0.05)
 
     def load_draw(self):

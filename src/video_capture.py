@@ -40,7 +40,7 @@ class MyVideoCapture:
                 raise Exception("Camera not opening")
         return origin_image
 
-    def get_frame(self, config, raw_data_draw=None, auto_calibrate=False):
+    def get_frame(self, config, raw_data_draw=None, auto_calibrate=False, reset=True):
         """ Get frame from video source"""
         if raw_data_draw is None:
             raw_data_draw = {}
@@ -87,7 +87,7 @@ class MyVideoCapture:
             cur_red = int(sum(r.ravel()/len(r.ravel())))
             cur_green = int(sum(g.ravel()/len(g.ravel())))
             cur_blue = int(sum(b.ravel()/len(b.ravel())))
-            if self.start_rgb == (0, 0, 0):
+            if self.start_rgb == (0, 0, 0) or reset:
                 diff_rgb = (0, 0, 0)
                 self.start_rgb = (cur_red, cur_green, cur_blue)
             else:
