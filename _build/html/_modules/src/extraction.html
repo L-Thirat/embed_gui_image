@@ -194,55 +194,45 @@
     <span class="k">return</span> <span class="n">select_contour</span><span class="p">,</span> <span class="n">img</span></div>
 
 
-<div class="viewcode-block" id="error_line"><a class="viewcode-back" href="../../docs/src.html#src.extraction.error_line">[docs]</a><span class="k">def</span> <span class="nf">error_line</span><span class="p">(</span><span class="n">cnt</span><span class="p">,</span> <span class="n">crop_area</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Check overlap between over-under area&quot;&quot;&quot;</span>
-    <span class="n">error</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">ps</span> <span class="ow">in</span> <span class="n">cnt</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">ps</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">LineString</span><span class="p">([(</span><span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])])</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">Polygon</span><span class="p">(</span><span class="n">crop_area</span><span class="p">)):</span>
-                    <span class="n">error</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">ps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">Point</span><span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="n">Polygon</span><span class="p">(</span><span class="n">crop_area</span><span class="p">)):</span>
-                    <span class="n">error</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
-    <span class="k">return</span> <span class="n">error</span></div>
-
-
 <div class="viewcode-block" id="detect_error_cnt"><a class="viewcode-back" href="../../docs/src.html#src.extraction.detect_error_cnt">[docs]</a><span class="k">def</span> <span class="nf">detect_error_cnt</span><span class="p">(</span><span class="n">contours</span><span class="p">,</span> <span class="n">raw_data_draw</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get result from comparing image&quot;&quot;&quot;</span>
     <span class="n">t_error</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_error&quot;</span><span class="p">]</span>
-    <span class="n">t_width_min</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_width_min&quot;</span><span class="p">]</span>
-    <span class="n">t_width_max</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_width_max&quot;</span><span class="p">]</span>
     <span class="n">t_space</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_space&quot;</span><span class="p">]</span>
 
     <span class="n">error_over</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">error_under</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">raw_data_draw</span><span class="p">[</span><span class="s2">&quot;detect&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">raw_data_draw</span><span class="p">[</span><span class="s2">&quot;inside&quot;</span><span class="p">]:</span>
         <span class="c1"># https://www.geeksforgeeks.org/solving-linear-regression-in-python/</span>
-        <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">length2points</span><span class="p">((</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="n">t_width_max</span><span class="p">)</span>
-        <span class="n">start_line</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">)</span>
-        <span class="n">end_line</span> <span class="o">=</span> <span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
+        <span class="n">start_line</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">end_line</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
         <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">linear_formula</span><span class="p">(</span><span class="n">start_line</span><span class="p">,</span> <span class="n">end_line</span><span class="p">)</span>
 
-        <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">diff_xy</span><span class="p">(</span><span class="n">start_line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">start_line</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">end_line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">end_line</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">t_space</span><span class="p">)</span>
+        <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">diff_xy</span><span class="p">(</span><span class="n">start_line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">start_line</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">end_line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">end_line</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">w</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">end_line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start_line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">end_line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dx</span><span class="p">)</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">m</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">c</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start_line</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">end_line</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dy</span><span class="p">)</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="n">m</span>
+            <span class="k">if</span> <span class="n">m</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="n">m</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         <span class="n">xnew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start_line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">end_line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dx</span><span class="p">)</span>
         <span class="n">ynew</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">xnew</span><span class="p">)</span>  <span class="c1"># use interpolation function returned by `interp1d`</span>
         <span class="c1"># plt.plot(x, y, &#39;o&#39;, xnew, ynew, &#39;-&#39;)</span>
         <span class="c1"># plt.show()</span>
-        <span class="n">sampling_point</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xnew</span><span class="p">,</span> <span class="n">ynew</span><span class="p">)]</span>
+
+        <span class="n">sampling_point</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xnew</span><span class="p">,</span> <span class="n">ynew</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="n">Polygon</span><span class="p">(</span><span class="n">raw_data_draw</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+                <span class="n">sampling_point</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
         <span class="n">lines</span><span class="p">[(</span><span class="n">start_line</span><span class="p">,</span> <span class="n">end_line</span><span class="p">)]</span> <span class="o">=</span> <span class="n">sampling_point</span>
 
     <span class="c1"># find over contour</span>
-    <span class="n">match_cnt</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">match_cnt</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">cnt</span> <span class="ow">in</span> <span class="n">contours</span><span class="p">:</span>
         <span class="n">start_point</span><span class="p">,</span> <span class="n">end_point</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">find_start_end</span><span class="p">(</span><span class="n">cnt</span><span class="p">)</span>
         <span class="n">num_error</span> <span class="o">=</span> <span class="mi">0</span>
@@ -251,25 +241,14 @@
             <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="c1"># find matching line</span>
-            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-                <span class="n">start_line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">end_line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">t_width_min</span> <span class="o">&lt;</span> <span class="n">t_width_max</span><span class="p">:</span>
-                    <span class="n">sample_rect</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">line2rect</span><span class="p">(</span><span class="n">start_line</span><span class="p">,</span> <span class="n">end_line</span><span class="p">,</span> <span class="n">t_width_max</span><span class="p">)</span>
-                    <span class="n">point_inside</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="k">if</span> <span class="n">t_width_min</span><span class="p">:</span>
-                        <span class="n">inside_sample_rect</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">line2rect</span><span class="p">(</span><span class="n">start_line</span><span class="p">,</span> <span class="n">end_line</span><span class="p">,</span> <span class="n">t_width_min</span><span class="p">)</span>
-                        <span class="n">point_inside</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="n">Polygon</span><span class="p">(</span><span class="n">inside_sample_rect</span><span class="p">))</span>
-                    <span class="k">if</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="n">Polygon</span><span class="p">(</span><span class="n">sample_rect</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">point_inside</span><span class="p">:</span>
-                        <span class="n">matching</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="n">poly_cnt</span> <span class="o">=</span> <span class="p">[(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">cnt</span><span class="p">]</span>
-
-                        <span class="k">if</span> <span class="n">line</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">match_cnt</span><span class="p">:</span>
-                            <span class="n">match_cnt</span><span class="p">[</span><span class="n">line</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">poly_cnt</span><span class="p">]</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">poly_cnt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">match_cnt</span><span class="p">[</span><span class="n">line</span><span class="p">]:</span>
-                                <span class="n">match_cnt</span><span class="p">[</span><span class="n">line</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">poly_cnt</span><span class="p">)</span>
-                        <span class="k">break</span>
+            <span class="k">for</span> <span class="n">pol_idx</span><span class="p">,</span> <span class="n">pol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw_data_draw</span><span class="p">[</span><span class="s2">&quot;detect&quot;</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="n">Polygon</span><span class="p">(</span><span class="n">pol</span><span class="p">)):</span>
+                    <span class="n">matching</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">poly_cnt</span> <span class="o">=</span> <span class="p">[(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">cnt</span><span class="p">]</span>
+                    <span class="n">poly_cnt</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">poly_cnt</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">poly_cnt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">match_cnt</span><span class="p">:</span>
+                        <span class="n">match_cnt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">poly_cnt</span><span class="p">)</span>
+                    <span class="k">break</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">matching</span><span class="p">:</span>
                 <span class="n">num_error</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">num_error</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">cnt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">t_error</span><span class="p">:</span>
@@ -277,32 +256,35 @@
 
     <span class="c1"># find matching line</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-        <span class="n">not_match_cnt</span> <span class="o">=</span> <span class="p">[[]]</span>
-        <span class="n">matching_count</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">prev_p</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># case line length &lt; space = always success</span>
+        <span class="k">if</span> <span class="n">lp</span><span class="o">.</span><span class="n">find_distance</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">t_space</span><span class="p">:</span>
+            <span class="n">start_not_match</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">last_not_match</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">prev_matching_cnt</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">]:</span>
-            <span class="n">matching</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="n">prev_p</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">match_cnt</span><span class="p">:</span>
-                    <span class="n">sample_rect</span> <span class="o">=</span> <span class="n">lp</span><span class="o">.</span><span class="n">line2rect</span><span class="p">(</span><span class="n">prev_p</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">t_space</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">poly_cnt</span> <span class="ow">in</span> <span class="n">match_cnt</span><span class="p">[</span><span class="n">line</span><span class="p">]:</span>
-                        <span class="k">if</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">poly_cnt</span><span class="p">)</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">Polygon</span><span class="p">(</span><span class="n">sample_rect</span><span class="p">)):</span>
-                            <span class="n">matching_count</span> <span class="o">+=</span> <span class="mi">1</span>
-                            <span class="k">if</span> <span class="n">not_match_cnt</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-                                <span class="n">not_match_cnt</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-                            <span class="n">matching</span> <span class="o">=</span> <span class="kc">True</span>
-                            <span class="k">break</span>
-
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">matching</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">not_match_cnt</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-                        <span class="n">not_match_cnt</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prev_p</span><span class="p">)</span>
-                    <span class="n">not_match_cnt</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
-            <span class="n">prev_p</span> <span class="o">=</span> <span class="n">point</span>
-        <span class="c1"># not_match_cnt.append([])</span>
-
-        <span class="k">if</span> <span class="n">matching_count</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">]):</span>
-            <span class="n">error_under</span> <span class="o">=</span> <span class="n">error_under</span> <span class="o">+</span> <span class="n">error_line</span><span class="p">(</span><span class="n">not_match_cnt</span><span class="p">,</span> <span class="n">raw_data_draw</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">]:</span>
+                <span class="n">matching</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">prev_matching_cnt</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">Point</span><span class="p">(</span><span class="n">point</span><span class="p">)</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="n">prev_matching_cnt</span><span class="p">):</span>
+                        <span class="n">matching</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">poly_cnt</span> <span class="ow">in</span> <span class="n">match_cnt</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">poly_cnt</span> <span class="o">!=</span> <span class="n">prev_matching_cnt</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">Point</span><span class="p">(</span><span class="n">point</span><span class="p">)</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="n">poly_cnt</span><span class="p">):</span>
+                                <span class="n">matching</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="n">prev_matching_cnt</span> <span class="o">=</span> <span class="n">poly_cnt</span>
+                                <span class="k">break</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">matching</span> <span class="ow">and</span> <span class="n">point</span> <span class="o">!=</span> <span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">start_not_match</span><span class="p">:</span>
+                        <span class="n">start_not_match</span> <span class="o">=</span> <span class="n">point</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">last_not_match</span> <span class="o">=</span> <span class="n">point</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">start_not_match</span> <span class="ow">and</span> <span class="n">last_not_match</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">lp</span><span class="o">.</span><span class="n">find_distance</span><span class="p">(</span><span class="n">start_not_match</span><span class="p">,</span> <span class="n">last_not_match</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">t_space</span><span class="p">:</span>
+                            <span class="n">error_under</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start_not_match</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">start_not_match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">last_not_match</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">last_not_match</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="n">start_not_match</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">last_not_match</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="n">error_over</span><span class="p">,</span> <span class="n">error_under</span></div>
 

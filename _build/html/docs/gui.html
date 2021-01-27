@@ -38,7 +38,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="init_project module" href="init_project.html" /> 
+    <link rel="next" title="init_project module" href="init_project.html" />
+    <link rel="prev" title="conf module" href="conf.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -85,14 +86,19 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Pages_gui_black_detection.html">Pages_gui_black_detection module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="init_project.html">init_project module</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">gui package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-gui.page1">gui.page1 module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-gui.page2">gui.page2 module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-gui.page_control">gui.page_control module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-gui">Module contents</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">TinkerBoard_line_detection35</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Pages_gui_black_detection.html">Pages_gui_black_detection module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conf.html">conf module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">gui package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gui.page1">gui.page1 module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gui.page2">gui.page2 module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gui.page_control">gui.page_control module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-gui">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="init_project.html">init_project module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.html">src package</a></li>
 </ul>
 </li>
 </ul>
@@ -143,6 +149,8 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
+          <li><a href="modules.html">TinkerBoard_line_detection35</a> &raquo;</li>
+        
       <li>gui package</li>
     
     
@@ -172,29 +180,11 @@
 <dl class="py class">
 <dt id="gui.page1.Page1">
 <em class="property">class </em><code class="sig-prename descclassname">gui.page1.</code><code class="sig-name descname">Page1</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">app</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#gui.page_control.Page" title="gui.page_control.Page"><code class="xref py py-class docutils literal notranslate"><span class="pre">gui.page_control.Page</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">gui.drawing_control.DrawingPage</span></code></p>
 <dl class="py method">
 <dt id="gui.page1.Page1.browse">
 <code class="sig-name descname">browse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.browse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.browse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find json data from Local PC</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="gui.page1.Page1.drawmode_area">
-<code class="sig-name descname">drawmode_area</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.drawmode_area"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.drawmode_area" title="Permalink to this definition">¶</a></dt>
-<dd><p>Draw mode: area</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="gui.page1.Page1.drawmode_default">
-<code class="sig-name descname">drawmode_default</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.drawmode_default"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.drawmode_default" title="Permalink to this definition">¶</a></dt>
-<dd><p>Change draw mode buttons to default</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="gui.page1.Page1.drawmode_detect">
-<code class="sig-name descname">drawmode_detect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.drawmode_detect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.drawmode_detect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Draw mode: detect</p>
 </dd></dl>
 
 <dl class="py method">
@@ -204,44 +194,9 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="gui.page1.Page1.load_line">
-<code class="sig-name descname">load_line</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.load_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.load_line" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load line data from saved json file</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="gui.page1.Page1.load_area">
-<code class="sig-name descname">load_area</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.load_area"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.load_area" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load rectangle data from saved json file</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="gui.page1.Page1.on_button_press">
-<code class="sig-name descname">on_button_press</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.on_button_press"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.on_button_press" title="Permalink to this definition">¶</a></dt>
-<dd><p>Left Click events in canvas</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="gui.page1.Page1.raw_data_draw">
-<code class="sig-name descname">raw_data_draw</code><em class="property"> = Ellipsis</em><a class="headerlink" href="#gui.page1.Page1.raw_data_draw" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="gui.page1.Page1.read_raw_data">
-<code class="sig-name descname">read_raw_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.read_raw_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.read_raw_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read json data and update canvas</p>
-</dd></dl>
-
-<dl class="py method">
 <dt id="gui.page1.Page1.reset">
 <code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.reset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset screen and parameters</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="gui.page1.Page1.save_draw">
-<code class="sig-name descname">save_draw</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.save_draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.save_draw" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save drawing data to json file</p>
 </dd></dl>
 
 <dl class="py method">
@@ -262,24 +217,7 @@
 <dd><p>Call snapshot function with original image(LEFT)</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="gui.page1.Page1.toggle_save_status">
-<code class="sig-name descname">toggle_save_status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.toggle_save_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.toggle_save_status" title="Permalink to this definition">¶</a></dt>
-<dd><p>Toggle snapshot status</p>
 </dd></dl>
-
-<dl class="py method">
-<dt id="gui.page1.Page1.undo">
-<code class="sig-name descname">undo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#Page1.undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.Page1.undo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Right click events in canvas</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt id="gui.page1.init_dir">
-<code class="sig-prename descclassname">gui.page1.</code><code class="sig-name descname">init_dir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">basedir</span></em>, <em class="sig-param"><span class="n">sub_dir</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page1.html#init_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page1.init_dir" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </div>
 <div class="section" id="module-gui.page2">
@@ -334,18 +272,6 @@
 <dt id="gui.page2.Page2.change_light">
 <code class="sig-name descname">change_light</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">val</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page2.html#Page2.change_light"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page2.Page2.change_light" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change light config</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="gui.page2.Page2.change_max">
-<code class="sig-name descname">change_max</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">val</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page2.html#Page2.change_max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page2.Page2.change_max" title="Permalink to this definition">¶</a></dt>
-<dd><p>Change maximum width of detect line</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="gui.page2.Page2.change_min">
-<code class="sig-name descname">change_min</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">val</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/page2.html#Page2.change_min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.page2.Page2.change_min" title="Permalink to this definition">¶</a></dt>
-<dd><p>Change minimum width of detect line</p>
 </dd></dl>
 
 <dl class="py method">
@@ -412,7 +338,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="init_project.html" class="btn btn-neutral float-left" title="init_project module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="init_project.html" class="btn btn-neutral float-right" title="init_project module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="conf.html" class="btn btn-neutral float-left" title="conf module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

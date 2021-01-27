@@ -164,6 +164,73 @@
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="init_dir"><a class="viewcode-back" href="../docs/init_project.html#init_project.init_dir">[docs]</a><span class="k">def</span> <span class="nf">init_dir</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="n">sub_dir</span><span class="p">):</span>
+    <span class="c1"># init directory</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">basedir</span> <span class="o">+</span> <span class="n">sub_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">basedir</span> <span class="o">+</span> <span class="n">sub_dir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="init_param"><a class="viewcode-back" href="../docs/init_project.html#init_project.init_param">[docs]</a><span class="k">def</span> <span class="nf">init_param</span><span class="p">():</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;load_data&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;file_path_o&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;file_path_c&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tk_photo_line&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;tk_photo_org&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;tk_photo_cp&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;load_img_o&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;load_img_cp&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;load_filename&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;raw_data_draw&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;detect&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;inside&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;output_display&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;error_box&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;error_line&quot;</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;drawing&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;drawing_data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;detect&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;prev&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">&quot;polygon&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">&quot;temp_pol&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;inside&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;prev&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">&quot;polygon&quot;</span><span class="p">:</span> <span class="p">[],</span>  <span class="c1"># line</span>
+                    <span class="s2">&quot;temp_pol&quot;</span><span class="p">:</span> <span class="p">[],</span>  <span class="c1"># not use</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;prev&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">&quot;polygon&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">&quot;temp_pol&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;prev_sub_pol&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;count_draw_sub_pol&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;start_x&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;start_y&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;range_rgb&quot;</span><span class="p">:</span> <span class="p">[{</span>
+                <span class="s2">&quot;point&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span>
+                <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="p">}]</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;save_status&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;detect&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">params</span></div>
 </pre></div>
 
            </div>

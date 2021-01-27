@@ -38,8 +38,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="init_project module" href="init_project.html" />
-    <link rel="prev" title="Welcome to LineDetection’s documentation!" href="../index.html" /> 
+    <link rel="next" title="conf module" href="conf.html" />
+    <link rel="prev" title="TinkerBoard_line_detection35" href="modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,9 +86,14 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Pages_gui_black_detection module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="init_project.html">init_project module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gui.html">gui package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">TinkerBoard_line_detection35</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Pages_gui_black_detection module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conf.html">conf module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gui.html">gui package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="init_project.html">init_project module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.html">src package</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -137,6 +142,8 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
+          <li><a href="modules.html">TinkerBoard_line_detection35</a> &raquo;</li>
+        
       <li>Pages_gui_black_detection module</li>
     
     
@@ -158,14 +165,40 @@
             
   <div class="section" id="module-Pages_gui_black_detection">
 <span id="pages-gui-black-detection-module"></span><h1>Pages_gui_black_detection module<a class="headerlink" href="#module-Pages_gui_black_detection" title="Permalink to this headline">¶</a></h1>
-<p>check linear line
-<a class="reference external" href="http://www.webmath.com/_answer.php">http://www.webmath.com/_answer.php</a>
-Iterporation
+<p>Reference</p>
+<p>Interpolation:
 <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html</a></p>
 <dl class="py class">
 <dt id="Pages_gui_black_detection.App">
 <em class="property">class </em><code class="sig-prename descclassname">Pages_gui_black_detection.</code><code class="sig-name descname">App</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">window</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Pages_gui_black_detection.html#App"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Pages_gui_black_detection.App" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tkinter.Frame</span></code></p>
+<p>This Application is use to detect line in image using image processing technique on CV2 that GUI based on tkinter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>setting_data</strong> (<em>dict</em>) – Project settings</p></li>
+<li><p><strong>log</strong> (<em>class</em>) – Log settings</p></li>
+<li><p><strong>LED_OK</strong> (<em>int</em>) – Output OK PIN</p></li>
+<li><p><strong>LED_NG</strong> (<em>int</em>) – Output NG PIN</p></li>
+<li><p><strong>BTN_input</strong> (<em>int</em>) – Input PIN</p></li>
+<li><p><strong>DEBUG</strong> (<em>bool</em><em> [</em><em>True: Run debug mode</em><em>, </em><em>False: Run production</em><em>]</em>) – Debug mode</p></li>
+<li><p><strong>TEST_MAMOS</strong> (<em>bool</em><em> [</em><em>True: Run on mamos</em><em>, </em><em>False: Run on PC</em><em>]</em>) – Test on Mamos mode</p></li>
+<li><p><strong>mm</strong> (<em>class</em>) – Mamos class</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) – Video config</p></li>
+<li><p><strong>range_rgb</strong> (<em>dict</em>) – RGB checker</p></li>
+<li><p><strong>window</strong> (<em>class</em>) – Tkinter (GUI builder) setup</p></li>
+<li><p><strong>vid</strong> (<em>class</em>) – Video capture class</p></li>
+<li><p><strong>frame</strong> (<em>class</em>) – Video Capture’s frame</p></li>
+<li><p><strong>mask</strong> (<em>class</em>) – Video Capture’s mask</p></li>
+<li><p><strong>cur_page</strong> (<em>int</em>) – Current page</p></li>
+<li><p><strong>prev_page</strong> (<em>int</em>) – Previous page</p></li>
+<li><p><strong>p1</strong> (<em>class</em>) – Page1</p></li>
+<li><p><strong>p2</strong> (<em>class</em>) – Page2</p></li>
+<li><p><strong>p3</strong> (<em>class</em>) – Page3</p></li>
+<li><p><strong>canvas_rt</strong> (<em>bool</em><em> [</em><em>True: Run on mamos</em><em>, </em><em>False: Run on PC</em><em>]</em>) – Canvas</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt id="Pages_gui_black_detection.App.click_rgb">
 <code class="sig-name descname">click_rgb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">event</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Pages_gui_black_detection.html#App.click_rgb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Pages_gui_black_detection.App.click_rgb" title="Permalink to this definition">¶</a></dt>
@@ -178,9 +211,33 @@ Iterporation
 </dd></dl>
 
 <dl class="py method">
+<dt id="Pages_gui_black_detection.App.create_monitor_canvas">
+<code class="sig-name descname">create_monitor_canvas</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Pages_gui_black_detection.html#App.create_monitor_canvas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Pages_gui_black_detection.App.create_monitor_canvas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a canvas that can fit the above video source size</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="Pages_gui_black_detection.App.exit_handler">
 <code class="sig-name descname">exit_handler</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Pages_gui_black_detection.html#App.exit_handler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Pages_gui_black_detection.App.exit_handler" title="Permalink to this definition">¶</a></dt>
 <dd><p>To run some function when this application was closed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Pages_gui_black_detection.App.move_p1">
+<code class="sig-name descname">move_p1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Pages_gui_black_detection.html#App.move_p1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Pages_gui_black_detection.App.move_p1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move to Page 1</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Pages_gui_black_detection.App.move_p2">
+<code class="sig-name descname">move_p2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Pages_gui_black_detection.html#App.move_p2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Pages_gui_black_detection.App.move_p2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move to Page 2</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="Pages_gui_black_detection.App.move_p3">
+<code class="sig-name descname">move_p3</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Pages_gui_black_detection.html#App.move_p3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Pages_gui_black_detection.App.move_p3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move to Page 3</p>
 </dd></dl>
 
 <dl class="py method">
@@ -216,8 +273,8 @@ Iterporation
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="init_project.html" class="btn btn-neutral float-right" title="init_project module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to LineDetection’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="conf.html" class="btn btn-neutral float-right" title="conf module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="modules.html" class="btn btn-neutral float-left" title="TinkerBoard_line_detection35" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

@@ -198,12 +198,6 @@
 </dd></dl>
 
 <dl class="py function">
-<dt id="src.extraction.error_line">
-<code class="sig-prename descclassname">src.extraction.</code><code class="sig-name descname">error_line</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cnt</span></em>, <em class="sig-param"><span class="n">crop_area</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/extraction.html#error_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.extraction.error_line" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check overlap between over-under area</p>
-</dd></dl>
-
-<dl class="py function">
 <dt id="src.extraction.min_max_color">
 <code class="sig-prename descclassname">src.extraction.</code><code class="sig-name descname">min_max_color</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">frame</span></em>, <em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">range_rgb</span></em>, <em class="sig-param"><span class="n">half_px</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/extraction.html#min_max_color"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.extraction.min_max_color" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract min-max RGB values</p>
@@ -216,6 +210,12 @@
 <dt id="src.linear_processing.diff_xy">
 <code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">diff_xy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">y1</span></em>, <em class="sig-param"><span class="n">x2</span></em>, <em class="sig-param"><span class="n">y2</span></em>, <em class="sig-param"><span class="n">w</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#diff_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.diff_xy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find difference distance when width change</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="src.linear_processing.dist2">
+<code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">dist2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">end</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#dist2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.dist2" title="Permalink to this definition">¶</a></dt>
+<dd><p>distance square</p>
 </dd></dl>
 
 <dl class="py function">
@@ -279,8 +279,7 @@ The function returns following values
 <dl class="py function">
 <dt id="src.linear_processing.point2line_match">
 <code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">point2line_match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">end</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#point2line_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.point2line_match" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find minimum distance between line-point</p>
-</dd></dl>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-src.logger">
@@ -362,9 +361,14 @@ The function returns following values
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt id="src.video_capture.MyVideoCapture.get_frame">
-<code class="sig-name descname">get_frame</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">raw_data_draw</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">auto_calibrate</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/video_capture.html#MyVideoCapture.get_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.video_capture.MyVideoCapture.get_frame" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_frame</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">raw_data_draw</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">auto_calibrate</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">reset</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/video_capture.html#MyVideoCapture.get_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.video_capture.MyVideoCapture.get_frame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get frame from video source</p>
 </dd></dl>
+
+<dl class="py method">
+<dt id="src.video_capture.MyVideoCapture.get_original_frame">
+<code class="sig-name descname">get_original_frame</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/video_capture.html#MyVideoCapture.get_original_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.video_capture.MyVideoCapture.get_original_frame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="src.video_capture.MyVideoCapture.zoom">

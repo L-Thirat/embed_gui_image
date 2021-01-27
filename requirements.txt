@@ -11,3 +11,5 @@ PyYAML==5.3.1
 scipy==1.4.1
 six==1.15.0
 shapely==1.7.1
+sphinx==3.4.3
+sphinx-rtd-theme==0.5.1

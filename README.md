@@ -75,3 +75,6 @@ TEST_MAMOS: True
 > add>> @./superscript
 > cp superscript ./superscript
 > sudo chmod +x Pages_gui_black_detection.py
+>
+* DOCSTRING
+https://sphinx-rtd-tutorial.readthedocs.io/en/latest/install.html

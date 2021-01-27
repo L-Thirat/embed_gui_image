@@ -5,10 +5,14 @@
 # todo program slowed when a lot function update realtime ex hue -> Need RUN/STOP Button when start/STOP
 # todo multiple camera
 # todo show line realtime (capture: Origin image)
+
+# todo fix blue line
+# todo fix create new log file each day
+# todo auto light calibrate
 """
-check linear line
-http://www.webmath.com/_answer.php
-Iterporation
+# Reference
+
+Interpolation:
 https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html
 """
 
@@ -40,17 +44,52 @@ delay = 15
 
 
 class App(tki.Frame):
-    def __init__(self, window, *args, **kwargs):
-        """ This is application to detect line in image using image processing technique on CV2
+    """ This Application is use to detect line in image using image processing technique on CV2 that GUI based on tkinter
 
-        :param window: Tkinter (GUI builder) setup
-        :type window: class
-        :param args: Tkinter's arguments
-        :type args: Optional
-        :param kwargs: Tkinter's kwargs arguments
-        :type kwargs: Optional
-        """
-        self.timing = time()
+    :param setting_data: Project settings
+    :type setting_data: dict
+    :param log: Log settings
+    :type log: class
+    :param LED_OK: Output OK PIN
+    :type LED_OK: int
+    :param LED_NG: Output NG PIN
+    :type LED_NG: int
+    :param BTN_input: Input PIN
+    :type BTN_input: int
+    :param DEBUG: Debug mode
+    :type DEBUG: bool [True: Run debug mode, False: Run production]
+    :param TEST_MAMOS: Test on Mamos mode
+    :type TEST_MAMOS: bool [True: Run on mamos, False: Run on PC]
+    :param mm: Mamos class
+    :type mm: class
+    :param config: Video config
+    :type config: dict
+    :param range_rgb: RGB checker
+    :type range_rgb: dict
+    :param window: Tkinter (GUI builder) setup
+    :type window: class
+    :param vid: Video capture class
+    :type vid: class
+    :param frame: Video Capture's frame
+    :type frame: class
+    :param mask: Video Capture's mask
+    :type mask: class
+    :param cur_page: Current page
+    :type cur_page: int
+    :param prev_page: Previous page
+    :type prev_page: int
+    :param p1: Page1
+    :type p1: class
+    :param p2: Page2
+    :type p2: class
+    :param p3: Page3
+    :type p3: class
+    :param canvas_rt: Canvas
+    :type canvas_rt: bool [True: Run on mamos, False: Run on PC]
+    """
+    def __init__(self, window, *args, **kwargs):
+        """Constructor method"""
+        # todo self.timing = time()
         # Project variable
         self.log = logger.GetSystemLogger()
 
@@ -68,7 +107,7 @@ class App(tki.Frame):
             self.LED_NG = self.setting_data["LED_NG"]
             self.BTN_input = self.setting_data["BTN_INPUT"]
 
-            # # Testing
+            # Testing
             self.DEBUG = self.setting_data["DEBUG"]
             if "sample_img" in self.DEBUG:
                 self.DEBUG["cam_width"] = self.cam_width
@@ -84,10 +123,6 @@ class App(tki.Frame):
 
         # config canvas
         with open(r'config.yaml') as file:
-            """
-            # The FullLoader parameter handles the conversion from YAML
-            # scalar values to Python the dictionary format
-            """
             self.config = yaml.load(file, Loader=yaml.FullLoader)
         self.range_rgb = copy.deepcopy(init_param["drawing"]["range_rgb"])
 
@@ -129,7 +164,7 @@ class App(tki.Frame):
         self.p1.show()
 
     def create_monitor_canvas(self):
-        # Create a canvas that can fit the above video source size
+        """Create a canvas that can fit the above video source size"""
         self.canvas_rt = tki.Canvas(self.window, cursor="cross")
         self.canvas_rt.bind("<ButtonPress-1>", self.click_rgb)
         self.canvas_rt.bind("<Button-3>", self.undo_rgb)
@@ -137,6 +172,7 @@ class App(tki.Frame):
         self.canvas_rt.config(width=int(self.cam_width * 0.8), height=int(self.cam_height * 0.8))
 
     def move_p1(self):
+        """Move to Page 1"""
         if self.cur_page != 1:
             if self.cur_page == 3:
                 self.p1.show(p3=self.p3)
@@ -149,6 +185,7 @@ class App(tki.Frame):
                 self.cur_page = 1
 
     def move_p2(self):
+        """Move to Page 2"""
         if self.cur_page != 2:
             if self.cur_page == 3:
                 self.p1.show(p3=self.p3)
@@ -162,6 +199,7 @@ class App(tki.Frame):
                 self.cur_page = 2
 
     def move_p3(self):
+        """Move to Page 3"""
         if self.cur_page != 3:
             msg_type = ""
             for mode in self.p1.drawing_data:
@@ -181,7 +219,7 @@ class App(tki.Frame):
                 self.cur_page = 3
 
     def click_rgb(self, event):
-        """ Click on video source to check RGB values
+        """Click on video source to check RGB values
 
         :param event: click event
         :type event: class
@@ -198,7 +236,7 @@ class App(tki.Frame):
         self.p2.lbl_rgb.config(text=txt_range, font=("Courier", 22))
 
     def undo_rgb(self, event):
-        """ Right click to undo RGB values
+        """Right click to undo RGB values
 
         :param event: click event
         :type event: class
@@ -213,13 +251,13 @@ class App(tki.Frame):
             self.range_rgb = copy.deepcopy(init_param["drawing"]["range_rgb"])
 
     def update(self):
+        """Real-time update image in canvas"""
         if self.cur_page != 3:
-            """ Real-time update image in canvas """
             if self.TEST_MAMOS:
                 # todo for auto testing if int(time() - self.timing) > 30:
                 if self.mm.output():
                     self.p1.snapshot("compare")
-                    self.timing = time()
+                    # todo self.timing = time()
 
             ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw)
             # todo test light calibrate >>, self.p1.save_status
@@ -239,14 +277,20 @@ class App(tki.Frame):
         self.window.after(delay, self.update)
 
     def exit_handler(self):
-        """ To run some function when this application was closed"""
+        """To run some function when this application was closed"""
         print("Ending ..")
         if self.TEST_MAMOS:
             self.mm.clean()
 
 
 def toggle_geom(self, event):
-    """ Geometry of GUI """
+    """Geometry of GUI
+
+    :param self: Tkinter class
+    :type self: class
+    :param event: Geometry event
+    :type event: class
+    """
     geom = self.master.winfo_geometry()
     print(geom, self._geom)
     self.master.geometry(self._geom)

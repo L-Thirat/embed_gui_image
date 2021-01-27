@@ -56,7 +56,7 @@ class MyVideoCapture:
         selected_area = self.get_original_frame()
 
         # Remove Shadow
-        # selected_area = pp.shadow_remove(selected_area)
+        selected_area = pp.shadow_remove(selected_area)
         # selected_area = pp.color_shadow_demove(selected_area)
 
         if t_zoom > 1:
@@ -93,7 +93,7 @@ class MyVideoCapture:
             else:
                 diff_rgb = (self.start_rgb[0] - cur_red, self.start_rgb[1] - cur_green, self.start_rgb[2] - cur_blue)
             print("diff_rgb: ", diff_rgb)
-            lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
+            lower_hue = np.array([(t_red_min - (diff_rgb[0]*1)), (t_green_min - (diff_rgb[1]*1)), (t_blue_min - (diff_rgb[2]*1))])
             upper_hue = np.array([(t_red_max - (diff_rgb[0]*1)), (t_green_max - (diff_rgb[1]*1)), (t_blue_max - (diff_rgb[2]*1))])
 
             # todo lightness control
