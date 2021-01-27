@@ -1,8 +1,8 @@
-TEST_MAMOS: False
-DEBUG: {
-  "sample_img": 'output/compare/2021/1/25/c_temp_filename.jpg'
-}
-#DEBUG: {}
+TEST_MAMOS: True
+#DEBUG: {
+#  "sample_img": 'output/compare/2021/1/25/c_temp_filename.jpg'
+#}
+DEBUG: {}
 
 gs: C:\Program Files\gs\gs9.53.3\bin\gswin64c
 

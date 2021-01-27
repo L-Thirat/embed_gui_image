@@ -56,7 +56,7 @@ class MyVideoCapture:
         selected_area = self.get_original_frame()
 
         # Remove Shadow
-        selected_area = pp.shadow_remove(selected_area)
+        # selected_area = pp.shadow_remove(selected_area)
         # selected_area = pp.color_shadow_demove(selected_area)
 
         if t_zoom > 1:

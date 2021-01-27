@@ -6,9 +6,9 @@
 # todo multiple camera
 # todo show line realtime (capture: Origin image)
 
-# todo fix blue line
 # todo fix create new log file each day
 # todo auto light calibrate
+# todo GUI bug
 """
 # Reference
 

@@ -41,6 +41,16 @@ def contour_selection(contours, img, noise_len):
     return select_contour, img
 
 
+def error_line(cnt):
+    """ Check overlap between over-under area"""
+    error = []
+    for ps in cnt:
+        if ps:
+            if len(ps) > 1:
+                error.append((ps[0][0], ps[0][1], ps[-1][0], ps[-1][1]))
+    return error
+
+
 def detect_error_cnt(contours, raw_data_draw, config):
     """Get result from comparing image"""
     t_error = config["t_error"]
@@ -103,35 +113,31 @@ def detect_error_cnt(contours, raw_data_draw, config):
 
     # find matching line
     for line in lines:
-        # case line length < space = always success
-        if lp.find_distance(lines[line][0], lines[line][-1]) > t_space:
-            start_not_match = None
-            last_not_match = None
-            prev_matching_cnt = None
+        not_match_cnt = [[]]
+        matching_count = 0
+        prev_p = None
 
-            for point in lines[line]:
-                matching = False
-                if prev_matching_cnt:
-                    if Point(point).within(prev_matching_cnt):
+        for point in lines[line]:
+            matching = False
+            if prev_p:
+                # print(match_cnt)
+                sample_rect = lp.line2rect(prev_p, point, t_space)
+                for poly_cnt in match_cnt:
+                    if poly_cnt.intersects(Polygon(sample_rect)):
+                        matching_count += 1
+                        if not_match_cnt[-1]:
+                            not_match_cnt.append([])
                         matching = True
-                else:
-                    for poly_cnt in match_cnt:
-                        if poly_cnt != prev_matching_cnt:
-                            if Point(point).within(poly_cnt):
-                                matching = True
-                                prev_matching_cnt = poly_cnt
-                                break
-                if not matching and point != lines[line][-1]:
-                    if not start_not_match:
-                        start_not_match = point
-                    else:
-                        last_not_match = point
-                else:
-                    if start_not_match and last_not_match:
-                        if lp.find_distance(start_not_match, last_not_match) > t_space:
-                            error_under.append((start_not_match[0], start_not_match[1], last_not_match[0], last_not_match[1]))
-                    start_not_match = None
-                    last_not_match = None
+                        break
+                if not matching:
+                    if not not_match_cnt[-1]:
+                        not_match_cnt[-1].append(prev_p)
+                    not_match_cnt[-1].append(point)
+            prev_p = point
+        # not_match_cnt.append([])
+
+        if matching_count < len(lines[line]):
+            error_under = error_under + error_line(not_match_cnt)
 
     return error_over, error_under
 
