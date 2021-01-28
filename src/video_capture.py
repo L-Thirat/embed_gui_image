@@ -77,22 +77,34 @@ class MyVideoCapture:
         # morphed = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         selected_area = cv2.medianBlur(selected_area, t_blur)
 
+        # if True:
+        #     # todo auto normalize
+        #     b, g, r = cv2.split(selected_area)
+        #     cur_red = int(sum(r.ravel() / len(r.ravel())))
+        #     cur_green = int(sum(g.ravel() / len(g.ravel())))
+        #     cur_blue = int(sum(b.ravel() / len(b.ravel())))
+        #     if self.start_rgb == (0, 0, 0):
+        #         diff_rgb = 0
+        #         self.start_rgb = (cur_red, cur_green, cur_blue)
+        #     else:
+        #         diff_rgb = int(((self.start_rgb[0] - cur_red) + (self.start_rgb[1] - cur_green) + (
+        #                 self.start_rgb[2] - cur_blue)) / 3)
+        #
+        #     img = pp.brightness(selected_area, -230 - diff_rgb, -15)
+        #     img, alpha, beta = pp.automatic_brightness_and_contrast(img)
+
         # Remove Shadow
         # img = pp.shadow_remove(img)
         # selected_area = pp.color_shadow_remove(selected_area)
 
-        lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
-        upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
         # todo run on RUN mode
         # todo rgb control -> gui slow**
         if not auto_calibrate:
+            # pass
             img = pp.brightness(selected_area, t_light, t_contrast)
-
-            # # define range of a color in HSV
-            # lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
-            # upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
         else:
-            # # image pre-process
+            # pass
+            # todo auto normalize
             b, g, r = cv2.split(selected_area)
             cur_red = int(sum(r.ravel() / len(r.ravel())))
             cur_green = int(sum(g.ravel() / len(g.ravel())))
@@ -105,8 +117,9 @@ class MyVideoCapture:
                             self.start_rgb[2] - cur_blue)) / 3)
 
             img = pp.brightness(selected_area, -230 - diff_rgb, -15)
-
             img, alpha, beta = pp.automatic_brightness_and_contrast(img)
+
+            # todo auto rgb
             # b, g, r = cv2.split(img)
             # cur_red = int(sum(r.ravel() / len(r.ravel())))
             # cur_green = int(sum(g.ravel() / len(g.ravel())))
@@ -128,8 +141,6 @@ class MyVideoCapture:
             # print(diff_rgb)
             # lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
             # upper_hue = np.array([t_red_max-diff_rgb, t_green_max-diff_rgb, t_blue_max-diff_rgb])
-
-        # define range of a color in HSV
         lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
         upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
         mask = pp.hue(img, lower_hue, upper_hue)
