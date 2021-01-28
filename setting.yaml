@@ -1,6 +1,12 @@
-TEST_MAMOS: True
+TEST_MAMOS: False
 #DEBUG: {
-#  "sample_img": 'output/compare/2021/1/25/c_temp_filename.jpg'
+#  "sample_img": 'output/debug/c_temp_filename.jpg'
+#}
+#DEBUG: {
+#  "sample_img": 'output/debug/20210125_172145_OK.png'
+#}
+#DEBUG: {
+#  "sample_img": 'output/debug/'
 #}
 DEBUG: {}
 

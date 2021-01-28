@@ -158,8 +158,12 @@
 <span class="c1"># todo program slowed when a lot function update realtime ex hue -&gt; Need RUN/STOP Button when start/STOP</span>
 <span class="c1"># todo multiple camera</span>
 <span class="c1"># todo show line realtime (capture: Origin image)</span>
+
+<span class="c1"># todo fix create new log file each day</span>
+<span class="c1"># todo auto light calibrate</span>
+<span class="c1"># todo GUI bug</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Reference</span>
+<span class="sd"># Reference</span>
 
 <span class="sd">Interpolation:</span>
 <span class="sd">https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html</span>
@@ -214,7 +218,7 @@
 <span class="sd">    :param config: Video config</span>
 <span class="sd">    :type config: dict</span>
 <span class="sd">    :param range_rgb: RGB checker</span>
-<span class="sd">    :type range_rgb: dict</span>
+<span class="sd">    :type range_rgb: list</span>
 <span class="sd">    :param window: Tkinter (GUI builder) setup</span>
 <span class="sd">    :type window: class</span>
 <span class="sd">    :param vid: Video capture class</span>
@@ -433,7 +437,13 @@
 
 
 <div class="viewcode-block" id="toggle_geom"><a class="viewcode-back" href="../docs/Pages_gui_black_detection.html#Pages_gui_black_detection.toggle_geom">[docs]</a><span class="k">def</span> <span class="nf">toggle_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Geometry of GUI &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Geometry of GUI</span>
+
+<span class="sd">    :param self: Tkinter class</span>
+<span class="sd">    :type self: class</span>
+<span class="sd">    :param event: Geometry event</span>
+<span class="sd">    :type event: class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">winfo_geometry</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geom</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_geom</span><span class="p">)</span>

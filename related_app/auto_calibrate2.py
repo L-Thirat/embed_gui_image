@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-# from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 
 BASE_ALPHA = 3.072289156626506
 BASE_BETA = -144.3975903614458
@@ -18,7 +18,7 @@ def convertScale(img, alpha, beta):
     return new_img.astype(np.uint8)
 
 # Automatic brightness and contrast optimization with optional histogram clipping
-def automatic_brightness_and_contrast(image, clip_hist_percent=25):
+def automatic_brightness_and_contrast(image, clip_hist_percent=1):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Calculate grayscale histogram
@@ -33,8 +33,9 @@ def automatic_brightness_and_contrast(image, clip_hist_percent=25):
 
     # Locate points to clip
     maximum = accumulator[-1]
-    clip_hist_percent *= (maximum/100.0)
-    clip_hist_percent /= 2.0
+    # clip_hist_percent *= (maximum/100.0)
+    # clip_hist_percent /= 2.0
+    clip_hist_percent = maximum*100/200.0
 
     # Locate left cut
     minimum_gray = 0
@@ -62,14 +63,23 @@ def automatic_brightness_and_contrast(image, clip_hist_percent=25):
     plt.show()
     '''
 
+    new_hist = cv2.calcHist([gray],[0],None,[256],[minimum_gray,maximum_gray])
+    plt.plot(hist)
+    plt.plot(new_hist)
+    plt.xlim([0,256])
+    plt.show()
+
     auto_result = convertScale(image, alpha=alpha, beta=beta)
+    auto_result = cv2.cvtColor(auto_result, cv2.COLOR_BGR2GRAY)
+
     return (auto_result, alpha, beta)
 
-image = cv2.imread('2.jpg')
+
+image = cv2.imread('3.jpg')
 auto_result, alpha, beta = automatic_brightness_and_contrast(image)
 print('alpha', alpha)
 print('beta', beta)
 cv2.imshow('auto_result2', auto_result)
-cv2.imwrite('auto_result2.png', auto_result)
+cv2.imwrite('auto_result3.png', auto_result)
 cv2.imshow('image', image)
 cv2.waitKey()

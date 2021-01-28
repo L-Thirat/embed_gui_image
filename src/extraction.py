@@ -66,7 +66,7 @@ def detect_error_cnt(contours, raw_data_draw, config):
         end_line = (line[2], line[3])
         m, c = lp.linear_formula(start_line, end_line)
 
-        dx, dy = lp.diff_xy(start_line[0], start_line[1], end_line[0], end_line[1], w=2)
+        dx, dy = lp.diff_xy(start_line[0], start_line[1], end_line[0], end_line[1], w=t_space)
         if end_line[0] - start_line[0] != 0:
             x = np.arange(start_line[0], end_line[0], dx)
             y = m * x + c
@@ -121,7 +121,7 @@ def detect_error_cnt(contours, raw_data_draw, config):
             matching = False
             if prev_p:
                 # print(match_cnt)
-                sample_rect = lp.line2rect(prev_p, point, t_space)
+                sample_rect = lp.line2rect(prev_p, point, 10)  # todo width gui
                 for poly_cnt in match_cnt:
                     if poly_cnt.intersects(Polygon(sample_rect)):
                         matching_count += 1

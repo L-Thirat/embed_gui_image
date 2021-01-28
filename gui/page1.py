@@ -21,6 +21,8 @@ from src.video_capture import MyVideoCapture as Vdo
 from src import extraction as et
 from gui.page_control import Page
 from gui.drawing_control import DrawingPage
+from src import logger
+
 import init_project
 from init_project import init_dir
 
@@ -112,6 +114,8 @@ class Page1(DrawingPage):
 
     def snapshot(self, mode):
         """ Get a frame from the video source """
+
+        log = logger.GetSystemLogger()
         if mode == "original" and self.tk_photo_org:
             msg_type = "Error"
             msg = "Need <reset> before <snapshot>"
@@ -144,7 +148,7 @@ class Page1(DrawingPage):
                     start = time.time()
                     init_dir(self.app.cp_path, sub_dir)
                     self.file_path_c = self.app.cp_path + sub_dir + "c_" + "temp_filename.jpg"
-                    origin_image = self.vid.get_original_frame()
+                    origin_image = self.vid.get_original_frame(self.config)
                     cv2.imwrite(self.file_path_c, cv2.cvtColor(origin_image, cv2.COLOR_RGB2BGR))
                     self.load_img_cp = Image.open(self.file_path_c)
 
@@ -196,7 +200,7 @@ class Page1(DrawingPage):
                     msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (
                         len(error_over), len(error_under))
                     # todo log.info(msg)
-                    self.app.log.info(msg)
+                    log.info(msg)
 
                     # use PIL to convert  PS to PNG
                     self.canvas3.update()

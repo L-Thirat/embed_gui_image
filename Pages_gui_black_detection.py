@@ -33,7 +33,6 @@ init_param = init_project.init_param()
 
 from src import extraction as et
 from src.video_capture import MyVideoCapture as Vdo
-from src import logger
 from gui import Page1, Page2, Page3
 from PIL import EpsImagePlugin
 from time import time
@@ -65,7 +64,7 @@ class App(tki.Frame):
     :param config: Video config
     :type config: dict
     :param range_rgb: RGB checker
-    :type range_rgb: dict
+    :type range_rgb: list
     :param window: Tkinter (GUI builder) setup
     :type window: class
     :param vid: Video capture class
@@ -89,10 +88,6 @@ class App(tki.Frame):
     """
     def __init__(self, window, *args, **kwargs):
         """Constructor method"""
-        # todo self.timing = time()
-        # Project variable
-        self.log = logger.GetSystemLogger()
-
         # Setting
         with open(r'setting.yaml') as file:
             # The FullLoader parameter handles the conversion from YAML
@@ -109,9 +104,13 @@ class App(tki.Frame):
 
             # Testing
             self.DEBUG = self.setting_data["DEBUG"]
+            self.auto_debug = False
             if "sample_img" in self.DEBUG:
                 self.DEBUG["cam_width"] = self.cam_width
                 self.DEBUG["cam_height"] = self.cam_height
+                if self.DEBUG["sample_img"][-4:] != ".png" and self.DEBUG["sample_img"][-4:] != ".jpg":
+                    self.auto_debug = True
+                    self.timing = time()
             self.TEST_MAMOS = bool(self.setting_data["TEST_MAMOS"])
 
             if self.TEST_MAMOS:
@@ -253,11 +252,15 @@ class App(tki.Frame):
     def update(self):
         """Real-time update image in canvas"""
         if self.cur_page != 3:
+            if self.auto_debug:
+                if int(time() - self.timing) > 3:  # todo delay per loop
+                    self.p1.snapshot("compare")
+                    self.timing = time()
+                    self.vid.cur_debug += 1
+
             if self.TEST_MAMOS:
-                # todo for auto testing if int(time() - self.timing) > 30:
                 if self.mm.output():
                     self.p1.snapshot("compare")
-                    # todo self.timing = time()
 
             ret, self.frame, _, self.mask = self.vid.get_frame(self.config, self.p1.raw_data_draw)
             # todo test light calibrate >>, self.p1.save_status
