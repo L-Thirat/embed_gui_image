@@ -7,10 +7,7 @@ import os
 
 class DailyLog(handlers.RotatingFileHandler):
     def __init__(self, basedir, mode='a', maxBytes=0, backupCount=0, encoding=None, delay=0):
-        """
-        Set self.baseFilename to date string of today.
-        The handler create logFile named self.baseFilename
-        """
+        """The handler create logFile named self.baseFilename today"""
         self.basedir_ = basedir
 
         self.baseFilename = self.getBaseFilename()
@@ -33,7 +30,7 @@ class DailyLog(handlers.RotatingFileHandler):
         return os.path.join(self.basedir_, basename_)
 
     def shouldRollover(self, record):
-        """ Rollover happen
+        """Rollover happen
         1. When the logFile size is get over maxBytes.
         2. When date is changed.
         """
@@ -41,7 +38,7 @@ class DailyLog(handlers.RotatingFileHandler):
 
 
 def GetSystemLogger():
-    """ Logger config"""
+    """Logger config"""
     log_handler = DailyLog("log/")
 
     formatter = logging.Formatter('%(levelname)s %(message)s')

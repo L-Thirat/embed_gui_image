@@ -21,7 +21,6 @@ from src.video_capture import MyVideoCapture as Vdo
 from src import extraction as et
 from gui.page_control import Page
 from gui.drawing_control import DrawingPage
-from src import logger
 
 import init_project
 from init_project import init_dir
@@ -34,7 +33,7 @@ init_param = init_project.init_param()
 
 class Page1(DrawingPage):
     def __init__(self, app, *args, **kwargs):
-        """ Page 1 config
+        """Page 1 config
 
         :param app: Tkinter (GUI builder) setup
         :type app: class
@@ -47,19 +46,20 @@ class Page1(DrawingPage):
         DrawingPage.__init__(self, app, size, "p1", *args, **kwargs)
 
         # Button that lets the user take a snapshot
-        self.btn_snapshot = tki.Button(self.buttonframe, text="Snapshot", font=("Courier", 44), width=9,
-                                       command=self.snapshot_origin)
-        self.btn_snapshot.place(relx=0.38, rely=0.05)
+        btn_snapshot = tki.Button(self.buttonframe, text="Snapshot", font=("Courier", 44), width=9,
+                                  command=self.snapshot_origin)
+        btn_snapshot.place(relx=0.38, rely=0.05)
         self.btn_save.place(relx=0.56, rely=0.05)
         # self.btn_save = tki.Button(self.buttonframe, text="Save", font=("Courier", 44), width=9, command=self.save_draw)
         # self.btn_save.place(relx=0.56, rely=0.05)
-        self.browsebutton = tki.Button(self.buttonframe, text="Browse", font=("Courier", 44), width=9, command=self.browse)
-        self.browsebutton.place(relx=0.74, rely=0.05)
-        self.btn_compare = tki.Button(self.buttonframe, text="Compare", font=("Courier", 44), width=9,
+        btn_browse = tki.Button(self.buttonframe, text="Browse", font=("Courier", 44), width=9,
+                                       command=self.browse)
+        btn_browse.place(relx=0.74, rely=0.05)
+        btn_compare = tki.Button(self.buttonframe, text="Compare", font=("Courier", 44), width=9,
                                       command=self.snapshot_compare)
-        self.btn_compare.place(relx=0.38, rely=0.18)
-        self.btn_reset = tki.Button(self.buttonframe, text="Reset", font=("Courier", 44), width=9, command=self.reset)
-        self.btn_reset.place(relx=0.56, rely=0.18)
+        btn_compare.place(relx=0.38, rely=0.18)
+        btn_reset = tki.Button(self.buttonframe, text="Reset", font=("Courier", 44), width=9, command=self.reset)
+        btn_reset.place(relx=0.56, rely=0.18)
         self.btn_mode_detect.place(relx=0.74, rely=0.18)
         self.btn_mode_inside.place(relx=0.81, rely=0.18)
         self.btn_mode_area.place(relx=0.88, rely=0.18)
@@ -113,9 +113,8 @@ class Page1(DrawingPage):
         self.start_x, self.start_y = 0, 0
 
     def snapshot(self, mode):
-        """ Get a frame from the video source """
+        """Get a frame from the video source """
 
-        log = logger.GetSystemLogger()
         if mode == "original" and self.tk_photo_org:
             msg_type = "Error"
             msg = "Need <reset> before <snapshot>"
@@ -142,7 +141,8 @@ class Page1(DrawingPage):
 
         elif mode == "compare":
             if self.save_status:
-                ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw, auto_calibrate=True, reset=self.reset_calibrate)
+                ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw, auto_calibrate=True,
+                                                                reset=self.reset_calibrate)
                 self.reset_calibrate = False
                 if ret:
                     start = time.time()
@@ -199,8 +199,7 @@ class Page1(DrawingPage):
                     log_time_form = cur_time.strftime("%Y:%m:%d %H:%M:%S")
                     msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (
                         len(error_over), len(error_under))
-                    # todo log.info(msg)
-                    log.info(msg)
+                    self.app.log.info(msg)
 
                     # use PIL to convert  PS to PNG
                     self.canvas3.update()
@@ -212,6 +211,7 @@ class Page1(DrawingPage):
                     ps = self.canvas3.postscript(colormode='color')
                     img = Image.open(io.BytesIO(ps.encode('utf-8')))
                     img.save(filename_png)
+                    img.close()
 
                     end_task = time.time()
                     print("Calculate event time: %f" % (end_task - start_task))
@@ -222,11 +222,11 @@ class Page1(DrawingPage):
                     raise Exception(msg_type + ": " + msg)
 
     def snapshot_origin(self):
-        """ Call snapshot function with original image(LEFT)"""
+        """Call snapshot function with original image(LEFT)"""
         self.snapshot("original")
 
     def snapshot_compare(self):
-        """ Call snapshot function with compare image(RIGHT)"""
+        """Call snapshot function with compare image(RIGHT)"""
         self.snapshot("compare")
 
     def get_result(self, contours):

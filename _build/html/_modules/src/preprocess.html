@@ -156,7 +156,7 @@
 
 
 <div class="viewcode-block" id="apply_brightness_contrast"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.apply_brightness_contrast">[docs]</a><span class="k">def</span> <span class="nf">apply_brightness_contrast</span><span class="p">(</span><span class="n">input_img</span><span class="p">,</span> <span class="n">brightness</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">contrast</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Light and contrast config&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Light and contrast config&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">brightness</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">brightness</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">shadow</span> <span class="o">=</span> <span class="n">brightness</span>
@@ -182,13 +182,13 @@
 
 
 <div class="viewcode-block" id="brightness"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.brightness">[docs]</a><span class="k">def</span> <span class="nf">brightness</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">t_light</span><span class="p">,</span> <span class="n">t_contrast</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Apply light config&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Apply light config&quot;&quot;&quot;</span>
     <span class="n">img</span> <span class="o">=</span> <span class="n">apply_brightness_contrast</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="o">-</span><span class="n">t_light</span><span class="p">,</span> <span class="n">t_contrast</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">img</span></div>
 
 
 <div class="viewcode-block" id="hue"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.hue">[docs]</a><span class="k">def</span> <span class="nf">hue</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">lower_hue</span><span class="p">,</span> <span class="n">upper_hue</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Select image by range of hue value&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Select image by range of hue value&quot;&quot;&quot;</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">inRange</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">lower_hue</span><span class="p">,</span> <span class="n">upper_hue</span><span class="p">)</span>
 
     <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">threshold</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">THRESH_BINARY_INV</span><span class="p">)</span>
@@ -196,8 +196,74 @@
     <span class="k">return</span> <span class="n">mask</span></div>
 
 
+<div class="viewcode-block" id="convertScale"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.convertScale">[docs]</a><span class="k">def</span> <span class="nf">convertScale</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add bias and gain to an image with saturation arithmetics. Unlike</span>
+<span class="sd">    cv2.convertScaleAbs, it does not take an absolute value, which would lead to</span>
+<span class="sd">    nonsensical results (e.g., a pixel at 44 with alpha = 3 and beta = -210</span>
+<span class="sd">    becomes 78 with OpenCV, when in fact it should become 0).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">new_img</span> <span class="o">=</span> <span class="n">img</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">+</span> <span class="n">beta</span>
+    <span class="n">new_img</span><span class="p">[</span><span class="n">new_img</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">new_img</span><span class="p">[</span><span class="n">new_img</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>
+    <span class="k">return</span> <span class="n">new_img</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span></div>
+
+
+<span class="c1"># Automatic brightness and contrast optimization with optional histogram clipping</span>
+<div class="viewcode-block" id="automatic_brightness_and_contrast"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.automatic_brightness_and_contrast">[docs]</a><span class="k">def</span> <span class="nf">automatic_brightness_and_contrast</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">clip_hist_percent</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">gray</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+
+    <span class="c1"># Calculate grayscale histogram</span>
+    <span class="n">hist</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">calcHist</span><span class="p">([</span><span class="n">gray</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="mi">256</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">256</span><span class="p">])</span>
+    <span class="n">hist_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+
+    <span class="c1"># Calculate cumulative distribution from the histogram</span>
+    <span class="n">accumulator</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">hist_size</span><span class="p">):</span>
+        <span class="n">accumulator</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">accumulator</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
+
+    <span class="c1"># Locate points to clip</span>
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">accumulator</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># clip_hist_percent *= (maximum/100.0)</span>
+    <span class="c1"># clip_hist_percent /= 2.0</span>
+    <span class="n">clip_hist_percent</span> <span class="o">=</span> <span class="n">maximum</span> <span class="o">/</span> <span class="mf">200.0</span>
+
+    <span class="c1"># Locate left cut</span>
+    <span class="n">minimum_gray</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">accumulator</span><span class="p">[</span><span class="n">minimum_gray</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">clip_hist_percent</span><span class="p">:</span>
+        <span class="n">minimum_gray</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Locate right cut</span>
+    <span class="n">maximum_gray</span> <span class="o">=</span> <span class="n">hist_size</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">accumulator</span><span class="p">[</span><span class="n">maximum_gray</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">maximum</span> <span class="o">-</span> <span class="n">clip_hist_percent</span><span class="p">):</span>
+        <span class="n">maximum_gray</span> <span class="o">-=</span> <span class="mi">1</span>
+
+    <span class="c1"># Calculate alpha and beta values</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">maximum_gray</span> <span class="o">-</span> <span class="n">minimum_gray</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">maximum_gray</span> <span class="o">-</span> <span class="n">minimum_gray</span><span class="p">)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mi">255</span> <span class="o">/</span> <span class="n">diff</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="o">-</span><span class="n">minimum_gray</span> <span class="o">*</span> <span class="n">alpha</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    # Calculate new histogram with desired range and show histogram </span>
+<span class="sd">    new_hist = cv2.calcHist([gray],[0],None,[256],[minimum_gray,maximum_gray])</span>
+<span class="sd">    plt.plot(hist)</span>
+<span class="sd">    plt.plot(new_hist)</span>
+<span class="sd">    plt.xlim([0,256])</span>
+<span class="sd">    plt.show()</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">auto_result</span> <span class="o">=</span> <span class="n">convertScale</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">)</span>
+    <span class="n">auto_result</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">auto_result</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+    <span class="n">auto_result</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">auto_result</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_GRAY2RGB</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">auto_result</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span></div>
+
+
 <div class="viewcode-block" id="shadow_remove"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.shadow_remove">[docs]</a><span class="k">def</span> <span class="nf">shadow_remove</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Remove shadow from image (Normalize color)&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Remove shadow from image (Normalize color)&quot;&quot;&quot;</span>
     <span class="c1"># todo developing</span>
     <span class="n">rgb_planes</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
     <span class="n">result_norm_planes</span> <span class="o">=</span> <span class="p">[]</span>
@@ -212,7 +278,7 @@
 
 
 <div class="viewcode-block" id="color_shadow_demove"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.color_shadow_demove">[docs]</a><span class="k">def</span> <span class="nf">color_shadow_demove</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Remove shadow from image (YCbCr image)&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Remove shadow from image (YCbCr image)&quot;&quot;&quot;</span>
     <span class="c1"># todo developing</span>
     <span class="c1"># covert the BGR image to an YCbCr image</span>
     <span class="n">y_cb_cr_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2YCrCb</span><span class="p">)</span>
@@ -291,7 +357,7 @@
 
 
 <div class="viewcode-block" id="crop_img"><a class="viewcode-back" href="../../docs/src.html#src.preprocess.crop_img">[docs]</a><span class="k">def</span> <span class="nf">crop_img</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">area</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Crop image area&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Crop image area&quot;&quot;&quot;</span>
     <span class="c1"># contours = [np.array([[333, 147], [320, 329], [361, 464], [411, 425], [382, 164]])]</span>
     <span class="n">contours</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">area</span><span class="p">)]</span>
     <span class="n">fill_color</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span>  <span class="c1"># any BGR color value to fill with</span>

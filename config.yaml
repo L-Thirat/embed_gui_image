@@ -7,10 +7,10 @@ t_error: 0
 t_green:
   max: 50
   min: 0
-t_light: -230
+t_light: 80
 t_noise: 30
 t_red:
   max: 50
   min: 0
 t_space: 15
-t_zoom: 1
+t_zoom: 2

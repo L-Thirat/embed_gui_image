@@ -8,7 +8,7 @@ import glob
 
 class MyVideoCapture:
     def __init__(self, DEBUG):
-        """ Video config"""
+        """Video config"""
         self.DEBUG = DEBUG
         self.start_rgb = (0, 0, 0)
         #  open video source (by default this will try to open the computer webcam)
@@ -55,7 +55,7 @@ class MyVideoCapture:
         return origin_image
 
     def get_frame(self, config, raw_data_draw=None, auto_calibrate=False, reset=True):
-        """ Get frame from video source"""
+        """Get frame from video source"""
         if raw_data_draw is None:
             raw_data_draw = {}
         t_red_min, t_red_max = config["t_red"]["min"], config["t_red"]["max"]
@@ -77,33 +77,7 @@ class MyVideoCapture:
         # morphed = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         selected_area = cv2.medianBlur(selected_area, t_blur)
 
-        # if True:
-        #     # todo auto normalize
-        #     b, g, r = cv2.split(selected_area)
-        #     cur_red = int(sum(r.ravel() / len(r.ravel())))
-        #     cur_green = int(sum(g.ravel() / len(g.ravel())))
-        #     cur_blue = int(sum(b.ravel() / len(b.ravel())))
-        #     if self.start_rgb == (0, 0, 0):
-        #         diff_rgb = 0
-        #         self.start_rgb = (cur_red, cur_green, cur_blue)
-        #     else:
-        #         diff_rgb = int(((self.start_rgb[0] - cur_red) + (self.start_rgb[1] - cur_green) + (
-        #                 self.start_rgb[2] - cur_blue)) / 3)
-        #
-        #     img = pp.brightness(selected_area, -230 - diff_rgb, -15)
-        #     img, alpha, beta = pp.automatic_brightness_and_contrast(img)
-
-        # Remove Shadow
-        # img = pp.shadow_remove(img)
-        # selected_area = pp.color_shadow_remove(selected_area)
-
-        # todo run on RUN mode
-        # todo rgb control -> gui slow**
-        if not auto_calibrate:
-            # pass
-            img = pp.brightness(selected_area, t_light, t_contrast)
-        else:
-            # pass
+        if False:
             # todo auto normalize
             b, g, r = cv2.split(selected_area)
             cur_red = int(sum(r.ravel() / len(r.ravel())))
@@ -114,26 +88,56 @@ class MyVideoCapture:
                 self.start_rgb = (cur_red, cur_green, cur_blue)
             else:
                 diff_rgb = int(((self.start_rgb[0] - cur_red) + (self.start_rgb[1] - cur_green) + (
-                            self.start_rgb[2] - cur_blue)) / 3)
+                        self.start_rgb[2] - cur_blue)) / 3)
 
             img = pp.brightness(selected_area, -230 - diff_rgb, -15)
             img, alpha, beta = pp.automatic_brightness_and_contrast(img)
 
+        # Remove Shadow
+        # img = pp.shadow_remove(img)
+        # selected_area = pp.color_shadow_remove(selected_area)
+
+        # todo run on RUN mode
+        # todo rgb control -> gui slow**
+        if not auto_calibrate:
+            if True:
+                img = pp.brightness(selected_area, t_light, t_contrast)
+                lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
+                upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
+        else:
+            # pass
+            if False:
+                # todo auto normalize
+                b, g, r = cv2.split(selected_area)
+                cur_red = int(sum(r.ravel() / len(r.ravel())))
+                cur_green = int(sum(g.ravel() / len(g.ravel())))
+                cur_blue = int(sum(b.ravel() / len(b.ravel())))
+                if self.start_rgb == (0, 0, 0):
+                    diff_rgb = 0
+                    self.start_rgb = (cur_red, cur_green, cur_blue)
+                else:
+                    diff_rgb = int(((self.start_rgb[0] - cur_red) + (self.start_rgb[1] - cur_green) + (
+                                self.start_rgb[2] - cur_blue)) / 3)
+
+                img = pp.brightness(selected_area, -230 - diff_rgb, -15)
+                img, alpha, beta = pp.automatic_brightness_and_contrast(img)
+
             # todo auto rgb
-            # b, g, r = cv2.split(img)
-            # cur_red = int(sum(r.ravel() / len(r.ravel())))
-            # cur_green = int(sum(g.ravel() / len(g.ravel())))
-            # cur_blue = int(sum(b.ravel() / len(b.ravel())))
-            # if self.start_rgb == (0, 0, 0) or reset:
-            #     diff_rgb = (0, 0, 0)
-            #     self.start_rgb = (cur_red, cur_green, cur_blue)
-            # else:
-            #     diff_rgb = (self.start_rgb[0] - cur_red, self.start_rgb[1] - cur_green, self.start_rgb[2] - cur_blue)
-            # print("diff_rgb: ", diff_rgb, self.start_rgb, (cur_red, cur_green, cur_blue))
-            # lower_hue = np.array(
-            #     [(t_red_min - (diff_rgb[0] * 1)), (t_green_min - (diff_rgb[1] * 1)), (t_blue_min - (diff_rgb[2] * 1))])
-            # upper_hue = np.array(
-            #     [(t_red_max - (diff_rgb[0] * 1)), (t_green_max - (diff_rgb[1] * 1)), (t_blue_max - (diff_rgb[2] * 1))])
+            if True:
+                b, g, r = cv2.split(img)
+                cur_red = int(sum(r.ravel() / len(r.ravel())))
+                cur_green = int(sum(g.ravel() / len(g.ravel())))
+                cur_blue = int(sum(b.ravel() / len(b.ravel())))
+                if self.start_rgb == (0, 0, 0) or reset:
+                    diff_rgb = (0, 0, 0)
+                    self.start_rgb = (cur_red, cur_green, cur_blue)
+                else:
+                    diff_rgb = (self.start_rgb[0] - cur_red, self.start_rgb[1] - cur_green, self.start_rgb[2] - cur_blue)
+                print("diff_rgb: ", diff_rgb, self.start_rgb, (cur_red, cur_green, cur_blue))
+                lower_hue = np.array(
+                    [(t_red_min - (diff_rgb[0] * 1)), (t_green_min - (diff_rgb[1] * 1)), (t_blue_min - (diff_rgb[2] * 1))])
+                upper_hue = np.array(
+                    [(t_red_max - (diff_rgb[0] * 1)), (t_green_max - (diff_rgb[1] * 1)), (t_blue_max - (diff_rgb[2] * 1))])
 
             # todo lightness control
             # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -141,8 +145,7 @@ class MyVideoCapture:
             # print(diff_rgb)
             # lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
             # upper_hue = np.array([t_red_max-diff_rgb, t_green_max-diff_rgb, t_blue_max-diff_rgb])
-        lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
-        upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
+
         mask = pp.hue(img, lower_hue, upper_hue)
 
         # contour extraction
@@ -153,8 +156,8 @@ class MyVideoCapture:
 
     @staticmethod
     def zoom(cv2Object, zoomSize):
-        """ Resizes the image/video frame to the specified amount of "zoomSize"""
-        cv2Object = imutils.resize(cv2Object, width=(zoomSize * cv2Object.shape[1]))
+        """Resizes the image/video frame to the specified amount of "zoomSize"""
+        cv2Object = imutils.resize(cv2Object, width=(int(zoomSize * cv2Object.shape[1])))
         # center is simply half of the height & width (y/2,x/2)
         center = (int(cv2Object.shape[0] / 2), int(cv2Object.shape[1] / 2))
         # cropScale represents the top left corner of the cropped frame (y/x)
@@ -166,6 +169,6 @@ class MyVideoCapture:
         return cv2Object
 
     def __del__(self):
-        """ Release the video source when the object is destroyed"""
+        """Release the video source when the object is destroyed"""
         if self.vid.isOpened():
             self.vid.release()

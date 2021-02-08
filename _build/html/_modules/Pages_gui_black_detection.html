@@ -186,7 +186,6 @@
 
 <span class="kn">from</span> <span class="nn">src</span> <span class="kn">import</span> <span class="n">extraction</span> <span class="k">as</span> <span class="n">et</span>
 <span class="kn">from</span> <span class="nn">src.video_capture</span> <span class="kn">import</span> <span class="n">MyVideoCapture</span> <span class="k">as</span> <span class="n">Vdo</span>
-<span class="kn">from</span> <span class="nn">src</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">gui</span> <span class="kn">import</span> <span class="n">Page1</span><span class="p">,</span> <span class="n">Page2</span><span class="p">,</span> <span class="n">Page3</span>
 <span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">EpsImagePlugin</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
@@ -242,10 +241,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor method&quot;&quot;&quot;</span>
-        <span class="c1"># todo self.timing = time()</span>
-        <span class="c1"># Project variable</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">GetSystemLogger</span><span class="p">()</span>
-
         <span class="c1"># Setting</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;setting.yaml&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="c1"># The FullLoader parameter handles the conversion from YAML</span>
@@ -262,9 +257,13 @@
 
             <span class="c1"># Testing</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auto_debug</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="s2">&quot;sample_img&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">[</span><span class="s2">&quot;cam_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cam_width</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">[</span><span class="s2">&quot;cam_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cam_height</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">[</span><span class="s2">&quot;sample_img&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s2">&quot;.png&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">[</span><span class="s2">&quot;sample_img&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">auto_debug</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">timing</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">TEST_MAMOS</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setting_data</span><span class="p">[</span><span class="s2">&quot;TEST_MAMOS&quot;</span><span class="p">])</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEST_MAMOS</span><span class="p">:</span>
@@ -406,11 +405,15 @@
 <div class="viewcode-block" id="App.update"><a class="viewcode-back" href="../docs/Pages_gui_black_detection.html#Pages_gui_black_detection.App.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Real-time update image in canvas&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cur_page</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_debug</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">timing</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># todo delay per loop</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(</span><span class="s2">&quot;compare&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">timing</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">cur_debug</span> <span class="o">+=</span> <span class="mi">1</span>
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEST_MAMOS</span><span class="p">:</span>
-                <span class="c1"># todo for auto testing if int(time() - self.timing) &gt; 30:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">output</span><span class="p">():</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(</span><span class="s2">&quot;compare&quot;</span><span class="p">)</span>
-                    <span class="c1"># todo self.timing = time()</span>
 
             <span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">get_frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">raw_data_draw</span><span class="p">)</span>
             <span class="c1"># todo test light calibrate &gt;&gt;, self.p1.save_status</span>

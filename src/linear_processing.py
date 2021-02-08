@@ -4,17 +4,39 @@ from numpy.linalg import lstsq
 
 
 def find_distance(p1, p2):
-    """ Find distance between 2 points"""
+    """Find distance between 2 points
+
+    :param p1: point
+    :type p1: tuple
+    :param p2: point
+    :type p2: tuple
+    :return: Distance between 2 points
+    :rtype: float
+    """
     return math.sqrt(((p1[0] - p2[0]) ** 2) + ((p1[1] - p2[1]) ** 2))
 
 
-def dist2(start, end):
-    """distance square"""
-    return (start[0] - end[0]) ** 2 + (start[1] - end[1]) ** 2
+def dist2(p1, p2):
+    """Find square of distance between 2 points
+
+    :param p1: point
+    :type p1: tuple
+    :param p2: point
+    :type p2: tuple
+    :return: Square of distance between 2 points
+    :rtype: float, int
+    """
+    return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2
 
 
 def find_start_end(cnt):
-    """ Find start-end point from contour data"""
+    """Find start-end point from contour data
+
+    :param cnt: list
+    :type cnt: class(numpy.ndarray)
+    :return: start point, end point
+    :rtype: (int, float), (int, float)
+    """
     # todo start_point, start_dis = (), find_distance((camera_w, camera_h), (0, 0))
     start_point, start_dis = (), find_distance((640, 480), (0, 0))
     end_point, end_dis = (), 0
@@ -29,7 +51,15 @@ def find_start_end(cnt):
 
 
 def linear_formula(p1, p2):
-    """ Find linear formula from 2 points"""
+    """"Find linear formula from 2 points
+
+    :param p1: point
+    :type p1:tuple
+    :param p2:point
+    :type p2: tuple
+    :return: slope, constant
+    :rtype: (int, float), (int, float)
+    """
     o_points = [p1, p2]
     x_coords, y_coords = zip(*o_points)
     A = vstack([x_coords, ones(len(x_coords))]).T
@@ -38,6 +68,17 @@ def linear_formula(p1, p2):
 
 
 def point2line_match(p, start, end):
+    """Find minimum distance between point-line
+
+    :param p: point
+    :type p: tuple
+    :param start: start point
+    :type start: tuple
+    :param end: end point
+    :type end: tuple
+    :return: Minimum distance between point-line
+    :rtype: float
+    """
     # https://stackoverfloend.com/questions/849211/shortest-distance-betendeen-a-point-and-a-line-segment
     l2 = dist2(start, end)
     # distToSegmentSquared
@@ -45,12 +86,26 @@ def point2line_match(p, start, end):
         return dist2(p, start)
     t = ((p[0] - start[0]) * (end[0] - start[0]) + (p[1] - start[1]) * (end[1] - start[1])) / l2
     t = max(0, min(1, t))
-    dis2sag_squad = dist2(p, [start[0] + t * (end[0] - start[0]), start[1] + t * (end[1] - start[1])])
+    dis2sag_squad = dist2(p, (start[0] + t * (end[0] - start[0]), start[1] + t * (end[1] - start[1])))
     return math.sqrt(dis2sag_squad)
 
 
 def diff_xy(x1, y1, x2, y2, w):
-    """ Find difference distance when width change"""
+    """Find delta x and y
+
+    :param x1: Point1 x
+    :type x1: int
+    :param y1: Point1 y
+    :type y1: int
+    :param x2: Point2 x
+    :type x2: int
+    :param y2: Point2 x
+    :type y2: int
+    :param w: width
+    :type w: int
+    :return: dy, dy
+    :rtype: float
+    """
     if x2 - x1 != 0:
         red = math.atan(abs(y2 - y1) / abs(x2 - x1))
         dx = math.cos(red) * w
@@ -62,7 +117,17 @@ def diff_xy(x1, y1, x2, y2, w):
 
 
 def length2points(p1, p2, w):
-    """ Find new points when width change"""
+    """Find new points when width change
+
+    :param p1: Point1
+    :type p1: tuple
+    :param p2: Point2
+    :type p2: tuple
+    :param w: width
+    :type w: int
+    :return: x1, y1, x2, y2
+    :rtype: (int, float), (int, float), (int, float), (int, float)
+    """
     x1 = p1[0]
     y1 = p1[1]
     x2 = p2[0]
@@ -91,7 +156,17 @@ INT_MAX = 10000
 
 
 def line2rect(p1, p2, w):
-    """ Convert points data to rectangle"""
+    """Convert points data to rectangle
+
+    :param p1: Point1
+    :type p1: tuple
+    :param p2: Point2
+    :type p2: tuple
+    :param w: width
+    :type w: int
+    :return: list of corner points
+    :rtype: list[(int, float), (int, float), (int, float), (int, float)]
+    """
     dx, dy = diff_xy(p1[0], p1[1], p2[0], p2[0], w)
     if p1[1] < p2[1]:
         new1_x = p1[0] - dx
@@ -117,8 +192,18 @@ def line2rect(p1, p2, w):
     return [(new1_x, new1_y), (new2_x, new2_y), (new3_x, new3_y), (new4_x, new4_y)]
 
 
-def on_segment(p: tuple, q: tuple, r: tuple) -> bool:
-    """ Check segmentation"""
+def on_segment(p, q, r):
+    """Check segmentation
+
+    :param p: colinear
+    :type p: tuple
+    :param q: colinear
+    :type q: tuple
+    :param r: colinear
+    :type r: tuple
+    :return: Segmented
+    :rtype: bool
+    """
     if ((q[0] <= max(p[0], r[0])) &
             (q[0] >= min(p[0], r[0])) &
             (q[1] <= max(p[1], r[1])) &
@@ -128,14 +213,18 @@ def on_segment(p: tuple, q: tuple, r: tuple) -> bool:
     return False
 
 
-def orientation(p: tuple, q: tuple, r: tuple) -> int:
-    """
+def orientation(p, q, r):
+    """To find orientation of ordered triplet (p, q, r).
 
-    To find orientation of ordered triplet (p, q, r).
-    The function returns following values
-    0 --> p, q and r are colinear
-    1 --> Clockwise
-    2 --> Counterclockwise"""
+    :param p: colinear
+    :type p: tuple
+    :param q: colinear
+    :type q: tuple
+    :param r: colinear
+    :type r: tuple
+    :return: 1 Clockwise, 2 Counterclockwise
+    :rtype: int
+    """
     val = (((q[1] - p[1]) *
             (r[0] - q[0])) -
            ((q[0] - p[0]) *
@@ -150,7 +239,19 @@ def orientation(p: tuple, q: tuple, r: tuple) -> int:
 
 
 def do_intersect(p1, q1, p2, q2):
-    """ Find the four orientations needed for general and special cases"""
+    """Find the four orientations needed for general and special cases
+
+    :param p1: colinear
+    :type p1: tuple
+    :param q1: colinear
+    :type q1: tuple
+    :param p2: colinear
+    :type p2: tuple
+    :param q2: colinear
+    :type q2: tuple
+    :return: True: general, False special cases
+    :rtype: bool
+    """
     o1 = orientation(p1, q1, p2)
     o2 = orientation(p1, q1, q2)
     o3 = orientation(p2, q2, p1)
@@ -184,10 +285,15 @@ def do_intersect(p1, q1, p2, q2):
     return False
 
 
-def is_inside_polygon(points: list, p: tuple) -> bool:
-    """
+def is_inside_polygon(points, p):
+    """To check that point is in polygon or not
 
-    Returns true if the point p lies inside the polygon[] with n vertices
+    :param points: polygon data
+    :type points: list
+    :param p: point
+    :type p: tuple
+    :return: true if the point p lies inside the polygon[] with n vertices
+    :rtype: bool
     """
     n = len(points)
 

@@ -14,7 +14,15 @@ else:
 
 
 def draw_contour(img, mask):
-    """ Draw contour"""
+    """Draw contour
+
+    :param img: Image
+    :type img: class
+    :param mask: Image that consist of contours data
+    :type mask: class
+    :return: Drawing contour data, Contours data
+    :rtype: list, numpy.ndarray
+    """
     if cv2ver == 3:
         # https://qiita.com/anyamaru/items/fd3d894966a98098376c
         mask, contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -22,11 +30,22 @@ def draw_contour(img, mask):
         contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     draw_cnt = cv2.drawContours(img, contours[1:], -1, (0, 255, 0), 2)
+
     return draw_cnt, contours
 
 
 def contour_selection(contours, img, noise_len):
-    """ Contour selection"""
+    """Contour selection
+
+    :param contours: Contours data
+    :type contours: numpy.ndarray
+    :param img: Image
+    :type img: class
+    :param noise_len: Noise length's threshold
+    :type noise_len: int
+    :return: Selected Contour, Image
+    :rtype: list, class
+    """
     select_contour = []  # todo for check only
     for cnt in contours[1:]:
         len_cont = cv2.arcLength(cnt, True)
@@ -42,7 +61,13 @@ def contour_selection(contours, img, noise_len):
 
 
 def error_line(cnt):
-    """ Check overlap between over-under area"""
+    """Check overlap between over-under area
+
+    :param cnt: Contour
+    :type cnt: list
+    :return: Error points
+    :rtype: list
+    """
     error = []
     for ps in cnt:
         if ps:
@@ -52,7 +77,17 @@ def error_line(cnt):
 
 
 def detect_error_cnt(contours, raw_data_draw, config):
-    """Get result from comparing image"""
+    """Get result from comparing image
+
+    :param contours: Contours data
+    :type contours: numpy.ndarray
+    :param raw_data_draw: Raw drawing data
+    :type raw_data_draw: dict
+    :param config: Config data
+    :type config:dict
+    :return: list, list
+    :rtype: Over error, Under error
+    """
     t_error = config["t_error"]
     t_space = config["t_space"]
 
@@ -143,7 +178,7 @@ def detect_error_cnt(contours, raw_data_draw, config):
 
 
 def min_max_color(frame, x, y, range_rgb, half_px):
-    """ Extract min-max RGB values"""
+    """Extract min-max RGB values"""
     base_min_rgb = range_rgb[-1]["min"]
     base_max_rgb = range_rgb[-1]["max"]
     for h in frame[y - half_px:y + half_px]:

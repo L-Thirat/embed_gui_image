@@ -156,19 +156,26 @@
 <span class="kn">from</span> <span class="nn">src</span> <span class="kn">import</span> <span class="n">extraction</span> <span class="k">as</span> <span class="n">et</span>
 <span class="kn">import</span> <span class="nn">imutils</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">glob</span>
 
 
 <div class="viewcode-block" id="MyVideoCapture"><a class="viewcode-back" href="../../docs/src.html#src.video_capture.MyVideoCapture">[docs]</a><span class="k">class</span> <span class="nc">MyVideoCapture</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">DEBUG</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Video config&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Video config&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span> <span class="o">=</span> <span class="n">DEBUG</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_rgb</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="c1">#  open video source (by default this will try to open the computer webcam)</span>
         <span class="k">if</span> <span class="s2">&quot;sample_img&quot;</span> <span class="ow">in</span> <span class="n">DEBUG</span><span class="p">:</span>
             <span class="n">sample_source</span> <span class="o">=</span> <span class="n">DEBUG</span><span class="p">[</span><span class="s2">&quot;sample_img&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_sources</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cam_width</span> <span class="o">=</span> <span class="n">DEBUG</span><span class="p">[</span><span class="s2">&quot;cam_width&quot;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cam_height</span> <span class="o">=</span> <span class="n">DEBUG</span><span class="p">[</span><span class="s2">&quot;cam_height&quot;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">vid</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">sample_source</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sample_source</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;.png&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">[</span><span class="s2">&quot;sample_img&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vid</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">sample_source</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sample_sources</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">*&#39;</span> <span class="o">%</span> <span class="n">sample_source</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cur_debug</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vid</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_sources</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cur_debug</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">vid</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
@@ -179,8 +186,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_WIDTH</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_HEIGHT</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MyVideoCapture.get_original_frame"><a class="viewcode-back" href="../../docs/src.html#src.video_capture.MyVideoCapture.get_original_frame">[docs]</a>    <span class="k">def</span> <span class="nf">get_original_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MyVideoCapture.get_original_frame"><a class="viewcode-back" href="../../docs/src.html#src.video_capture.MyVideoCapture.get_original_frame">[docs]</a>    <span class="k">def</span> <span class="nf">get_original_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
         <span class="k">if</span> <span class="s2">&quot;sample_img&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_sources</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vid</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_sources</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cur_debug</span><span class="p">])</span>
             <span class="n">origin_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span>
             <span class="n">origin_image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">origin_image</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cam_width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cam_height</span><span class="p">),</span>
                                       <span class="n">interpolation</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">INTER_AREA</span><span class="p">)</span>
@@ -191,10 +200,15 @@
                     <span class="k">return</span> <span class="n">ret</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Camera not opening&quot;</span><span class="p">)</span>
+
+        <span class="n">t_zoom</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_zoom&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">t_zoom</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">origin_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">origin_image</span><span class="p">,</span> <span class="n">t_zoom</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">origin_image</span></div>
 
 <div class="viewcode-block" id="MyVideoCapture.get_frame"><a class="viewcode-back" href="../../docs/src.html#src.video_capture.MyVideoCapture.get_frame">[docs]</a>    <span class="k">def</span> <span class="nf">get_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">raw_data_draw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auto_calibrate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Get frame from video source&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Get frame from video source&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">raw_data_draw</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">raw_data_draw</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">t_red_min</span><span class="p">,</span> <span class="n">t_red_max</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_red&quot;</span><span class="p">][</span><span class="s2">&quot;min&quot;</span><span class="p">],</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_red&quot;</span><span class="p">][</span><span class="s2">&quot;max&quot;</span><span class="p">]</span>
@@ -202,18 +216,10 @@
         <span class="n">t_blue_min</span><span class="p">,</span> <span class="n">t_blue_max</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_blue&quot;</span><span class="p">][</span><span class="s2">&quot;min&quot;</span><span class="p">],</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_blue&quot;</span><span class="p">][</span><span class="s2">&quot;max&quot;</span><span class="p">]</span>
         <span class="n">t_contrast</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_contrast&quot;</span><span class="p">]</span>
         <span class="n">t_light</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_light&quot;</span><span class="p">]</span>
-        <span class="n">t_zoom</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_zoom&quot;</span><span class="p">]</span>
         <span class="n">t_blur</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_blur&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">t_noise</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;t_noise&quot;</span><span class="p">]</span>
 
-        <span class="n">selected_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_original_frame</span><span class="p">()</span>
-
-        <span class="c1"># Remove Shadow</span>
-        <span class="c1"># selected_area = pp.shadow_remove(selected_area)</span>
-        <span class="c1"># selected_area = pp.color_shadow_demove(selected_area)</span>
-
-        <span class="k">if</span> <span class="n">t_zoom</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">selected_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">selected_area</span><span class="p">,</span> <span class="n">t_zoom</span><span class="p">)</span>
+        <span class="n">selected_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_original_frame</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">raw_data_draw</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]:</span>
             <span class="n">selected_area</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">crop_img</span><span class="p">(</span><span class="n">selected_area</span><span class="p">,</span> <span class="n">raw_data_draw</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
@@ -224,32 +230,63 @@
         <span class="c1"># morphed = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)</span>
         <span class="n">selected_area</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">medianBlur</span><span class="p">(</span><span class="n">selected_area</span><span class="p">,</span> <span class="n">t_blur</span><span class="p">)</span>
 
-        <span class="c1"># # image pre-process</span>
-        <span class="n">img</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">brightness</span><span class="p">(</span><span class="n">selected_area</span><span class="p">,</span> <span class="n">t_light</span><span class="p">,</span> <span class="n">t_contrast</span><span class="p">)</span>
+        <span class="c1"># if True:</span>
+        <span class="c1">#     # todo auto normalize</span>
+        <span class="c1">#     b, g, r = cv2.split(selected_area)</span>
+        <span class="c1">#     cur_red = int(sum(r.ravel() / len(r.ravel())))</span>
+        <span class="c1">#     cur_green = int(sum(g.ravel() / len(g.ravel())))</span>
+        <span class="c1">#     cur_blue = int(sum(b.ravel() / len(b.ravel())))</span>
+        <span class="c1">#     if self.start_rgb == (0, 0, 0):</span>
+        <span class="c1">#         diff_rgb = 0</span>
+        <span class="c1">#         self.start_rgb = (cur_red, cur_green, cur_blue)</span>
+        <span class="c1">#     else:</span>
+        <span class="c1">#         diff_rgb = int(((self.start_rgb[0] - cur_red) + (self.start_rgb[1] - cur_green) + (</span>
+        <span class="c1">#                 self.start_rgb[2] - cur_blue)) / 3)</span>
+        <span class="c1">#</span>
+        <span class="c1">#     img = pp.brightness(selected_area, -230 - diff_rgb, -15)</span>
+        <span class="c1">#     img, alpha, beta = pp.automatic_brightness_and_contrast(img)</span>
+
+        <span class="c1"># Remove Shadow</span>
+        <span class="c1"># img = pp.shadow_remove(img)</span>
+        <span class="c1"># selected_area = pp.color_shadow_remove(selected_area)</span>
 
         <span class="c1"># todo run on RUN mode</span>
         <span class="c1"># todo rgb control -&gt; gui slow**</span>
-        <span class="c1"># lower_hue = np.array([t_red_min, t_green_min, t_blue_min])</span>
-        <span class="c1"># upper_hue = np.array([t_red_max, t_green_max, t_blue_max])</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">auto_calibrate</span><span class="p">:</span>
-            <span class="c1"># define range of a color in HSV</span>
-            <span class="n">lower_hue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t_red_min</span><span class="p">,</span> <span class="n">t_green_min</span><span class="p">,</span> <span class="n">t_blue_min</span><span class="p">])</span>
-            <span class="n">upper_hue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t_red_max</span><span class="p">,</span> <span class="n">t_green_max</span><span class="p">,</span> <span class="n">t_blue_max</span><span class="p">])</span>
+            <span class="c1"># pass</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">brightness</span><span class="p">(</span><span class="n">selected_area</span><span class="p">,</span> <span class="n">t_light</span><span class="p">,</span> <span class="n">t_contrast</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">b</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+            <span class="c1"># pass</span>
+            <span class="c1"># todo auto normalize</span>
+            <span class="n">b</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">selected_area</span><span class="p">)</span>
             <span class="n">cur_red</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">ravel</span><span class="p">())))</span>
             <span class="n">cur_green</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ravel</span><span class="p">())))</span>
             <span class="n">cur_blue</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">ravel</span><span class="p">())))</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_rgb</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="n">reset</span><span class="p">:</span>
-                <span class="n">diff_rgb</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_rgb</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">diff_rgb</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">start_rgb</span> <span class="o">=</span> <span class="p">(</span><span class="n">cur_red</span><span class="p">,</span> <span class="n">cur_green</span><span class="p">,</span> <span class="n">cur_blue</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">diff_rgb</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">cur_red</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_rgb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">cur_green</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_rgb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">cur_blue</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;diff_rgb: &quot;</span><span class="p">,</span> <span class="n">diff_rgb</span><span class="p">)</span>
-            <span class="n">lower_hue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                <span class="p">[(</span><span class="n">t_red_min</span> <span class="o">-</span> <span class="p">(</span><span class="n">diff_rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)),</span> <span class="p">(</span><span class="n">t_green_min</span> <span class="o">-</span> <span class="p">(</span><span class="n">diff_rgb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)),</span> <span class="p">(</span><span class="n">t_blue_min</span> <span class="o">-</span> <span class="p">(</span><span class="n">diff_rgb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1</span><span class="p">))])</span>
-            <span class="n">upper_hue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                <span class="p">[(</span><span class="n">t_red_max</span> <span class="o">-</span> <span class="p">(</span><span class="n">diff_rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)),</span> <span class="p">(</span><span class="n">t_green_max</span> <span class="o">-</span> <span class="p">(</span><span class="n">diff_rgb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)),</span> <span class="p">(</span><span class="n">t_blue_max</span> <span class="o">-</span> <span class="p">(</span><span class="n">diff_rgb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1</span><span class="p">))])</span>
+                <span class="n">diff_rgb</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">start_rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">cur_red</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_rgb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">cur_green</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">start_rgb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">cur_blue</span><span class="p">))</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+
+            <span class="n">img</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">brightness</span><span class="p">(</span><span class="n">selected_area</span><span class="p">,</span> <span class="o">-</span><span class="mi">230</span> <span class="o">-</span> <span class="n">diff_rgb</span><span class="p">,</span> <span class="o">-</span><span class="mi">15</span><span class="p">)</span>
+            <span class="n">img</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">automatic_brightness_and_contrast</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+            <span class="c1"># todo auto rgb</span>
+            <span class="c1"># b, g, r = cv2.split(img)</span>
+            <span class="c1"># cur_red = int(sum(r.ravel() / len(r.ravel())))</span>
+            <span class="c1"># cur_green = int(sum(g.ravel() / len(g.ravel())))</span>
+            <span class="c1"># cur_blue = int(sum(b.ravel() / len(b.ravel())))</span>
+            <span class="c1"># if self.start_rgb == (0, 0, 0) or reset:</span>
+            <span class="c1">#     diff_rgb = (0, 0, 0)</span>
+            <span class="c1">#     self.start_rgb = (cur_red, cur_green, cur_blue)</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     diff_rgb = (self.start_rgb[0] - cur_red, self.start_rgb[1] - cur_green, self.start_rgb[2] - cur_blue)</span>
+            <span class="c1"># print(&quot;diff_rgb: &quot;, diff_rgb, self.start_rgb, (cur_red, cur_green, cur_blue))</span>
+            <span class="c1"># lower_hue = np.array(</span>
+            <span class="c1">#     [(t_red_min - (diff_rgb[0] * 1)), (t_green_min - (diff_rgb[1] * 1)), (t_blue_min - (diff_rgb[2] * 1))])</span>
+            <span class="c1"># upper_hue = np.array(</span>
+            <span class="c1">#     [(t_red_max - (diff_rgb[0] * 1)), (t_green_max - (diff_rgb[1] * 1)), (t_blue_max - (diff_rgb[2] * 1))])</span>
 
             <span class="c1"># todo lightness control</span>
             <span class="c1"># hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)</span>
@@ -257,6 +294,8 @@
             <span class="c1"># print(diff_rgb)</span>
             <span class="c1"># lower_hue = np.array([t_red_min, t_green_min, t_blue_min])</span>
             <span class="c1"># upper_hue = np.array([t_red_max-diff_rgb, t_green_max-diff_rgb, t_blue_max-diff_rgb])</span>
+        <span class="n">lower_hue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t_red_min</span><span class="p">,</span> <span class="n">t_green_min</span><span class="p">,</span> <span class="n">t_blue_min</span><span class="p">])</span>
+        <span class="n">upper_hue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t_red_max</span><span class="p">,</span> <span class="n">t_green_max</span><span class="p">,</span> <span class="n">t_blue_max</span><span class="p">])</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">hue</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">lower_hue</span><span class="p">,</span> <span class="n">upper_hue</span><span class="p">)</span>
 
         <span class="c1"># contour extraction</span>
@@ -267,7 +306,7 @@
 
 <div class="viewcode-block" id="MyVideoCapture.zoom"><a class="viewcode-back" href="../../docs/src.html#src.video_capture.MyVideoCapture.zoom">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">zoom</span><span class="p">(</span><span class="n">cv2Object</span><span class="p">,</span> <span class="n">zoomSize</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Resizes the image/video frame to the specified amount of &quot;zoomSize&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Resizes the image/video frame to the specified amount of &quot;zoomSize&quot;&quot;&quot;</span>
         <span class="n">cv2Object</span> <span class="o">=</span> <span class="n">imutils</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">cv2Object</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="p">(</span><span class="n">zoomSize</span> <span class="o">*</span> <span class="n">cv2Object</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
         <span class="c1"># center is simply half of the height &amp; width (y/2,x/2)</span>
         <span class="n">center</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">cv2Object</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">cv2Object</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
@@ -280,7 +319,7 @@
         <span class="k">return</span> <span class="n">cv2Object</span></div>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Release the video source when the object is destroyed&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Release the video source when the object is destroyed&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">isOpened</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">vid</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
 </pre></div>

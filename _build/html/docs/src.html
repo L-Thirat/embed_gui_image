@@ -195,6 +195,20 @@
 <dt id="src.extraction.draw_contour">
 <code class="sig-prename descclassname">src.extraction.</code><code class="sig-name descname">draw_contour</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">mask</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/extraction.html#draw_contour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.extraction.draw_contour" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draw contour</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>class</em>) – Image</p></li>
+<li><p><strong>mask</strong> (<em>class</em>) – Image that consist of contours data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Contours data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list, numpy.ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -215,77 +229,245 @@
 <dl class="py function">
 <dt id="src.linear_processing.diff_xy">
 <code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">diff_xy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">y1</span></em>, <em class="sig-param"><span class="n">x2</span></em>, <em class="sig-param"><span class="n">y2</span></em>, <em class="sig-param"><span class="n">w</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#diff_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.diff_xy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find difference distance when width change</p>
+<dd><p>Find delta x and y</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x1</strong> (<em>int</em>) – Point1 x</p></li>
+<li><p><strong>y1</strong> (<em>int</em>) – Point1 y</p></li>
+<li><p><strong>x2</strong> (<em>int</em>) – Point2 x</p></li>
+<li><p><strong>y2</strong> (<em>int</em>) – Point2 x</p></li>
+<li><p><strong>w</strong> (<em>int</em>) – width</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dy, dy</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="src.linear_processing.dist2">
-<code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">dist2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">end</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#dist2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.dist2" title="Permalink to this definition">¶</a></dt>
-<dd><p>distance square</p>
+<code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">dist2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p1</span></em>, <em class="sig-param"><span class="n">p2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#dist2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.dist2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find square of distance between 2 points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p1</strong> (<em>tuple</em>) – point</p></li>
+<li><p><strong>p2</strong> (<em>tuple</em>) – point</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Square of distance between 2 points</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float, int</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="src.linear_processing.do_intersect">
 <code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">do_intersect</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p1</span></em>, <em class="sig-param"><span class="n">q1</span></em>, <em class="sig-param"><span class="n">p2</span></em>, <em class="sig-param"><span class="n">q2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#do_intersect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.do_intersect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the four orientations needed for general and special cases</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p1</strong> (<em>tuple</em>) – colinear</p></li>
+<li><p><strong>q1</strong> (<em>tuple</em>) – colinear</p></li>
+<li><p><strong>p2</strong> (<em>tuple</em>) – colinear</p></li>
+<li><p><strong>q2</strong> (<em>tuple</em>) – colinear</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True: general, False special cases</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="src.linear_processing.find_distance">
 <code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">find_distance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p1</span></em>, <em class="sig-param"><span class="n">p2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#find_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.find_distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find distance between 2 points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p1</strong> (<em>tuple</em>) – point</p></li>
+<li><p><strong>p2</strong> (<em>tuple</em>) – point</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Distance between 2 points</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="src.linear_processing.find_start_end">
 <code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">find_start_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cnt</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#find_start_end"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.find_start_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find start-end point from contour data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cnt</strong> (<em>class</em><em>(</em><em>numpy.ndarray</em><em>)</em>) – list</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>start point, end point</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(int, float), (int, float)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="src.linear_processing.is_inside_polygon">
-<code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">is_inside_polygon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">points</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n">tuple</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="../_modules/src/linear_processing.html#is_inside_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.is_inside_polygon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns true if the point p lies inside the polygon[] with n vertices</p>
+<code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">is_inside_polygon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">points</span></em>, <em class="sig-param"><span class="n">p</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#is_inside_polygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.is_inside_polygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>To check that point is in polygon or not</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<em>list</em>) – polygon data</p></li>
+<li><p><strong>p</strong> (<em>tuple</em>) – point</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if the point p lies inside the polygon[] with n vertices</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="src.linear_processing.length2points">
 <code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">length2points</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p1</span></em>, <em class="sig-param"><span class="n">p2</span></em>, <em class="sig-param"><span class="n">w</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#length2points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.length2points" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find new points when width change</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p1</strong> (<em>tuple</em>) – Point1</p></li>
+<li><p><strong>p2</strong> (<em>tuple</em>) – Point2</p></li>
+<li><p><strong>w</strong> (<em>int</em>) – width</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>x1, y1, x2, y2</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(int, float), (int, float), (int, float), (int, float)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="src.linear_processing.line2rect">
 <code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">line2rect</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p1</span></em>, <em class="sig-param"><span class="n">p2</span></em>, <em class="sig-param"><span class="n">w</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#line2rect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.line2rect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert points data to rectangle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p1</strong> (<em>tuple</em>) – Point1</p></li>
+<li><p><strong>p2</strong> (<em>tuple</em>) – Point2</p></li>
+<li><p><strong>w</strong> (<em>int</em>) – width</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of corner points</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list[(int, float), (int, float), (int, float), (int, float)]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="src.linear_processing.linear_formula">
 <code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">linear_formula</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p1</span></em>, <em class="sig-param"><span class="n">p2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#linear_formula"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.linear_formula" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find linear formula from 2 points</p>
+<dd><p>«Find linear formula from 2 points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>p1</strong> – point</p>
+</dd>
+</dl>
+<p>:type p1:tuple
+:param p2:point
+:type p2: tuple
+:return: slope, constant
+:rtype: (int, float), (int, float)</p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="src.linear_processing.on_segment">
-<code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">on_segment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n">tuple</span></em>, <em class="sig-param"><span class="n">q</span><span class="p">:</span> <span class="n">tuple</span></em>, <em class="sig-param"><span class="n">r</span><span class="p">:</span> <span class="n">tuple</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="../_modules/src/linear_processing.html#on_segment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.on_segment" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">on_segment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">r</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#on_segment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.on_segment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check segmentation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>tuple</em>) – colinear</p></li>
+<li><p><strong>q</strong> (<em>tuple</em>) – colinear</p></li>
+<li><p><strong>r</strong> (<em>tuple</em>) – colinear</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Segmented</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="src.linear_processing.orientation">
-<code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">orientation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span><span class="p">:</span> <span class="n">tuple</span></em>, <em class="sig-param"><span class="n">q</span><span class="p">:</span> <span class="n">tuple</span></em>, <em class="sig-param"><span class="n">r</span><span class="p">:</span> <span class="n">tuple</span></em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="../_modules/src/linear_processing.html#orientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.orientation" title="Permalink to this definition">¶</a></dt>
-<dd><p>To find orientation of ordered triplet (p, q, r).
-The function returns following values
-0 –&gt; p, q and r are colinear
-1 –&gt; Clockwise
-2 –&gt; Counterclockwise</p>
+<code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">orientation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">r</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#orientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.orientation" title="Permalink to this definition">¶</a></dt>
+<dd><p>To find orientation of ordered triplet (p, q, r).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>tuple</em>) – colinear</p></li>
+<li><p><strong>q</strong> (<em>tuple</em>) – colinear</p></li>
+<li><p><strong>r</strong> (<em>tuple</em>) – colinear</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>1 Clockwise, 2 Counterclockwise</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="src.linear_processing.point2line_match">
 <code class="sig-prename descclassname">src.linear_processing.</code><code class="sig-name descname">point2line_match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">end</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/linear_processing.html#point2line_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.linear_processing.point2line_match" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Find minimum distance between point-line</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>tuple</em>) – point</p></li>
+<li><p><strong>start</strong> (<em>tuple</em>) – start point</p></li>
+<li><p><strong>end</strong> (<em>tuple</em>) – end point</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Minimum distance between point-line</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 <div class="section" id="module-src.logger">
@@ -329,6 +511,11 @@ The function returns following values
 </dd></dl>
 
 <dl class="py function">
+<dt id="src.preprocess.automatic_brightness_and_contrast">
+<code class="sig-prename descclassname">src.preprocess.</code><code class="sig-name descname">automatic_brightness_and_contrast</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">clip_hist_percent</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/preprocess.html#automatic_brightness_and_contrast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.preprocess.automatic_brightness_and_contrast" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt id="src.preprocess.brightness">
 <code class="sig-prename descclassname">src.preprocess.</code><code class="sig-name descname">brightness</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">t_light</span></em>, <em class="sig-param"><span class="n">t_contrast</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/preprocess.html#brightness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.preprocess.brightness" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply light config</p>
@@ -338,6 +525,15 @@ The function returns following values
 <dt id="src.preprocess.color_shadow_demove">
 <code class="sig-prename descclassname">src.preprocess.</code><code class="sig-name descname">color_shadow_demove</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/preprocess.html#color_shadow_demove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.preprocess.color_shadow_demove" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove shadow from image (YCbCr image)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="src.preprocess.convertScale">
+<code class="sig-prename descclassname">src.preprocess.</code><code class="sig-name descname">convertScale</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">alpha</span></em>, <em class="sig-param"><span class="n">beta</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/preprocess.html#convertScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.preprocess.convertScale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add bias and gain to an image with saturation arithmetics. Unlike
+cv2.convertScaleAbs, it does not take an absolute value, which would lead to
+nonsensical results (e.g., a pixel at 44 with alpha = 3 and beta = -210
+becomes 78 with OpenCV, when in fact it should become 0).</p>
 </dd></dl>
 
 <dl class="py function">
@@ -373,7 +569,7 @@ The function returns following values
 
 <dl class="py method">
 <dt id="src.video_capture.MyVideoCapture.get_original_frame">
-<code class="sig-name descname">get_original_frame</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/video_capture.html#MyVideoCapture.get_original_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.video_capture.MyVideoCapture.get_original_frame" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_original_frame</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/video_capture.html#MyVideoCapture.get_original_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.video_capture.MyVideoCapture.get_original_frame" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">

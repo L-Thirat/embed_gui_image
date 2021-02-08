@@ -32,6 +32,7 @@ init_project.create_folders()
 init_param = init_project.init_param()
 
 from src import extraction as et
+from src import logger
 from src.video_capture import MyVideoCapture as Vdo
 from gui import Page1, Page2, Page3
 from PIL import EpsImagePlugin
@@ -88,6 +89,7 @@ class App(tki.Frame):
     """
     def __init__(self, window, *args, **kwargs):
         """Constructor method"""
+        self.log = logger.GetSystemLogger()
         # Setting
         with open(r'setting.yaml') as file:
             # The FullLoader parameter handles the conversion from YAML
@@ -252,11 +254,11 @@ class App(tki.Frame):
     def update(self):
         """Real-time update image in canvas"""
         if self.cur_page != 3:
-            if self.auto_debug:
-                if int(time() - self.timing) > 3:  # todo delay per loop
-                    self.p1.snapshot("compare")
-                    self.timing = time()
-                    self.vid.cur_debug += 1
+            # if self.auto_debug:
+            #     if int(time() - self.timing) > 3:  # todo delay per loop
+            #         self.p1.snapshot("compare")
+            #         self.timing = time()
+            #         self.vid.cur_debug += 1
 
             if self.TEST_MAMOS:
                 if self.mm.output():

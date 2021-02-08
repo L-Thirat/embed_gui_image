@@ -157,17 +157,39 @@
 
 
 <div class="viewcode-block" id="find_distance"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.find_distance">[docs]</a><span class="k">def</span> <span class="nf">find_distance</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Find distance between 2 points&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Find distance between 2 points</span>
+
+<span class="sd">    :param p1: point</span>
+<span class="sd">    :type p1: tuple</span>
+<span class="sd">    :param p2: point</span>
+<span class="sd">    :type p2: tuple</span>
+<span class="sd">    :return: Distance between 2 points</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="dist2"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.dist2">[docs]</a><span class="k">def</span> <span class="nf">dist2</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;distance square&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">end</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span></div>
+<div class="viewcode-block" id="dist2"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.dist2">[docs]</a><span class="k">def</span> <span class="nf">dist2</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find square of distance between 2 points</span>
+
+<span class="sd">    :param p1: point</span>
+<span class="sd">    :type p1: tuple</span>
+<span class="sd">    :param p2: point</span>
+<span class="sd">    :type p2: tuple</span>
+<span class="sd">    :return: Square of distance between 2 points</span>
+<span class="sd">    :rtype: float, int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span></div>
 
 
 <div class="viewcode-block" id="find_start_end"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.find_start_end">[docs]</a><span class="k">def</span> <span class="nf">find_start_end</span><span class="p">(</span><span class="n">cnt</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Find start-end point from contour data&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Find start-end point from contour data</span>
+
+<span class="sd">    :param cnt: list</span>
+<span class="sd">    :type cnt: class(numpy.ndarray)</span>
+<span class="sd">    :return: start point, end point</span>
+<span class="sd">    :rtype: (int, float), (int, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># todo start_point, start_dis = (), find_distance((camera_w, camera_h), (0, 0))</span>
     <span class="n">start_point</span><span class="p">,</span> <span class="n">start_dis</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">find_distance</span><span class="p">((</span><span class="mi">640</span><span class="p">,</span> <span class="mi">480</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="n">end_point</span><span class="p">,</span> <span class="n">end_dis</span> <span class="o">=</span> <span class="p">(),</span> <span class="mi">0</span>
@@ -182,7 +204,15 @@
 
 
 <div class="viewcode-block" id="linear_formula"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.linear_formula">[docs]</a><span class="k">def</span> <span class="nf">linear_formula</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Find linear formula from 2 points&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;&quot;Find linear formula from 2 points</span>
+
+<span class="sd">    :param p1: point</span>
+<span class="sd">    :type p1:tuple</span>
+<span class="sd">    :param p2:point</span>
+<span class="sd">    :type p2: tuple</span>
+<span class="sd">    :return: slope, constant</span>
+<span class="sd">    :rtype: (int, float), (int, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">o_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">]</span>
     <span class="n">x_coords</span><span class="p">,</span> <span class="n">y_coords</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">o_points</span><span class="p">)</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">([</span><span class="n">x_coords</span><span class="p">,</span> <span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_coords</span><span class="p">))])</span><span class="o">.</span><span class="n">T</span>
@@ -191,6 +221,17 @@
 
 
 <div class="viewcode-block" id="point2line_match"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.point2line_match">[docs]</a><span class="k">def</span> <span class="nf">point2line_match</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find minimum distance between point-line</span>
+
+<span class="sd">    :param p: point</span>
+<span class="sd">    :type p: tuple</span>
+<span class="sd">    :param start: start point</span>
+<span class="sd">    :type start: tuple</span>
+<span class="sd">    :param end: end point</span>
+<span class="sd">    :type end: tuple</span>
+<span class="sd">    :return: Minimum distance between point-line</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># https://stackoverfloend.com/questions/849211/shortest-distance-betendeen-a-point-and-a-line-segment</span>
     <span class="n">l2</span> <span class="o">=</span> <span class="n">dist2</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
     <span class="c1"># distToSegmentSquared</span>
@@ -198,12 +239,26 @@
         <span class="k">return</span> <span class="n">dist2</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
     <span class="n">t</span> <span class="o">=</span> <span class="p">((</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="o">/</span> <span class="n">l2</span>
     <span class="n">t</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
-    <span class="n">dis2sag_squad</span> <span class="o">=</span> <span class="n">dist2</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="p">[</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
+    <span class="n">dis2sag_squad</span> <span class="o">=</span> <span class="n">dist2</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
     <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dis2sag_squad</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="diff_xy"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.diff_xy">[docs]</a><span class="k">def</span> <span class="nf">diff_xy</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Find difference distance when width change&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Find delta x and y</span>
+
+<span class="sd">    :param x1: Point1 x</span>
+<span class="sd">    :type x1: int</span>
+<span class="sd">    :param y1: Point1 y</span>
+<span class="sd">    :type y1: int</span>
+<span class="sd">    :param x2: Point2 x</span>
+<span class="sd">    :type x2: int</span>
+<span class="sd">    :param y2: Point2 x</span>
+<span class="sd">    :type y2: int</span>
+<span class="sd">    :param w: width</span>
+<span class="sd">    :type w: int</span>
+<span class="sd">    :return: dy, dy</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">red</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">y2</span> <span class="o">-</span> <span class="n">y1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="p">))</span>
         <span class="n">dx</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">red</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span>
@@ -215,7 +270,17 @@
 
 
 <div class="viewcode-block" id="length2points"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.length2points">[docs]</a><span class="k">def</span> <span class="nf">length2points</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Find new points when width change&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Find new points when width change</span>
+
+<span class="sd">    :param p1: Point1</span>
+<span class="sd">    :type p1: tuple</span>
+<span class="sd">    :param p2: Point2</span>
+<span class="sd">    :type p2: tuple</span>
+<span class="sd">    :param w: width</span>
+<span class="sd">    :type w: int</span>
+<span class="sd">    :return: x1, y1, x2, y2</span>
+<span class="sd">    :rtype: (int, float), (int, float), (int, float), (int, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x1</span> <span class="o">=</span> <span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">y1</span> <span class="o">=</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">x2</span> <span class="o">=</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -244,7 +309,17 @@
 
 
 <div class="viewcode-block" id="line2rect"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.line2rect">[docs]</a><span class="k">def</span> <span class="nf">line2rect</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Convert points data to rectangle&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Convert points data to rectangle</span>
+
+<span class="sd">    :param p1: Point1</span>
+<span class="sd">    :type p1: tuple</span>
+<span class="sd">    :param p2: Point2</span>
+<span class="sd">    :type p2: tuple</span>
+<span class="sd">    :param w: width</span>
+<span class="sd">    :type w: int</span>
+<span class="sd">    :return: list of corner points</span>
+<span class="sd">    :rtype: list[(int, float), (int, float), (int, float), (int, float)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">diff_xy</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">w</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">new1_x</span> <span class="o">=</span> <span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dx</span>
@@ -270,8 +345,18 @@
     <span class="k">return</span> <span class="p">[(</span><span class="n">new1_x</span><span class="p">,</span> <span class="n">new1_y</span><span class="p">),</span> <span class="p">(</span><span class="n">new2_x</span><span class="p">,</span> <span class="n">new2_y</span><span class="p">),</span> <span class="p">(</span><span class="n">new3_x</span><span class="p">,</span> <span class="n">new3_y</span><span class="p">),</span> <span class="p">(</span><span class="n">new4_x</span><span class="p">,</span> <span class="n">new4_y</span><span class="p">)]</span></div>
 
 
-<div class="viewcode-block" id="on_segment"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.on_segment">[docs]</a><span class="k">def</span> <span class="nf">on_segment</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Check segmentation&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="on_segment"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.on_segment">[docs]</a><span class="k">def</span> <span class="nf">on_segment</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check segmentation</span>
+
+<span class="sd">    :param p: colinear</span>
+<span class="sd">    :type p: tuple</span>
+<span class="sd">    :param q: colinear</span>
+<span class="sd">    :type q: tuple</span>
+<span class="sd">    :param r: colinear</span>
+<span class="sd">    :type r: tuple</span>
+<span class="sd">    :return: Segmented</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="p">((</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">&amp;</span>
             <span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="nb">min</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">&amp;</span>
             <span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="o">&amp;</span>
@@ -281,14 +366,18 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="orientation"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.orientation">[docs]</a><span class="k">def</span> <span class="nf">orientation</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="orientation"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.orientation">[docs]</a><span class="k">def</span> <span class="nf">orientation</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;To find orientation of ordered triplet (p, q, r).</span>
 
-<span class="sd">    To find orientation of ordered triplet (p, q, r).</span>
-<span class="sd">    The function returns following values</span>
-<span class="sd">    0 --&gt; p, q and r are colinear</span>
-<span class="sd">    1 --&gt; Clockwise</span>
-<span class="sd">    2 --&gt; Counterclockwise&quot;&quot;&quot;</span>
+<span class="sd">    :param p: colinear</span>
+<span class="sd">    :type p: tuple</span>
+<span class="sd">    :param q: colinear</span>
+<span class="sd">    :type q: tuple</span>
+<span class="sd">    :param r: colinear</span>
+<span class="sd">    :type r: tuple</span>
+<span class="sd">    :return: 1 Clockwise, 2 Counterclockwise</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">val</span> <span class="o">=</span> <span class="p">(((</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span>
             <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">-</span>
            <span class="p">((</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span>
@@ -303,7 +392,19 @@
 
 
 <div class="viewcode-block" id="do_intersect"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.do_intersect">[docs]</a><span class="k">def</span> <span class="nf">do_intersect</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">q1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">q2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Find the four orientations needed for general and special cases&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Find the four orientations needed for general and special cases</span>
+
+<span class="sd">    :param p1: colinear</span>
+<span class="sd">    :type p1: tuple</span>
+<span class="sd">    :param q1: colinear</span>
+<span class="sd">    :type q1: tuple</span>
+<span class="sd">    :param p2: colinear</span>
+<span class="sd">    :type p2: tuple</span>
+<span class="sd">    :param q2: colinear</span>
+<span class="sd">    :type q2: tuple</span>
+<span class="sd">    :return: True: general, False special cases</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">o1</span> <span class="o">=</span> <span class="n">orientation</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">q1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
     <span class="n">o2</span> <span class="o">=</span> <span class="n">orientation</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">)</span>
     <span class="n">o3</span> <span class="o">=</span> <span class="n">orientation</span><span class="p">(</span><span class="n">p2</span><span class="p">,</span> <span class="n">q2</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
@@ -337,10 +438,15 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="is_inside_polygon"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.is_inside_polygon">[docs]</a><span class="k">def</span> <span class="nf">is_inside_polygon</span><span class="p">(</span><span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="is_inside_polygon"><a class="viewcode-back" href="../../docs/src.html#src.linear_processing.is_inside_polygon">[docs]</a><span class="k">def</span> <span class="nf">is_inside_polygon</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;To check that point is in polygon or not</span>
 
-<span class="sd">    Returns true if the point p lies inside the polygon[] with n vertices</span>
+<span class="sd">    :param points: polygon data</span>
+<span class="sd">    :type points: list</span>
+<span class="sd">    :param p: point</span>
+<span class="sd">    :type p: tuple</span>
+<span class="sd">    :return: true if the point p lies inside the polygon[] with n vertices</span>
+<span class="sd">    :rtype: bool</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 
