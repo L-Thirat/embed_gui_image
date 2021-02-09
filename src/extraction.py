@@ -13,6 +13,11 @@ else:
     cv2ver = 4
 
 
+def contour2image(img, contours):
+    draw_cnt = cv2.drawContours(img, contours, -1, (0, 255, 0), 2)
+    return draw_cnt
+
+
 def draw_contour(img, mask):
     """Draw contour
 
@@ -29,7 +34,7 @@ def draw_contour(img, mask):
     else:
         contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    draw_cnt = cv2.drawContours(img, contours[1:], -1, (0, 255, 0), 2)
+    draw_cnt = contour2image(img, contours)
 
     return draw_cnt, contours
 

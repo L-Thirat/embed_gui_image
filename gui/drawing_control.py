@@ -125,7 +125,7 @@ class DrawingPage(tki.Frame):
         #     latest_file = max(list_of_files, key=os.path.getctime)
         #     self.read_raw_data(latest_file)
         #
-        # self.canvas3 = tki.Canvas(buttonframe)
+        self.canvas3 = tki.Canvas(buttonframe)
         # # self.canvas3.place(relx=0.45, rely=0.35)
         # self.canvas3.config(width=app.cam_width, height=app.cam_height)
 
@@ -159,7 +159,7 @@ class DrawingPage(tki.Frame):
             self.drawing_data = p1.drawing_data
             self.raw_data_draw = p1.raw_data_draw
             self.drawing_scale(1.5)
-            self.load_draw()
+            self.load_draw(2)
         elif p3:
             # To page 1
             self.save_status = p3.save_status
@@ -306,20 +306,27 @@ class DrawingPage(tki.Frame):
                 self.reset_calibrate = True
             self.btn_save.place(relx=0.56, rely=0.05)
 
-    def load_draw(self):
+    def load_draw(self, cv_id):
         for mode in self.drawing_data:
             if self.raw_data_draw[mode]:
                 if mode == "inside":
                     lines = self.raw_data_draw["inside"]
                     if lines:
                         for line in lines:
-                            self.drawing_data[mode]["prev"].append(
-                                self.canvas2.create_line(line[0], line[1], line[2], line[3], width=2, fill='blue'))
+                            if cv_id == 2:
+                                self.drawing_data[mode]["prev"].append(
+                                    self.canvas2.create_line(line[0], line[1], line[2], line[3], width=2, fill='blue'))
+                            else:
+                                self.canvas3.create_line(line[0], line[1], line[2], line[3], width=2, fill='blue')
                 else:
                     for polygon in self.raw_data_draw[mode]:
                         flat_polygon = [item for sublist in polygon for item in sublist]
-                        self.drawing_data[mode]["prev"].append(self.canvas2.create_polygon(
-                            flat_polygon, outline=self.drawing_data[mode]["color"], fill="", width=2))
+                        if cv_id == 2:
+                            self.drawing_data[mode]["prev"].append(self.canvas2.create_polygon(
+                                flat_polygon, outline=self.drawing_data[mode]["color"], fill="", width=2))
+                        else:
+                            self.canvas3.create_polygon(
+                                flat_polygon, outline=self.drawing_data[mode]["color"], fill="", width=2)
                 self.drawing_data[mode]["polygon"] = self.raw_data_draw[mode]
 
     def read_raw_data(self, filename):
@@ -343,7 +350,7 @@ class DrawingPage(tki.Frame):
                 self.canvas2.create_image(self.size[2], self.size[3], image=self.tk_photo_org, anchor=tki.NW)
 
                 # load draw
-                self.load_draw()
+                self.load_draw(2)
 
     def reset(self):
         pass

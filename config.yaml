@@ -12,5 +12,5 @@ t_noise: 30
 t_red:
   max: 50
   min: 0
-t_space: 15
+t_space: 1
 t_zoom: 2

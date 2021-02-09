@@ -74,10 +74,6 @@ class Page1(DrawingPage):
         self.lbl_result = tki.Label(self.buttonframe, text="        ", bg="yellow", font=("Courier", 44))
         self.lbl_result.place(relx=0.83, rely=0.44)
 
-        # Result Time
-        self.lbl_dt = tki.Label(self.buttonframe, text="        ", font=("Courier", 44))
-        self.lbl_dt.place(relx=0.83, rely=0.53)
-
         # Drawing cv
         self.canvas2.place(relx=0.05, rely=0.35)
         self.canvas2.config(width=app.cam_width, height=app.cam_height)
@@ -88,7 +84,7 @@ class Page1(DrawingPage):
             latest_file = max(list_of_files, key=os.path.getctime)
             self.read_raw_data(latest_file)
 
-        # self.canvas3 = tki.Canvas(self.buttonframe)
+        self.canvas3 = tki.Canvas(self.buttonframe)
         self.canvas3.place(relx=0.45, rely=0.35)
         self.canvas3.config(width=app.cam_width, height=app.cam_height)
 
@@ -138,22 +134,49 @@ class Page1(DrawingPage):
                 init_dir(self.app.out_path, sub_dir)
                 self.file_path_o = self.app.out_path + sub_dir + "o_" + filename
                 cv2.imwrite(self.file_path_o, cv2.cvtColor(mask, cv2.COLOR_RGB2BGR))
-                self.load_img_o = Image.open(self.file_path_o)
-                self.load_img_o = self.load_img_o.resize((self.size[0], self.size[1]), Image.ANTIALIAS)
-                self.tk_photo_org = ImageTk.PhotoImage(image=self.load_img_o)
+                load_img_o = Image.open(self.file_path_o)
+                load_img_o = load_img_o.resize((self.size[0], self.size[1]), Image.ANTIALIAS)
+                self.tk_photo_org = ImageTk.PhotoImage(image=load_img_o)
+        else:
+            if self.save_status:
+                self.reset_calibrate = False
+                ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw, auto_calibrate=True,
+                                                                reset=self.reset_calibrate)
+                if ret:
+                    # todo change variable name
+                    init_dir(self.app.out_path, sub_dir)
+                    file_path_o = self.app.out_path + sub_dir + "o_" + filename
+                    cv2.imwrite(file_path_o, cv2.cvtColor(mask, cv2.COLOR_RGB2BGR))
+                    load_img_o = Image.open(file_path_o)
+                    load_img_o = load_img_o.resize((self.size[0], self.size[1]), Image.ANTIALIAS)
+                    tk_photo_org = ImageTk.PhotoImage(image=load_img_o)
+            else:
+                msg_type = "Error"
+                msg = "Need <save> before <compare>"
+                messagebox.showerror(msg_type, msg)
+                raise Exception(msg_type + ": " + msg)
+
+        if mode == "original":
+            # ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw)
+            # if ret:
+                # init_dir(self.app.out_path, sub_dir)
+                # self.file_path_o = self.app.out_path + sub_dir + "o_" + filename
+                # cv2.imwrite(self.file_path_o, cv2.cvtColor(mask, cv2.COLOR_RGB2BGR))
+                # self.load_img_o = Image.open(self.file_path_o)
+                # self.load_img_o = self.load_img_o.resize((self.size[0], self.size[1]), Image.ANTIALIAS)
+                # self.tk_photo_org = ImageTk.PhotoImage(image=self.load_img_o)
                 self.canvas2.create_image(self.size[2], self.size[3], image=self.tk_photo_org, anchor=tki.NW)
 
         elif mode == "compare":
             if self.save_status:
-                ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw, auto_calibrate=True,
-                                                                reset=self.reset_calibrate)
-                self.reset_calibrate = False
-                if ret:
+                # ret, frame, contours, mask = self.vid.get_frame(self.config, self.raw_data_draw, auto_calibrate=True,
+                #                                                 reset=self.reset_calibrate)
+                # self.reset_calibrate = False
+                # if ret:
                     start = time.time()
                     init_dir(self.app.cp_path, sub_dir)
                     self.file_path_c = self.app.cp_path + sub_dir + "c_" + "temp_filename.jpg"
                     origin_image = self.vid.get_original_frame(self.config)
-                    origin_image = et.contour2image(origin_image, contours)
                     cv2.imwrite(self.file_path_c, cv2.cvtColor(origin_image, cv2.COLOR_RGB2BGR))
                     self.load_img_cp = Image.open(self.file_path_c)
 
@@ -164,9 +187,7 @@ class Page1(DrawingPage):
                     print("Calculate time: %f" % (end - start))
                     self.tk_photo_cp = ImageTk.PhotoImage(image=self.load_img_cp)
                     self.canvas3.delete("all")
-                    self.canvas3.create_image(self.size[2], self.size[3], image=self.tk_photo_cp, anchor=tki.NW)
-                    self.load_draw(3)
-
+                    self.canvas3.create_image(self.size[2], self.size[3], image=tk_photo_org, anchor=tki.NW)
                     output_status = "        "
                     if error_under:
                         output_status = "NG:UNDER"
@@ -199,7 +220,6 @@ class Page1(DrawingPage):
                         self.lbl_result.config(text=output_status, bg="green")
                     else:
                         self.lbl_result.config(text=output_status, bg="red")
-                    self.lbl_dt.config(text=ts.strftime("%H:%M:%S"))
 
                     # Output log
                     cur_time = datetime.datetime.now()
@@ -223,11 +243,11 @@ class Page1(DrawingPage):
 
                     end_task = time.time()
                     print("Calculate event time: %f" % (end_task - start_task))
-                else:
-                    msg_type = "Error"
-                    msg = "Need <save> before <compare>"
-                    messagebox.showerror(msg_type, msg)
-                    raise Exception(msg_type + ": " + msg)
+                # else:
+                #     msg_type = "Error"
+                #     msg = "Need <save> before <compare>"
+                #     messagebox.showerror(msg_type, msg)
+                #     raise Exception(msg_type + ": " + msg)
 
     def snapshot_origin(self):
         """Call snapshot function with original image(LEFT)"""

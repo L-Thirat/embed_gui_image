@@ -99,12 +99,13 @@ class MyVideoCapture:
 
         # todo run on RUN mode
         # todo rgb control -> gui slow**
-        if not auto_calibrate:
-            if True:
-                img = pp.brightness(selected_area, t_light, t_contrast)
-                lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
-                upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
-        else:
+        # if not auto_calibrate:
+        #     if True:
+        #         img = pp.brightness(selected_area, t_light, t_contrast)
+        #         lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
+        #         upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
+        # else:
+        if True:
             # pass
             if False:
                 # todo auto normalize
@@ -124,20 +125,25 @@ class MyVideoCapture:
 
             # todo auto rgb
             if True:
+                img = pp.brightness(selected_area, t_light, t_contrast)
                 b, g, r = cv2.split(img)
                 cur_red = int(sum(r.ravel() / len(r.ravel())))
                 cur_green = int(sum(g.ravel() / len(g.ravel())))
                 cur_blue = int(sum(b.ravel() / len(b.ravel())))
-                if self.start_rgb == (0, 0, 0) or reset:
+                if self.start_rgb == (0, 0, 0) and reset:
                     diff_rgb = (0, 0, 0)
-                    self.start_rgb = (cur_red, cur_green, cur_blue)
+                    if auto_calibrate:
+                        self.start_rgb = (cur_red, cur_green, cur_blue)
                 else:
                     diff_rgb = (self.start_rgb[0] - cur_red, self.start_rgb[1] - cur_green, self.start_rgb[2] - cur_blue)
-                print("diff_rgb: ", diff_rgb, self.start_rgb, (cur_red, cur_green, cur_blue))
-                lower_hue = np.array(
-                    [(t_red_min - (diff_rgb[0] * 1)), (t_green_min - (diff_rgb[1] * 1)), (t_blue_min - (diff_rgb[2] * 1))])
-                upper_hue = np.array(
-                    [(t_red_max - (diff_rgb[0] * 1)), (t_green_max - (diff_rgb[1] * 1)), (t_blue_max - (diff_rgb[2] * 1))])
+                # print("diff_rgb: ", diff_rgb, self.start_rgb, (cur_red, cur_green, cur_blue))
+                img = pp.brightness(selected_area, t_light - int((diff_rgb[0]+diff_rgb[1]+diff_rgb[2])/3), t_contrast)
+                # lower_hue = np.array(
+                #     [(t_red_min + (diff_rgb[0] * 1)), (t_green_min + (diff_rgb[1] * 1)), (t_blue_min + (diff_rgb[2] * 1))])
+                # upper_hue = np.array(
+                #     [(t_red_max + (diff_rgb[0] * 1)), (t_green_max + (diff_rgb[1] * 1)), (t_blue_max + (diff_rgb[2] * 1))])
+                lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
+                upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
 
             # todo lightness control
             # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)

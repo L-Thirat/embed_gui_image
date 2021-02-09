@@ -1,4 +1,4 @@
-TEST_MAMOS: False
+TEST_MAMOS: True
 #DEBUG: {
 #  "sample_img": 'output/debug/c_temp_filename.jpg'
 #}
