@@ -1,0 +1,22 @@
+{% extends "top_layout.html" %}
+{% block content %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <p id="output-contain" class="ui-widget">
+        Loading...
+    </p>
+
+    <script>
+
+        window.setInterval( function () {
+          refresh();
+        }, 10000);
+
+        function refresh(select_date){
+          var url = "/reload";
+          setTimeout( function() {
+            $('#output-contain').load(url);
+          }, 0);
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>シーリンク</title>
+  </head>
+  <body>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+
+    <style>
+        body { overflow:scroll; margin:0; font-size: xx-large; }
+        input { font-size : 1.6em; width: 6em;  height: 2em; }
+        fieldset { padding:0; border:0; margin-top:25px; }
+        h1 { font-size: 0.8em; }
+        h2 { font-size: 1.6em; background: #9FA5C8; background-clip: border-box; padding: 15px; color: #334FFF; }
+        h3 { font-size: 1.0em; margin: .6em 0; background: #CFD0D5; background-clip: border-box; padding: 15px;}
+        div#users-contain { width: 1700px; margin: 20px 0; }
+        div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
+        div#users-contain table td, div#users-contain table th { border: 5px solid #eee; padding: .6em 10px; text-align: left; }
+        .ui-dialog .ui-state-error { padding: .3em; }
+        .validateTips { border: 1px solid transparent; padding: 0.3em; }
+        form { display: inline-block; padding: 20px}
+        #home { margin: -0.8em 0em; padding: 15px; }
+        table, tr, th {
+          border: 7 solid black;
+          border-collapse: collapse;
+        }
+    </style>
+
+    <h1>シーリンク検出</h1>
+    {% block content %}
+    {% endblock %}
+    <h3>&copy; 2021 ASKA Co., Ltd.</h3>
+  </body>
+</html>

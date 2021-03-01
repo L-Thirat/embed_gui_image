@@ -17,8 +17,8 @@ gs: C:\Program Files\gs\gs9.53.3\bin\gswin64c
 
 cam_height: 480
 cam_width: 640
-out_path: output/original/
-cp_path : output/compare/
+out_path: static/output/original/
+cp_path : static/output/compare/
 
 # Mamos setting
 LED_OK: 161

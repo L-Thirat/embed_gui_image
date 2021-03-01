@@ -1,0 +1,11 @@
+<p>
+    今日:　【<b style="color:green">OK: {{ output.count_ok }}</b> / <b style="color:red">NG: {{ output.count_ng }}</b>】
+</p>
+<img src="{{ output.img }}" />
+<p>
+    {% if output.result　== "OK" %}
+    {{ output.dt }}: <b style="color:green">【{{ output.result }}】</b>
+    {% else %}
+    {{ output.dt }}: <b style="color:red">【{{ output.result }}】</b>
+    {% endif %}
+</p>

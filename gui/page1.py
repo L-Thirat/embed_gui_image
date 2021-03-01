@@ -16,6 +16,7 @@ import glob
 import os
 import time
 import io
+import shutil
 
 from src.video_capture import MyVideoCapture as Vdo
 from src import extraction as et
@@ -199,12 +200,13 @@ class Page1(DrawingPage):
                         self.lbl_result.config(text=output_status, bg="green")
                     else:
                         self.lbl_result.config(text=output_status, bg="red")
-                    self.lbl_dt.config(text=ts.strftime("%H:%M:%S"))
+                    cur_time = ts.strftime("%H:%M:%S")
+                    self.lbl_dt.config(text=cur_time)
 
                     # Output log
-                    cur_time = datetime.datetime.now()
-                    file_time_form = cur_time.strftime("%Y%m%d_%H%M%S")
-                    log_time_form = cur_time.strftime("%Y:%m:%d %H:%M:%S")
+                    # cur_time = datetime.datetime.now()
+                    file_time_form = ts.strftime("%Y%m%d_%H%M%S")
+                    log_time_form = ts.strftime("%Y:%m:%d %H:%M:%S")
                     msg = log_time_form + "> Output: " + output_status + " | Over count: %d | Under count:  %d" % (
                         len(error_over), len(error_under))
                     self.app.log.info(msg)
@@ -220,6 +222,15 @@ class Page1(DrawingPage):
                     img = Image.open(io.BytesIO(ps.encode('utf-8')))
                     img.save(filename_png)
                     img.close()
+                    # shutil.copyfile(filename_png, "static/temp.png")
+
+                    data = {
+                        "img": filename_png,
+                        "result": output_status,
+                        "dt": cur_time
+                    }
+                    with open('cur_result.json', 'w') as outfile:
+                        json.dump(data, outfile)
 
                     end_task = time.time()
                     print("Calculate event time: %f" % (end_task - start_task))
