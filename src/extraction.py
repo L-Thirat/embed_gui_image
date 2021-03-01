@@ -58,8 +58,8 @@ def contour_selection(contours, img, noise_len):
         x, y, w, h = cv2.boundingRect(approx)
         if len_cont > noise_len:
             select_contour.append(cnt)
-            cv2.putText(img, "" + str(int(len_cont)), (x, y), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255),
-                        2)
+            # cv2.putText(img, "" + str(int(len_cont)), (x, y), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255),
+            #             2)
             cv2.drawContours(img, cnt, -1, (255, 0, 0), 2)
         # cv2.imshow("img", img)
     return select_contour, img
