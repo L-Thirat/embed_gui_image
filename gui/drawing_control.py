@@ -234,7 +234,8 @@ class DrawingPage(tki.Frame):
                     self.raw_data_draw[self.mode].append(blue_line)
                     self.start_x, self.start_y = 0, 0
                 else:
-                    if abs(x - self.start_x) < 20 and abs(y - self.start_y) < 20:
+                    print(len(self.prev_sub_pol))
+                    if (abs(x - self.start_x) < 20 and abs(y - self.start_y) < 20) and (len(self.prev_sub_pol) > 1):
                         for draw_line in self.prev_sub_pol:
                             self.canvas2.delete(draw_line)
                         self.prev_sub_pol = []
