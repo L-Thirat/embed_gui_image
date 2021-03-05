@@ -4,6 +4,7 @@ import numpy as np
 from src import linear_processing as lp
 from shapely.geometry import LineString, Point, Polygon
 import shapely.speedups
+
 shapely.speedups.enable()
 
 cv2ver = cv2.__version__
@@ -116,6 +117,9 @@ def detect_error_cnt(contours, raw_data_draw, config):
                 x = (y - c) / m
             else:
                 x = 0
+        if len(x) == 1 and len(y) == 1:
+            x = np.append(x, end_line[0])
+            y = np.append(y, end_line[1])
         f = interpolate.interp1d(x, y)
         xnew = np.arange(start_line[0], end_line[0], dx)
         ynew = f(xnew)  # use interpolation function returned by `interp1d`
