@@ -228,7 +228,8 @@ class App(tki.Frame):
         """
         x, y = event.x, event.y
         open_cv_image = np.array(self.mask)
-        rgb_min, rgb_max = et.min_max_color(open_cv_image, x, y, self.range_rgb, half_color_dot)
+        range_rgb = copy.deepcopy(self.range_rgb)
+        rgb_min, rgb_max = et.min_max_color(open_cv_image, x, y, range_rgb, half_color_dot)
         self.range_rgb.append({
             "point": (x, y),
             "min": rgb_min,
@@ -245,6 +246,7 @@ class App(tki.Frame):
         """
         if self.range_rgb[-1]["point"] is not None:
             del self.range_rgb[-1]
+
         txt_range = "Range: " + str(self.range_rgb[-1]["min"]) + " ~ " + str(self.range_rgb[-1]["max"])
         if self.range_rgb[-1]["point"] is not None:
             self.p2.lbl_rgb.config(text=txt_range, font=("Courier", 22))
