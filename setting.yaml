@@ -5,12 +5,12 @@ TEST_MAMOS: False
 #DEBUG: {
 #  "sample_img": 'output/debug/20210125_172145_OK.png'
 #}
-#DEBUG: {
-#  "sample_img": 'frame/2/frame_2021-02-13_130255_IN4.jpg'
-#}
 DEBUG: {
-  "sample_img": 'frame/1/'
+  "sample_img": 'frame/1/frame_2021-02-22_155453_IN4.jpg'
 }
+#DEBUG: {
+#  "sample_img": 'frame/1/'
+#}
 #DEBUG: {}
 
 gs: C:\Program Files\gs\gs9.53.3\bin\gswin64c
@@ -24,3 +24,37 @@ cp_path : static/output/compare/
 LED_OK: 161
 LED_NG: 184
 BTN_INPUT: 167
+
+#frame/1/frame_2021-02-22_113547_IN4.jpg static/output/compare/2021/3/12\20210312_144019_NG.png
+#frame/1/frame_2021-02-22_155453_IN4.jpg static/output/compare/2021/3/12\20210312_144038_NG.png
+#frame/1/frame_2021-02-22_161140_IN4.jpg static/output/compare/2021/3/12\20210312_144042_NG.png
+#frame/1/frame_2021-02-22_162835_IN4.jpg static/output/compare/2021/3/12\20210312_144052_NG.png
+#frame/1/frame_2021-02-22_163253_IN4.jpg static/output/compare/2021/3/12\20210312_144056_NG.png
+#frame/1/frame_2021-02-22_164013_IN4.jpg static/output/compare/2021/3/12\20210312_144101_NG.png
+#frame/1/frame_2021-02-22_165228_IN4.jpg static/output/compare/2021/3/12\20210312_144110_NG.png
+#frame/1/frame_2021-02-22_170807_IN4.jpg static/output/compare/2021/3/12\20210312_144114_NG.png
+#frame/1/frame_2021-02-22_171942_IN4.jpg static/output/compare/2021/3/12\20210312_144128_NG.png
+#frame/1/frame_2021-02-22_172034_IN4.jpg static/output/compare/2021/3/12\20210312_144133_NG.png
+#frame/1/frame_2021-02-23_024546_IN4.jpg static/output/compare/2021/3/12\20210312_144536_NG.png
+#frame/1/frame_2021-02-23_160813_IN4.jpg static/output/compare/2021/3/12\20210312_145039_NG.png
+#frame/1/frame_2021-02-23_160859_IN4.jpg static/output/compare/2021/3/12\20210312_145044_NG.png
+#frame/1/frame_2021-02-23_161618_IN4.jpg static/output/compare/2021/3/12\20210312_145053_NG.png
+#frame/1/frame_2021-02-23_162642_IN4.jpg static/output/compare/2021/3/12\20210312_145107_NG.png
+#frame/1/frame_2021-02-23_162921_IN4.jpg static/output/compare/2021/3/12\20210312_145112_NG.png
+#frame/1/frame_2021-02-23_163007_IN4.jpg static/output/compare/2021/3/12\20210312_145116_NG.png
+#frame/1/frame_2021-02-23_164331_IN4.jpg static/output/compare/2021/3/12\20210312_145135_NG.png
+#frame/1/frame_2021-02-23_165304_IN4.jpg static/output/compare/2021/3/12\20210312_145144_NG.png
+#frame/1/frame_2021-02-23_170228_IN4.jpg static/output/compare/2021/3/12\20210312_145148_NG.png
+#frame/1/frame_2021-02-23_171046_IN4.jpg static/output/compare/2021/3/12\20210312_145157_NG.png
+#frame/1/frame_2021-02-23_171749_IN4.jpg static/output/compare/2021/3/12\20210312_145207_NG.png
+#frame/1/frame_2021-02-23_173412_IN4.jpg static/output/compare/2021/3/12\20210312_145230_NG.png
+#frame/1/frame_2021-02-23_183341_IN4.jpg static/output/compare/2021/3/12\20210312_145304_NG.png
+#frame/1/frame_2021-02-23_184042_IN4.jpg static/output/compare/2021/3/12\20210312_145309_NG.png
+#frame/1/frame_2021-02-23_184657_IN4.jpg static/output/compare/2021/3/12\20210312_145314_NG.png
+#frame/1/frame_2021-02-23_185650_IN4.jpg static/output/compare/2021/3/12\20210312_145318_NG.png
+#frame/1/frame_2021-02-25_153410_IN4.jpg static/output/compare/2021/3/12\20210312_150737_NG.png
+#frame/1/frame_2021-03-01_112302_IN4.jpg static/output/compare/2021/3/12\20210312_151814_NG.png
+#frame/1/frame_2021-03-02_063748_IN4.jpg static/output/compare/2021/3/12\20210312_152112_NG.png
+#frame/1/frame_2021-03-02_064141_IN4.jpg static/output/compare/2021/3/12\20210312_152119_NG.png
+#frame/1/frame_2021-03-03_090258_IN4.jpg static/output/compare/2021/3/12\20210312_154614_NG.png
+#frame/1/frame_2021-03-04_221339_IN4.jpg static/output/compare/2021/3/12\20210312_155946_NG.png

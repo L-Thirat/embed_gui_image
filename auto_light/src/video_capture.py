@@ -4,8 +4,10 @@ from src import extraction as et
 import imutils
 import numpy as np
 import glob
-import copy
+from shapely.geometry import LineString, Point, Polygon
+import shapely.speedups
 
+shapely.speedups.enable()
 
 class MyVideoCapture:
     def __init__(self, DEBUG):
@@ -59,9 +61,7 @@ class MyVideoCapture:
         """Get frame from video source"""
         if raw_data_draw is None:
             raw_data_draw = {}
-        t_red_min, t_red_max = config["t_red"]["min"], config["t_red"]["max"]
-        t_green_min, t_green_max = config["t_green"]["min"], config["t_green"]["max"]
-        t_blue_min, t_blue_max = config["t_blue"]["min"], config["t_blue"]["max"]
+        t_dk = config["t_dk"]
         t_contrast = config["t_contrast"]
         t_light = config["t_light"]
         t_blur = (2 * (config["t_blur"] - 1)) + 1
@@ -78,55 +78,9 @@ class MyVideoCapture:
         # morphed = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         selected_area = cv2.medianBlur(selected_area, t_blur)
 
-        if False:
-            # todo auto normalize
-            b, g, r = cv2.split(selected_area)
-            cur_red = int(sum(r.ravel() / len(r.ravel())))
-            cur_green = int(sum(g.ravel() / len(g.ravel())))
-            cur_blue = int(sum(b.ravel() / len(b.ravel())))
-            if self.start_rgb == (0, 0, 0):
-                diff_rgb = 0
-                self.start_rgb = (cur_red, cur_green, cur_blue)
-            else:
-                diff_rgb = int(((self.start_rgb[0] - cur_red) + (self.start_rgb[1] - cur_green) + (
-                        self.start_rgb[2] - cur_blue)) / 3)
-
-            img = pp.brightness(selected_area, -230 - diff_rgb, -15)
-            img, alpha, beta = pp.automatic_brightness_and_contrast(img)
-
-        # Remove Shadow
-        # img = pp.shadow_remove(img)
-        # selected_area = pp.color_shadow_remove(selected_area)
-
-        # todo run on RUN mode
-        # todo rgb control -> gui slow**
-        # if not auto_calibrate:
-        #     if True:
-        #         img = pp.brightness(selected_area, t_light, t_contrast)
-        #         lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
-        #         upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
-        # else:
-
         img = pp.brightness(selected_area, t_light, t_contrast)
 
         if True:
-            # pass
-            if False:
-                # todo auto normalize
-                b, g, r = cv2.split(selected_area)
-                cur_red = int(sum(r.ravel() / len(r.ravel())))
-                cur_green = int(sum(g.ravel() / len(g.ravel())))
-                cur_blue = int(sum(b.ravel() / len(b.ravel())))
-                if self.start_rgb == (0, 0, 0):
-                    diff_rgb = 0
-                    self.start_rgb = (cur_red, cur_green, cur_blue)
-                else:
-                    diff_rgb = int(((self.start_rgb[0] - cur_red) + (self.start_rgb[1] - cur_green) + (
-                                self.start_rgb[2] - cur_blue)) / 3)
-
-                img = pp.brightness(selected_area, -230 - diff_rgb, -15)
-                img, alpha, beta = pp.automatic_brightness_and_contrast(img)
-
             # todo auto rgb
             if auto_calibrate:
                 b, g, r = cv2.split(img)
@@ -138,11 +92,11 @@ class MyVideoCapture:
                     if auto_calibrate:
                         self.start_rgb = (cur_red, cur_green, cur_blue)
                 else:
-                    diff_rgb = (self.start_rgb[0] - cur_red, self.start_rgb[1] - cur_green, self.start_rgb[2] - cur_blue)
+                    diff_rgb = (
+                    self.start_rgb[0] - cur_red, self.start_rgb[1] - cur_green, self.start_rgb[2] - cur_blue)
                 print("diff_rgb: ", diff_rgb, self.start_rgb, (cur_red, cur_green, cur_blue))
-                changed_val = (diff_rgb[0]+diff_rgb[1]+diff_rgb[2])/3
-                changed_val /= 2
-                img = pp.brightness(selected_area, t_light - int(changed_val), t_contrast)
+                img = pp.brightness(selected_area, t_light - int((diff_rgb[0] + diff_rgb[1] + diff_rgb[2]) / 3),
+                                    t_contrast)
 
             # todo lightness control
             # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -150,11 +104,15 @@ class MyVideoCapture:
             # print(diff_rgb)
             # lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
             # upper_hue = np.array([t_red_max-diff_rgb, t_green_max-diff_rgb, t_blue_max-diff_rgb])
-        lower_hue = np.array([t_red_min, t_green_min, t_blue_min])
-        upper_hue = np.array([t_red_max, t_green_max, t_blue_max])
-        mask = pp.hue(img, lower_hue, upper_hue)
+
+        # # convert to RGB
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        # convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        _, binary = cv2.threshold(gray, t_dk, 255, cv2.THRESH_BINARY)  # todo config
 
         # contour extraction
+        mask, contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         draw_cnt, contours = et.draw_contour(img, mask)
         select_contour, mask = et.contour_selection(contours, img, t_noise, raw_data_draw["inside"])
 

@@ -1,16 +1,16 @@
 t_blue:
-  max: 125
+  max: 0
   min: 0
 t_blur: 4
-t_contrast: 10
+t_contrast: 0
 t_error: 0
 t_green:
-  max: 150
+  max: 0
   min: 0
-t_light: 70
+t_light: 0
 t_noise: 200
 t_red:
-  max: 150
+  max: 0
   min: 0
-t_space: 1
+t_space: 40
 t_zoom: 2

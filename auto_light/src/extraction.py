@@ -55,7 +55,7 @@ def contour_selection(contours, img, noise_len, lines):
     :rtype: list, class
     """
     select_contour = []  # todo for check only
-    for cnt in contours[1:]:
+    for cnt in contours:
         len_cont = cv2.arcLength(cnt, True)
         # approx = cv2.approxPolyDP(cnt, 0.02 * len_cont, True)
         # x, y, w, h = cv2.boundingRect(approx)
@@ -194,18 +194,3 @@ def detect_error_cnt(contours, raw_data_draw, config):
             error_under = error_under + error_line(not_match_cnt)
 
     return error_over, error_under
-
-
-def min_max_color(frame, x, y, range_rgb, half_px):
-    """Extract min-max RGB values"""
-    base_min_rgb = range_rgb[-1]["min"]
-    base_max_rgb = range_rgb[-1]["max"]
-    for h in frame[y - half_px:y + half_px]:
-        for w in h[x - half_px:x + half_px]:
-            for i in range(3):
-                if w[i] < base_min_rgb[i]:
-                    base_min_rgb[i] = w[i]
-            for i in range(3):
-                if w[i] > base_max_rgb[i]:
-                    base_max_rgb[i] = w[i]
-    return base_min_rgb, base_max_rgb
