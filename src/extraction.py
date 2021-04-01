@@ -60,17 +60,10 @@ def contour_selection(contours, img, noise_len, lines):
         # approx = cv2.approxPolyDP(cnt, 0.02 * len_cont, True)
         # x, y, w, h = cv2.boundingRect(approx)
         if len_cont > noise_len:
-            poly_cnt = [(item[0][0], item[0][1]) for item in cnt]
-            poly_cnt = Polygon(poly_cnt)
-            for line in lines:
-                start_line = line[0], line[1]
-                end_line = line[2], line[3]
-                sample_line = LineString([start_line, end_line])
-                if poly_cnt.intersects(sample_line):
-                    select_contour.append(cnt)
-                    # cv2.putText(img, "" + str(int(len_cont)), (x, y), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255),
-                    #             2)
-                    cv2.drawContours(img, cnt, -1, (255, 0, 0), 2)
+            select_contour.append(cnt)
+            # cv2.putText(img, "" + str(int(len_cont)), (x, y), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255),
+            #             2)
+            cv2.drawContours(img, cnt, -1, (255, 0, 0), 2)
         # cv2.imshow("img", img)
     return select_contour, img
 

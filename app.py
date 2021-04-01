@@ -125,8 +125,18 @@ def main():
     return render_template("main.html", output={})
 
 
-DIR = "static/output/compare/2021/2/22"
+# DIR = "static/output/compare/2021/2/22"
 import os
+cwd = os.getcwd()
+DIR = os.path.join(cwd, "static/output/compare")
+newest_date = ""
+if os.path.isdir(DIR):
+    yy = os.listdir(DIR)
+    DIR = os.path.join(DIR, max(yy))
+    mm = os.listdir(DIR)
+    DIR = os.path.join(DIR, max(mm))
+    dd = os.listdir(DIR)
+    DIR = os.path.join(DIR, max(dd))
 
 
 @app.route('/reload', methods=['POST', 'GET'])
@@ -140,7 +150,7 @@ def reload():
             elif "_NG" in filename:
                 COUNT_NG += 1
 
-    with open('cur_result.json', 'r') as outfile:
+    with open(os.path.join(cwd, 'cur_result.json'), 'r') as outfile:
         output = json.load(outfile)
         output["img"] = output["img"]
         output["count_ok"] = COUNT_OK

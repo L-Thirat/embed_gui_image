@@ -258,7 +258,7 @@ class App(tki.Frame):
         """Real-time update image in canvas"""
         if self.cur_page != 3:
             # if self.auto_debug:
-            #     if int(time() - self.timing) > 2:  # todo delay per loop
+            #     # if int(time() - self.timing) > 2:  # todo delay per loop
             #         self.p1.snapshot("compare")
             #         self.timing = time()
             #         self.vid.cur_debug += 1

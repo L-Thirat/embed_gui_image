@@ -5,12 +5,12 @@ TEST_MAMOS: False
 #DEBUG: {
 #  "sample_img": 'output/debug/20210125_172145_OK.png'
 #}
-DEBUG: {
-  "sample_img": 'frame/1/frame_2021-02-22_155453_IN4.jpg'
-}
 #DEBUG: {
-#  "sample_img": 'frame/1/'
+#  "sample_img": 'frame/1/frame_2021-02-22_155453_IN4.jpg'
 #}
+DEBUG: {
+  "sample_img": 'frame/1/'
+}
 #DEBUG: {}
 
 gs: C:\Program Files\gs\gs9.53.3\bin\gswin64c
