@@ -1,8 +1,0 @@
--> gui
-copy_page1.py
-page1
-page2
-
--> src
-extraction
-video_cap

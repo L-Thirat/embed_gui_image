@@ -6,7 +6,6 @@ import os
 dir_file = "frame/"
 vdo_dir = "frame/video/"
 for filename in os.listdir(vdo_dir):
-    # filename = "2021-02-12_121437_IN4"
     if "mp4" in filename and "IN4" in filename:
         cam = cv2.VideoCapture(vdo_dir + filename)
 
