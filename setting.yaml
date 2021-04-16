@@ -8,8 +8,11 @@ TEST_MAMOS: False
 #DEBUG: {
 #  "sample_img": 'frame/1/frame_2021-02-22_155453_IN4.jpg'
 #}
+#DEBUG: {
+#  "sample_img": 'frame/1/'
+#}
 DEBUG: {
-  "sample_img": 'frame/1/'
+  "sample_img": 'sample/sample1.jpg'
 }
 #DEBUG: {}
 

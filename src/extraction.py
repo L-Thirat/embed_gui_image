@@ -167,7 +167,6 @@ def detect_error_cnt(contours, raw_data_draw, config):
         for point in lines[line]:
             matching = False
             if prev_p:
-                # print(match_cnt)
                 sample_rect = lp.line2rect(prev_p, point, t_space)  # todo width gui
                 for poly_cnt in match_cnt:
                     if poly_cnt.intersects(Polygon(sample_rect)):

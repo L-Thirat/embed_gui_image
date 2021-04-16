@@ -23,10 +23,6 @@ class DailyLog(handlers.RotatingFileHandler):
             os.makedirs(self.basedir_ + sub_dir)
         basename_ = sub_dir + "system_" + cur_date.strftime("%Y-%m-%d") + ".log"
 
-        # if settings.DEV_DEBUG:
-        #     print("LOGDIR:" + self.basedir_)
-        #     print("LOGFILE:" + basename_)
-
         return os.path.join(self.basedir_, basename_)
 
     def shouldRollover(self, record):
